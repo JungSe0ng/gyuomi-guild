@@ -34,6 +34,7 @@ function switchAuthTab(tab) {
 async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
 
     if (!email || !password) {
         alert('이메일과 비밀번호를 입력해주세요.');
@@ -56,6 +57,15 @@ async function handleLogin() {
                 alert('아직 관리자 승인이 완료되지 않았습니다. 승인 후 로그인 가능합니다.');
                 await window.firebaseAuth.signOut(window.auth);
                 return;
+            }
+            
+            // 자동 로그인 체크 시 로컬 스토리지에 저장
+            if (rememberMe) {
+                localStorage.setItem('autoLogin', 'true');
+                localStorage.setItem('userEmail', email);
+            } else {
+                localStorage.removeItem('autoLogin');
+                localStorage.removeItem('userEmail');
             }
             
             currentUser = {
@@ -157,6 +167,11 @@ async function handleLogout() {
     try {
         await window.firebaseAuth.signOut(window.auth);
         currentUser = null;
+        
+        // 자동 로그인 정보 삭제
+        localStorage.removeItem('autoLogin');
+        localStorage.removeItem('userEmail');
+        
         document.getElementById('authOverlay').style.display = 'flex';
         switchAuthTab('login');
     } catch (error) {
@@ -353,6 +368,15 @@ async function deleteUser(uid, nickname) {
 
 // 인증 상태 관찰
 window.addEventListener('DOMContentLoaded', () => {
+    // 자동 로그인 체크 및 이메일 자동 입력
+    const autoLogin = localStorage.getItem('autoLogin');
+    const savedEmail = localStorage.getItem('userEmail');
+    
+    if (autoLogin === 'true' && savedEmail) {
+        document.getElementById('loginEmail').value = savedEmail;
+        document.getElementById('rememberMe').checked = true;
+    }
+    
     window.firebaseAuth.onAuthStateChanged(window.auth, async (user) => {
         if (user) {
             // 로그인 상태
