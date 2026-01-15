@@ -49,10 +49,19 @@ async function handleLogin() {
         const userDoc = await window.firestore.getDoc(userDocRef);
 
         if (userDoc.exists()) {
+            const userData = userDoc.data();
+            
+            // 승인 대기 중인 사용자 차단
+            if (userData.role === 'pending') {
+                alert('아직 관리자 승인이 완료되지 않았습니다. 승인 후 로그인 가능합니다.');
+                await window.firebaseAuth.signOut(window.auth);
+                return;
+            }
+            
             currentUser = {
                 uid: user.uid,
                 email: user.email,
-                ...userDoc.data()
+                ...userData
             };
 
             document.getElementById('authOverlay').style.display = 'none';
@@ -114,11 +123,11 @@ async function handleRegister() {
         await window.firestore.setDoc(window.firestore.doc(window.db, 'users', user.uid), {
             email: email,
             nickname: nickname,
-            role: 'member', // 기본 권한: member
+            role: 'pending', // 승인 대기 상태
             createdAt: new Date().toISOString()
         });
 
-        alert('회원가입이 완료되었습니다! 로그인해주세요.');
+        alert('회원가입이 완료되었습니다! 관리자 승인 후 로그인 가능합니다.');
         switchAuthTab('login');
 
         // 입력 필드 초기화
@@ -265,6 +274,7 @@ async function showUserManagement() {
                         </div>
                         <div style="display: flex; gap: 5px; align-items: center;">
                             <select id="role-${user.uid}" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.9em;" ${isCurrentUser ? 'disabled' : ''}>
+                                <option value="pending" ${user.role === 'pending' ? 'selected' : ''}>⏳ 승인대기</option>
                                 <option value="member" ${user.role === 'member' ? 'selected' : ''}>👤 멤버</option>
                                 <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 관리자</option>
                             </select>
@@ -316,7 +326,8 @@ async function updateUserRole(uid) {
             role: newRole
         });
         
-        alert(`권한이 ${newRole === 'admin' ? '관리자' : '멤버'}로 변경되었습니다.`);
+        const roleText = newRole === 'admin' ? '관리자' : (newRole === 'member' ? '멤버' : '승인대기');
+        alert(`권한이 ${roleText}로 변경되었습니다.`);
         closeUserManagement();
         showUserManagement();
     } catch (error) {
@@ -349,10 +360,20 @@ window.addEventListener('DOMContentLoaded', () => {
             const userDoc = await window.firestore.getDoc(userDocRef);
 
             if (userDoc.exists()) {
+                const userData = userDoc.data();
+                
+                // 승인 대기 중인 사용자는 로그인 불가
+                if (userData.role === 'pending') {
+                    await window.firebaseAuth.signOut(window.auth);
+                    currentUser = null;
+                    document.getElementById('authOverlay').style.display = 'flex';
+                    return;
+                }
+                
                 currentUser = {
                     uid: user.uid,
                     email: user.email,
-                    ...userDoc.data()
+                    ...userData
                 };
                 document.getElementById('authOverlay').style.display = 'none';
                 init();
