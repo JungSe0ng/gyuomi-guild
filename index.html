@@ -90,12 +90,51 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('attack')">⚔️ 공격 공략</button>
+            <button class="tab-btn active" onclick="switchTab('main')">🏠 메인</button>
+            <button class="tab-btn" onclick="switchTab('attack')">⚔️ 공격 공략</button>
             <button class="tab-btn" onclick="switchTab('defense')">🛡️ 방어 공략</button>
         </div>
 
+        <!-- 메인 탭 -->
+        <div id="main-tab" class="tab-content active">
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 30px;">🌸 환영합니다! 🌸</h2>
+                
+                <div style="background: linear-gradient(135deg, rgba(176,138,176,0.1), rgba(152,216,200,0.1)); padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+                    <h3 style="margin-top: 0; color: #B08AB0;">📋 길드 소개</h3>
+                    <p style="line-height: 1.8; color: #555;">
+                        귀요미 길드는 세븐나이츠를 함께 즐기는 길드입니다!<br>
+                        공격 공략과 방어 팀 구성을 공유하며 함께 성장해요! 💪
+                    </p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <div style="background: linear-gradient(135deg, rgba(176,138,176,0.15), rgba(139,90,134,0.15)); padding: 20px; border-radius: 12px; border: 2px solid rgba(176,138,176,0.3);">
+                        <div style="font-size: 2em; margin-bottom: 10px;">⚔️</div>
+                        <h4 style="margin: 0 0 10px 0; color: #B08AB0;">공격 공략</h4>
+                        <p style="margin: 0; font-size: 0.9em; color: #666;">상대 방어팀을 상대할 공략을 등록하고 확인하세요!</p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(152,216,200,0.15), rgba(111,195,168,0.15)); padding: 20px; border-radius: 12px; border: 2px solid rgba(152,216,200,0.3);">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🛡️</div>
+                        <h4 style="margin: 0 0 10px 0; color: #98D8C8;">방어 공략</h4>
+                        <p style="margin: 0; font-size: 0.9em; color: #666;">강력한 방어 팀 구성을 공유하고 배워보세요!</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.5); padding: 20px; border-radius: 12px; border: 2px dashed rgba(176,138,176,0.3);">
+                    <h4 style="margin-top: 0; color: #B08AB0;">💡 이용 팁</h4>
+                    <ul style="line-height: 1.8; color: #555;">
+                        <li>각 탭에서 공략을 확인하고 배워보세요</li>
+                        <li>검색 기능으로 원하는 영웅 공략을 빠르게 찾을 수 있어요</li>
+                        <li>관리자는 새로운 공략을 등록할 수 있습니다</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- 공격 공략 탭 -->
-        <div id="attack-tab" class="tab-content active">
+        <div id="attack-tab" class="tab-content">
             <div class="sub-tabs" style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 15px;">
                 <button class="sub-tab-btn attack-tab active" data-subtab="register" data-admin-only>공략 등록</button>
                 <button class="sub-tab-btn attack-tab" data-subtab="list">공략 목록</button>
