@@ -96,9 +96,9 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('main')">🏠 메인</button>
-            <button class="tab-btn" onclick="switchTab('attack')">⚔️ 공격 공략</button>
-            <button class="tab-btn" onclick="switchTab('defense')">🛡️ 방어 공략</button>
+            <button class="tab-btn active" onclick="switchTab('main', event)">🏠 메인</button>
+            <button class="tab-btn" onclick="switchTab('attack', event)">⚔️ 공격 공략</button>
+            <button class="tab-btn" onclick="switchTab('defense', event)">🛡️ 방어 공략</button>
         </div>
 
         <!-- 메인 탭 -->
@@ -152,8 +152,8 @@
         <!-- 공격 공략 탭 -->
         <div id="attack-tab" class="tab-content">
             <div class="sub-tabs" style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 15px;">
-                <button class="sub-tab-btn attack-tab active" data-subtab="register" data-admin-only>공략 등록</button>
-                <button class="sub-tab-btn attack-tab" data-subtab="list">공략 목록</button>
+                <button class="sub-tab-btn attack-tab active" onclick="switchSubTab('register', event)" data-admin-only>공략 등록</button>
+                <button class="sub-tab-btn attack-tab" onclick="switchSubTab('list', event)">공략 목록</button>
             </div>
 
             <!-- 공략 등록 -->
@@ -231,8 +231,8 @@
         <!-- 방어 공략 탭 -->
         <div id="defense-tab" class="tab-content">
             <div class="sub-tabs" style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 15px;">
-                <button class="sub-tab-btn defense-tab active" data-subtab="def-register" data-admin-only>방어팀 등록</button>
-                <button class="sub-tab-btn defense-tab" data-subtab="def-list">방어팀 목록</button>
+                <button class="sub-tab-btn defense-tab active" onclick="switchDefenseSubTab('def-register', event)" data-admin-only>방어팀 등록</button>
+                <button class="sub-tab-btn defense-tab" onclick="switchDefenseSubTab('def-list', event)">방어팀 목록</button>
             </div>
 
             <!-- 방어팀 등록 -->

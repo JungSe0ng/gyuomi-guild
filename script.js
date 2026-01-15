@@ -77,32 +77,38 @@ function init() {
 // 탭 전환
 // ===========================
 
-function switchTab(tab) {
+function switchTab(tab, event) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     
     document.getElementById(tab + '-tab').classList.add('active');
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
 }
 
-function switchSubTab(sub) {
+function switchSubTab(sub, event) {
     document.querySelectorAll('#attack-tab .sub-content').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('#attack-tab .sub-tab-btn').forEach(b => b.classList.remove('active'));
     
     document.getElementById(sub + '-content').classList.add('active');
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
     
     if (sub === 'list') {
         renderGuides();
     }
 }
 
-function switchDefenseSubTab(sub) {
+function switchDefenseSubTab(sub, event) {
     document.querySelectorAll('#defense-tab .sub-content').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('#defense-tab .sub-tab-btn').forEach(b => b.classList.remove('active'));
     
     document.getElementById(sub + '-content').classList.add('active');
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
     
     if (sub === 'def-list') {
         renderDefenseTeams();
@@ -726,7 +732,7 @@ function updateDefenseEquipment() {
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 500;">방어구 1 옵션</label>
                         <select id="defHero${id}Armor1" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
@@ -740,14 +746,58 @@ function updateDefenseEquipment() {
                         </select>
                     </div>
                 </div>
-
-                <div>
-                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">스킬 우선순위</label>
-                    <input type="text" id="defHero${id}SkillPriority" placeholder="예: 1스킬 → 2스킬 → 3스킬" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
-                </div>
             </div>
         `;
     });
+
+    // 스킬 순서 선택 (6개 스킬 중 3개)
+    const skills = [];
+    if (hero1) {
+        skills.push(`${hero1} - 스킬1`, `${hero1} - 스킬2`);
+    }
+    if (hero2) {
+        skills.push(`${hero2} - 스킬1`, `${hero2} - 스킬2`);
+    }
+    if (hero3) {
+        skills.push(`${hero3} - 스킬1`, `${hero3} - 스킬2`);
+    }
+
+    if (skills.length > 0) {
+        html += `
+            <div class="form-group" style="background: rgba(255,253,208,0.3); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+                <label style="color: #f57c00; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; display: block;">
+                    🎯 스킬 사용 순서 (3개 선택)
+                </label>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.9em;">
+                    전투에서 사용할 스킬 3개를 순서대로 선택하세요
+                </p>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">1번째 스킬</label>
+                        <select id="defSkillOrder1" required style="width: 100%; padding: 10px; border: 2px solid #ffc107; border-radius: 8px;">
+                            <option value="">선택</option>
+                            ${skills.map(skill => `<option value="${skill}">${skill}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">2번째 스킬</label>
+                        <select id="defSkillOrder2" required style="width: 100%; padding: 10px; border: 2px solid #ffc107; border-radius: 8px;">
+                            <option value="">선택</option>
+                            ${skills.map(skill => `<option value="${skill}">${skill}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">3번째 스킬</label>
+                        <select id="defSkillOrder3" required style="width: 100%; padding: 10px; border: 2px solid #ffc107; border-radius: 8px;">
+                            <option value="">선택</option>
+                            ${skills.map(skill => `<option value="${skill}">${skill}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     container.innerHTML = html;
 }
@@ -770,6 +820,18 @@ async function saveDefenseTeam(event) {
         return;
     }
 
+    // 스킬 순서 가져오기
+    const skillOrder1 = document.getElementById('defSkillOrder1')?.value || '';
+    const skillOrder2 = document.getElementById('defSkillOrder2')?.value || '';
+    const skillOrder3 = document.getElementById('defSkillOrder3')?.value || '';
+
+    if (!skillOrder1 || !skillOrder2 || !skillOrder3) {
+        alert('스킬 사용 순서 3개를 모두 선택해주세요.');
+        return;
+    }
+
+    const skillOrder = `${skillOrder1} → ${skillOrder2} → ${skillOrder3}`;
+
     try {
         const defenseData = {
             name: name,
@@ -777,37 +839,35 @@ async function saveDefenseTeam(event) {
                 {
                     name: hero1,
                     equipment: {
-                        set: document.getElementById('defHero1Set').value,
-                        weapon1: document.getElementById('defHero1Weapon1').value,
-                        weapon2: document.getElementById('defHero1Weapon2').value,
-                        armor1: document.getElementById('defHero1Armor1').value,
-                        armor2: document.getElementById('defHero1Armor2').value
-                    },
-                    skillPriority: document.getElementById('defHero1SkillPriority').value.trim()
+                        set: document.getElementById('defHero1Set')?.value || '미설정',
+                        weapon1: document.getElementById('defHero1Weapon1')?.value || '미설정',
+                        weapon2: document.getElementById('defHero1Weapon2')?.value || '미설정',
+                        armor1: document.getElementById('defHero1Armor1')?.value || '미설정',
+                        armor2: document.getElementById('defHero1Armor2')?.value || '미설정'
+                    }
                 },
                 {
                     name: hero2,
                     equipment: {
-                        set: document.getElementById('defHero2Set').value,
-                        weapon1: document.getElementById('defHero2Weapon1').value,
-                        weapon2: document.getElementById('defHero2Weapon2').value,
-                        armor1: document.getElementById('defHero2Armor1').value,
-                        armor2: document.getElementById('defHero2Armor2').value
-                    },
-                    skillPriority: document.getElementById('defHero2SkillPriority').value.trim()
+                        set: document.getElementById('defHero2Set')?.value || '미설정',
+                        weapon1: document.getElementById('defHero2Weapon1')?.value || '미설정',
+                        weapon2: document.getElementById('defHero2Weapon2')?.value || '미설정',
+                        armor1: document.getElementById('defHero2Armor1')?.value || '미설정',
+                        armor2: document.getElementById('defHero2Armor2')?.value || '미설정'
+                    }
                 },
                 {
                     name: hero3,
                     equipment: {
-                        set: document.getElementById('defHero3Set').value,
-                        weapon1: document.getElementById('defHero3Weapon1').value,
-                        weapon2: document.getElementById('defHero3Weapon2').value,
-                        armor1: document.getElementById('defHero3Armor1').value,
-                        armor2: document.getElementById('defHero3Armor2').value
-                    },
-                    skillPriority: document.getElementById('defHero3SkillPriority').value.trim()
+                        set: document.getElementById('defHero3Set')?.value || '미설정',
+                        weapon1: document.getElementById('defHero3Weapon1')?.value || '미설정',
+                        weapon2: document.getElementById('defHero3Weapon2')?.value || '미설정',
+                        armor1: document.getElementById('defHero3Armor1')?.value || '미설정',
+                        armor2: document.getElementById('defHero3Armor2')?.value || '미설정'
+                    }
                 }
             ],
+            skillOrder: skillOrder, // 전체 팀의 스킬 순서
             tip: tip,
             comments: [], // 빈 댓글 배열로 시작
             createdAt: new Date().toISOString(),
@@ -914,20 +974,20 @@ function renderDefenseCard(team) {
                             <span style="font-weight: 600; color: #666;">• 방어구2:</span>
                             <span style="margin-left: 8px; color: #333;">${hero.equipment.armor2 || '미설정'}</span>
                         </div>
-
-                        ${hero.skillPriority ? `
-                            <div style="background: rgba(255,253,208,0.5); padding: 12px; border-radius: 8px; margin-top: 10px;">
-                                <span style="font-weight: 600; color: #666;">스킬 순서:</span>
-                                <span style="margin-left: 8px; color: #333;">${hero.skillPriority}</span>
-                            </div>
-                        ` : ''}
                     </div>
                 `).join('')}
             </div>
 
+            ${team.skillOrder ? `
+                <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; border-left: 4px solid #ffc107; margin-bottom: 20px;">
+                    <h5 style="margin: 0 0 8px 0; color: #f57c00;">🎯 스킬 사용 순서:</h5>
+                    <p style="margin: 0; line-height: 1.6; color: #555; font-weight: 600;">${team.skillOrder}</p>
+                </div>
+            ` : ''}
+
             ${team.tip ? `
                 <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; border-left: 4px solid #ffd93d; margin-bottom: 20px;">
-                    <h5 style="margin: 0 0 8px 0; color: #666;">💡 스킬 순서:</h5>
+                    <h5 style="margin: 0 0 8px 0; color: #666;">💡 운용 팁:</h5>
                     <p style="margin: 0; line-height: 1.6; color: #555;">${team.tip}</p>
                 </div>
             ` : ''}
