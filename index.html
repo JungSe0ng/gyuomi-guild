@@ -316,6 +316,8 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
+        console.log('🔥 Firebase 모듈 로드 시작');
+
         // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -332,38 +334,66 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        console.log('🔥 Firebase 초기화 완료:', { auth, db });
+
         // 전역으로 export
         window.auth = auth;
         window.db = db;
         window.firebaseAuth = { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut };
         window.firestore = { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc };
 
-        // Firebase 초기화 완료 플래그
-        window.firebaseReady = true;
+        console.log('✅ window.auth:', window.auth);
+        console.log('✅ window.db:', window.db);
         
-        // Firebase 초기화 완료 후 스크립트 로드
-        function loadScript(src) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.body.appendChild(script);
+        // Firebase 초기화 완료 이벤트 발생
+        window.dispatchEvent(new Event('firebaseReady'));
+        console.log('📢 firebaseReady 이벤트 발생');
+    </script>
+    
+    <script>
+        // Firebase가 준비될 때까지 대기
+        console.log('⏳ Firebase 대기 중...');
+        
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.auth && window.db) {
+                    console.log('✅ Firebase 이미 준비됨');
+                    resolve();
+                } else {
+                    console.log('⏳ firebaseReady 이벤트 대기 중...');
+                    window.addEventListener('firebaseReady', () => {
+                        console.log('✅ firebaseReady 이벤트 수신');
+                        resolve();
+                    });
+                }
             });
         }
 
-        // auth.js와 script.js를 순차적으로 로드
-        (async () => {
-            try {
-                console.log('Firebase 초기화 완료');
-                await loadScript('auth.js');
-                console.log('auth.js 로드 완료');
-                await loadScript('script.js');
-                console.log('script.js 로드 완료');
-            } catch (error) {
-                console.error('스크립트 로드 오류:', error);
-            }
-        })();
+        // Firebase 준비 후 스크립트 로드
+        waitForFirebase().then(() => {
+            console.log('📦 auth.js 로드 시작');
+            const authScript = document.createElement('script');
+            authScript.src = 'auth.js';
+            authScript.onload = () => {
+                console.log('✅ auth.js 로드 완료');
+                
+                console.log('📦 script.js 로드 시작');
+                const scriptJs = document.createElement('script');
+                scriptJs.src = 'script.js';
+                scriptJs.onload = () => {
+                    console.log('✅ script.js 로드 완료');
+                    console.log('🎉 모든 스크립트 로드 완료!');
+                };
+                scriptJs.onerror = (e) => {
+                    console.error('❌ script.js 로드 실패:', e);
+                };
+                document.body.appendChild(scriptJs);
+            };
+            authScript.onerror = (e) => {
+                console.error('❌ auth.js 로드 실패:', e);
+            };
+            document.body.appendChild(authScript);
+        });
     </script>
 </body>
 </html>
