@@ -378,6 +378,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('authOverlay').style.display = 'none';
                 init();
                 updateUIForUser();
+                loadGuildMembers(); // 길드원 목록 로드
             }
         } else {
             // 로그아웃 상태
@@ -386,3 +387,63 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// 길드원 목록 로드
+async function loadGuildMembers() {
+    try {
+        const usersSnapshot = await window.firestore.getDocs(window.firestore.collection(window.db, 'users'));
+        const users = [];
+        usersSnapshot.forEach(doc => {
+            const userData = doc.data();
+            // pending 사용자는 제외
+            if (userData.role !== 'pending') {
+                users.push({ uid: doc.id, ...userData });
+            }
+        });
+
+        // 역할별로 정렬 (admin > member), 같은 역할이면 가입일순
+        users.sort((a, b) => {
+            if (a.role === 'admin' && b.role !== 'admin') return -1;
+            if (a.role !== 'admin' && b.role === 'admin') return 1;
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+
+        const listContainer = document.getElementById('guildMembersList');
+        if (!listContainer) return;
+
+        if (users.length === 0) {
+            listContainer.innerHTML = '<p style="text-align: center; color: #999;">아직 등록된 길드원이 없습니다.</p>';
+            return;
+        }
+
+        listContainer.innerHTML = users.map(user => {
+            const isCurrentUser = currentUser && user.uid === currentUser.uid;
+            const roleIcon = user.role === 'admin' ? '👑' : '👤';
+            const roleText = user.role === 'admin' ? '관리자' : '멤버';
+            const roleColor = user.role === 'admin' ? '#FFB6C1' : '#98D8C8';
+            const borderColor = user.role === 'admin' ? 'rgba(255,182,193,0.5)' : 'rgba(152,216,200,0.5)';
+
+            return `
+                <div style="padding: 15px; border: 2px solid ${borderColor}; border-radius: 12px; background: ${isCurrentUser ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'}; transition: all 0.3s; ${isCurrentUser ? 'box-shadow: 0 2px 8px rgba(176,138,176,0.3);' : ''}" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='${isCurrentUser ? '0 2px 8px rgba(176,138,176,0.3)' : 'none'}'">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 1.5em;">${roleIcon}</span>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 1em; color: #333;">
+                                ${user.nickname}${isCurrentUser ? ' (나)' : ''}
+                            </div>
+                            <div style="font-size: 0.8em; color: ${roleColor}; font-weight: 500;">
+                                ${roleText}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.75em; color: #999;">
+                        가입일: ${new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('길드원 목록 로드 오류:', error);
+    }
+}
