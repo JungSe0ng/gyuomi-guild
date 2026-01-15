@@ -743,7 +743,7 @@ function updateDefenseEquipment() {
 
                 <div>
                     <label style="display: block; margin-bottom: 5px; font-weight: 500;">스킬 우선순위</label>
-                    <input type="text" id="defHero${id}Skills" placeholder="예: 1스킬 → 2스킬 → 3스킬" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <input type="text" id="defHero${id}SkillPriority" placeholder="예: 1스킬 → 2스킬 → 3스킬" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
                 </div>
             </div>
         `;
@@ -783,7 +783,7 @@ async function saveDefenseTeam(event) {
                         armor1: document.getElementById('defHero1Armor1').value,
                         armor2: document.getElementById('defHero1Armor2').value
                     },
-                    skills: document.getElementById('defHero1Skills').value.trim()
+                    skillPriority: document.getElementById('defHero1SkillPriority').value.trim()
                 },
                 {
                     name: hero2,
@@ -794,7 +794,7 @@ async function saveDefenseTeam(event) {
                         armor1: document.getElementById('defHero2Armor1').value,
                         armor2: document.getElementById('defHero2Armor2').value
                     },
-                    skills: document.getElementById('defHero2Skills').value.trim()
+                    skillPriority: document.getElementById('defHero2SkillPriority').value.trim()
                 },
                 {
                     name: hero3,
@@ -805,10 +805,11 @@ async function saveDefenseTeam(event) {
                         armor1: document.getElementById('defHero3Armor1').value,
                         armor2: document.getElementById('defHero3Armor2').value
                     },
-                    skills: document.getElementById('defHero3Skills').value.trim()
+                    skillPriority: document.getElementById('defHero3SkillPriority').value.trim()
                 }
             ],
             tip: tip,
+            comments: [], // 빈 댓글 배열로 시작
             createdAt: new Date().toISOString(),
             createdBy: currentUser.nickname
         };
@@ -857,6 +858,7 @@ function renderDefenseTeams() {
 
 function renderDefenseCard(team) {
     const isAdmin = currentUser && currentUser.role === 'admin';
+    const comments = team.comments || [];
     
     return `
         <div class="defense-card" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
@@ -866,44 +868,57 @@ function renderDefenseCard(team) {
                     <p style="margin: 0; font-size: 0.9em; color: #999;">작성자: ${team.createdBy} | ${new Date(team.createdAt).toLocaleDateString('ko-KR')}</p>
                 </div>
                 ${isAdmin ? `
-                    <button onclick="deleteDefenseTeam('${team.id}')" class="btn" style="padding: 8px 16px; background: #ff6b6b; font-size: 0.9em;">
+                    <button onclick="deleteDefenseTeam('${team.id}')" class="btn" style="padding: 8px 16px; background: #ff6b6b; color: white; font-size: 0.9em; border: none; border-radius: 8px; cursor: pointer;">
                         🗑️ 삭제
                     </button>
                 ` : ''}
             </div>
 
+            <div style="background: rgba(152,216,200,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color: #98D8C8;">🛡️ 방어 영웅:</h4>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    ${team.heroes.map(hero => `
+                        <span style="padding: 8px 16px; background: rgba(152,216,200,0.3); border-radius: 8px; font-weight: 500;">
+                            ${hero.name}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+
             <div style="display: grid; gap: 20px; margin-bottom: 20px;">
                 ${team.heroes.map((hero, idx) => `
-                    <div style="background: rgba(152,216,200,0.1); padding: 20px; border-radius: 12px; border-left: 4px solid #98D8C8;">
-                        <h4 style="margin: 0 0 15px 0; color: #98D8C8;">🛡️ ${hero.name}</h4>
+                    <div style="background: rgba(152,216,200,0.05); padding: 20px; border-radius: 12px; border-left: 4px solid #98D8C8;">
+                        <h4 style="margin: 0 0 15px 0; color: #98D8C8;">${hero.name}:</h4>
                         
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
-                            <div>
-                                <span style="font-weight: 600; color: #666;">장비 세트:</span>
-                                <span style="margin-left: 8px; color: #333;">${hero.equipment.set}</span>
-                            </div>
-                            <div>
-                                <span style="font-weight: 600; color: #666;">무기 1:</span>
-                                <span style="margin-left: 8px; color: #333;">${hero.equipment.weapon1}</span>
-                            </div>
-                            <div>
-                                <span style="font-weight: 600; color: #666;">무기 2:</span>
-                                <span style="margin-left: 8px; color: #333;">${hero.equipment.weapon2}</span>
-                            </div>
-                            <div>
-                                <span style="font-weight: 600; color: #666;">방어구 1:</span>
-                                <span style="margin-left: 8px; color: #333;">${hero.equipment.armor1}</span>
-                            </div>
-                            <div>
-                                <span style="font-weight: 600; color: #666;">방어구 2:</span>
-                                <span style="margin-left: 8px; color: #333;">${hero.equipment.armor2}</span>
-                            </div>
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">• 세트:</span>
+                            <span style="margin-left: 8px; color: #333;">${hero.equipment.set || '미설정'}</span>
                         </div>
 
-                        ${hero.skills ? `
-                            <div style="background: rgba(255,253,208,0.5); padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">• 무기1:</span>
+                            <span style="margin-left: 8px; color: #333;">${hero.equipment.weapon1 || '미설정'}</span>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">• 무기2:</span>
+                            <span style="margin-left: 8px; color: #333;">${hero.equipment.weapon2 || '미설정'}</span>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">• 방어구1:</span>
+                            <span style="margin-left: 8px; color: #333;">${hero.equipment.armor1 || '미설정'}</span>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">• 방어구2:</span>
+                            <span style="margin-left: 8px; color: #333;">${hero.equipment.armor2 || '미설정'}</span>
+                        </div>
+
+                        ${hero.skillPriority ? `
+                            <div style="background: rgba(255,253,208,0.5); padding: 12px; border-radius: 8px; margin-top: 10px;">
                                 <span style="font-weight: 600; color: #666;">스킬 순서:</span>
-                                <span style="margin-left: 8px; color: #333;">${hero.skills}</span>
+                                <span style="margin-left: 8px; color: #333;">${hero.skillPriority}</span>
                             </div>
                         ` : ''}
                     </div>
@@ -911,11 +926,44 @@ function renderDefenseCard(team) {
             </div>
 
             ${team.tip ? `
-                <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; border-left: 4px solid #ffd93d;">
-                    <h5 style="margin: 0 0 8px 0; color: #666;">💡 운용 팁</h5>
+                <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; border-left: 4px solid #ffd93d; margin-bottom: 20px;">
+                    <h5 style="margin: 0 0 8px 0; color: #666;">💡 스킬 순서:</h5>
                     <p style="margin: 0; line-height: 1.6; color: #555;">${team.tip}</p>
                 </div>
             ` : ''}
+
+            <div style="border-top: 2px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 style="margin: 0; color: #666;">💬 댓글 (${comments.length})</h4>
+                    <button onclick="toggleDefenseComments('${team.id}')" style="padding: 6px 12px; background: rgba(152,216,200,0.2); border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
+                        <span id="toggle-def-${team.id}">▼ 펼치기</span>
+                    </button>
+                </div>
+                
+                <div id="def-comments-${team.id}" style="display: none;">
+                    <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                        ${comments.length === 0 ? 
+                            '<p style="text-align: center; color: #999; padding: 20px;">아직 댓글이 없습니다.</p>' :
+                            comments.map(comment => `
+                                <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(0,0,0,0.05);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <span style="font-weight: 600; font-size: 0.9em; color: #98D8C8;">${comment.user}</span>
+                                        <span style="font-size: 0.75em; color: #999;">${new Date(comment.time).toLocaleString('ko-KR')}</span>
+                                    </div>
+                                    <p style="margin: 0; font-size: 0.9em; color: #555;">${comment.text}</p>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="def-comment-${team.id}" placeholder="댓글을 입력하세요..." style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.9em;">
+                        <button onclick="addDefenseComment('${team.id}')" style="padding: 8px 16px; background: #98D8C8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em; white-space: nowrap;">
+                            댓글 작성
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }
@@ -934,5 +982,146 @@ async function deleteDefenseTeam(teamId) {
     } catch (error) {
         console.error('방어팀 삭제 오류:', error);
         alert('방어팀 삭제에 실패했습니다.');
+    }
+}
+
+// ===========================
+// 방어팀 댓글 토글
+// ===========================
+
+function toggleDefenseComments(teamId) {
+    const container = document.getElementById(`def-comments-${teamId}`);
+    const toggleBtn = document.getElementById(`toggle-def-${teamId}`);
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        toggleBtn.textContent = '▲ 접기';
+    } else {
+        container.style.display = 'none';
+        toggleBtn.textContent = '▼ 펼치기';
+    }
+}
+
+// ===========================
+// 방어팀 댓글 추가
+// ===========================
+
+async function addDefenseComment(teamId) {
+    const input = document.getElementById(`def-comment-${teamId}`);
+    const text = input.value.trim();
+    
+    if (!text) {
+        alert('댓글 내용을 입력해주세요.');
+        return;
+    }
+
+    try {
+        const team = defenseTeams.find(t => t.id === teamId);
+        if (!team) {
+            alert('방어팀을 찾을 수 없습니다.');
+            return;
+        }
+
+        const comment = {
+            user: currentUser.nickname,
+            text: text,
+            time: new Date().toISOString()
+        };
+
+        const comments = team.comments || [];
+        comments.push(comment);
+
+        await window.firestore.updateDoc(
+            window.firestore.doc(window.db, 'defenseTeams', teamId),
+            { comments: comments }
+        );
+
+        input.value = '';
+        await loadData();
+        
+        // 댓글창 자동으로 펼쳐두기
+        setTimeout(() => {
+            const container = document.getElementById(`def-comments-${teamId}`);
+            const toggleBtn = document.getElementById(`toggle-def-${teamId}`);
+            if (container && container.style.display === 'none') {
+                container.style.display = 'block';
+                toggleBtn.textContent = '▲ 접기';
+            }
+        }, 100);
+        
+    } catch (error) {
+        console.error('댓글 추가 오류:', error);
+        alert('댓글 추가에 실패했습니다.');
+    }
+}
+
+
+// ===========================
+// 방어팀 댓글 토글
+// ===========================
+
+function toggleDefenseComments(teamId) {
+    const container = document.getElementById(`def-comments-${teamId}`);
+    const toggleBtn = document.getElementById(`toggle-def-${teamId}`);
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        toggleBtn.textContent = '▲ 접기';
+    } else {
+        container.style.display = 'none';
+        toggleBtn.textContent = '▼ 펼치기';
+    }
+}
+
+// ===========================
+// 방어팀 댓글 추가
+// ===========================
+
+async function addDefenseComment(teamId) {
+    const input = document.getElementById(`def-comment-${teamId}`);
+    const text = input.value.trim();
+    
+    if (!text) {
+        alert('댓글 내용을 입력해주세요.');
+        return;
+    }
+
+    try {
+        const team = defenseTeams.find(t => t.id === teamId);
+        if (!team) {
+            alert('방어팀을 찾을 수 없습니다.');
+            return;
+        }
+
+        const comment = {
+            user: currentUser.nickname,
+            text: text,
+            time: new Date().toISOString()
+        };
+
+        const comments = team.comments || [];
+        comments.push(comment);
+
+        await window.firestore.updateDoc(
+            window.firestore.doc(window.db, 'defenseTeams', teamId),
+            { comments: comments }
+        );
+
+        input.value = '';
+        await loadData();
+        
+        // 댓글 영역 자동으로 펼치기
+        setTimeout(() => {
+            const container = document.getElementById(`def-comments-${teamId}`);
+            const toggleBtn = document.getElementById(`toggle-def-${teamId}`);
+            if (container && container.style.display === 'none') {
+                container.style.display = 'block';
+                toggleBtn.textContent = '▲ 접기';
+            }
+        }, 100);
+        
+    } catch (error) {
+        console.error('댓글 추가 오류:', error);
+        alert('댓글 추가에 실패했습니다.');
     }
 }
