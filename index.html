@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>귀요미 길드 세븐나이츠 공략집 ✨</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- 로그인/회원가입 오버레이 -->
+<div id="authOverlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(107, 73, 102, 0.97), rgba(139, 90, 134, 0.97)); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; border-radius: 25px; padding: 40px; max-width: 450px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: fadeInUp 0.5s ease;">
+        <!-- 로고 -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="width: 100px; height: 100px; margin: 0 auto 15px; background: linear-gradient(135deg, #B08AB0, #8B5A86); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(176,138,176,0.4);">
+                <span style="font-size: 3em;">⚔️</span>
+            </div>
+            <h2 style="color: #B08AB0; margin: 0; font-size: 1.8em;">귀요미 길드 공략집</h2>
+            <p style="color: #999; margin-top: 8px; font-size: 0.9em;">길드원 전용 공간입니다</p>
+        </div>
+        
+        <!-- 탭 버튼 -->
+        <div style="display: flex; gap: 10px; margin-bottom: 25px; background: #f0f0f0; padding: 5px; border-radius: 12px;">
+            <button id="loginTabBtn" onclick="switchAuthTab('login')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #B08AB0, #8B5A86); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s;">로그인</button>
+            <button id="signupTabBtn" onclick="switchAuthTab('signup')" style="flex: 1; padding: 12px; background: transparent; color: #666; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s;">회원가입</button>
+        </div>
+        
+        <!-- 로그인 폼 -->
+        <div id="loginForm">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">닉네임</label>
+                <input type="text" id="loginNickname" placeholder="닉네임을 입력하세요" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#B08AB0'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">비밀번호</label>
+                <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#B08AB0'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="autoLogin" style="width: 18px; height: 18px; margin-right: 8px; cursor: pointer; accent-color: #B08AB0;">
+                    <span style="color: #666; font-size: 0.95em;">자동 로그인</span>
+                </label>
+            </div>
+            <button onclick="handleLogin()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #B08AB0, #8B5A86); color: white; border: none; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(176,138,176,0.4); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(176,138,176,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(176,138,176,0.4)'">
+                로그인 하기
+            </button>
+        </div>
+        
+        <!-- 회원가입 폼 -->
+        <div id="signupForm" style="display: none;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">닉네임</label>
+                <input type="text" id="signupNickname" placeholder="닉네임 (2-10자)" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#98D8C8'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">비밀번호</label>
+                <input type="password" id="signupPassword" placeholder="비밀번호 (4자 이상)" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#98D8C8'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">비밀번호 확인</label>
+                <input type="password" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#98D8C8'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <button onclick="handleRegister()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #98D8C8, #6FC3A8); color: white; border: none; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(152,216,200,0.4); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(152,216,200,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(152,216,200,0.4)'">
+                회원가입 하기
+            </button>
+        </div>
+        
+        <!-- 게스트 로그인 -->
+        <div style="margin-top: 20px; text-align: center;">
+            <button onclick="handleGuestLogin()" style="color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.9em; padding: 10px;">
+                게스트로 둘러보기 (댓글만 가능)
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+
+    <div class="container">
+        <header>
+            <div class="logo-container" style="margin-bottom: 20px;">
+                <img src="data:image/png;base64,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" alt="GYUOMI GUILD" style="width: 200px; height: 200px; margin: 0 auto; display: block; animation: float 3s ease-in-out infinite; border-radius: 50%; box-shadow: 0 8px 32px rgba(255,182,193,0.6), 0 0 60px rgba(255,192,203,0.3); object-fit: cover;">
+            </div>
+            <h1 style="background: linear-gradient(45deg, #FFB6C1, #FFC0CB, #FFD1DC); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🌟 귀요미 길드 공략집 🌟</h1>
+            <p style="font-size: 1.2em; color: #FFD1DC;">세븐나이츠 길드전 전략 모음집</p>
+        </header>
+
+        <link rel="stylesheet" href="style.css">
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="home">메인</button>
+            <button class="tab-btn" data-tab="attack">공격 공략</button>
+            <button class="tab-btn" data-tab="defense">방어 공략</button>
+        </div>
+
+        <!-- 메인 페이지 -->
+        <div id="home-tab" class="tab-content active">
+            <div class="card" style="text-align: center; padding: 60px 30px;">
+                <h2 style="font-size: 2.5em; margin-bottom: 30px;">⚔️ 세븐나이츠 길드전 ⚔️</h2>
+                <p style="font-size: 1.2em; color: #666; margin-bottom: 40px;">
+                    공격과 방어 전략을 체계적으로 관리하세요
+                </p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
+                    <div class="main-card" data-tab="attack" style="cursor: pointer; padding: 40px; background: linear-gradient(135deg, #FFF0F5, #FFE4E9); border-radius: 20px; border: 3px solid #FFB6C1; transition: all 0.3s;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">⚔️</div>
+                        <h3 style="color: #B08AB0; margin-bottom: 15px; font-size: 1.8em;">공격 공략집</h3>
+                        <p style="color: #8B5A86;">상대 방어팀을 공략하는<br>전략을 등록하고 관리</p>
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #FFB6C1;">
+                            <span id="attackCount" style="font-size: 1.2em; font-weight: bold; color: #B08AB0;">0개 등록</span>
+                        </div>
+                    </div>
+                    
+                    <div class="main-card" data-tab="defense" style="cursor: pointer; padding: 40px; background: linear-gradient(135deg, #F0FFF8, #E0F2F1); border-radius: 20px; border: 3px solid #98D8C8; transition: all 0.3s;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">🛡️</div>
+                        <h3 style="color: #6FC3A8; margin-bottom: 15px; font-size: 1.8em;">방어 공략집</h3>
+                        <p style="color: #5AA88F;">나의 방어팀을<br>구성하고 관리</p>
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #98D8C8;">
+                            <span id="defenseCount" style="font-size: 1.2em; font-weight: bold; color: #6FC3A8;">0개 등록</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 공격 공략 탭 -->
+        <div id="attack-tab" class="tab-content">
+            <div class="sub-tabs" style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 15px;">
+                <button class="sub-tab-btn attack-tab active" data-subtab="register" data-admin-only>공략 등록</button>
+                <button class="sub-tab-btn attack-tab" data-subtab="list">공략 목록</button>
+            </div>
+
+            <!-- 공략 등록 -->
+            <div id="register-content" class="sub-content active" data-admin-only>
+                <div class="card">
+                    <h2>⚔️ 공격 공략 등록</h2>
+                    <p style="color: #666; margin-bottom: 20px;">상대 방어 조합을 등록하세요. 공격 전략은 나중에 추가할 수 있습니다.</p>
+                    
+                    <form id="guideForm" onsubmit="saveGuide(event)">
+                        <div class="form-group">
+                            <label>공략 이름</label>
+                            <input type="text" id="guideName" placeholder="예: 루디 + 카구라 + 카일 방어 공략" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>상대 방어 영웅 (3명)</label>
+                            <div class="hero-grid">
+                                <div>
+                                    <select onchange="updateDefHero1Options(this.value)" style="margin-bottom: 8px;">
+                                        <option value="">등급 선택</option>
+                                        <option value="구세나">구세나</option>
+                                        <option value="찐스">찐스</option>
+                                        <option value="짭스">짭스</option>
+                                        <option value="희귀">희귀</option>
+                                    </select>
+                                    <select id="defHero1" required disabled>
+                                        <option value="">영웅 선택</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select onchange="updateDefHero2Options(this.value)" style="margin-bottom: 8px;">
+                                        <option value="">등급 선택</option>
+                                        <option value="구세나">구세나</option>
+                                        <option value="찐스">찐스</option>
+                                        <option value="짭스">짭스</option>
+                                        <option value="희귀">희귀</option>
+                                    </select>
+                                    <select id="defHero2" required disabled>
+                                        <option value="">영웅 선택</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select onchange="updateDefHero3Options(this.value)" style="margin-bottom: 8px;">
+                                        <option value="">등급 선택</option>
+                                        <option value="구세나">구세나</option>
+                                        <option value="찐스">찐스</option>
+                                        <option value="짭스">짭스</option>
+                                        <option value="희귀">희귀</option>
+                                    </select>
+                                    <select id="defHero3" required disabled>
+                                        <option value="">영웅 선택</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>설명 (선택)</label>
+                            <textarea id="guideDescription" rows="2" placeholder="방어팀 특징, 주의사항 등"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">공략 등록하기</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 공략 목록 -->
+            <div id="list-content" class="sub-content">
+                <div class="card">
+                    <h2>📚 등록된 공략 목록</h2>
+                    
+                    <!-- 검색 필터 -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                            <input type="text" id="searchGuide" placeholder="🔍 영웅 이름으로 검색..." 
+                                style="flex: 1; min-width: 200px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                                oninput="filterGuides()"
+                                onfocus="this.style.borderColor='#667eea'" 
+                                onblur="this.style.borderColor='#e0e0e0'">
+                            <button onclick="document.getElementById('searchGuide').value=''; filterGuides();" 
+                                style="padding: 12px 20px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                                초기화
+                            </button>
+                        </div>
+                        <p style="margin: 10px 0 0 0; color: #666; font-size: 0.9em;">
+                            💡 상대 방어 영웅 이름으로 검색하세요 (예: 카구라, 피어, 플로)
+                        </p>
+                    </div>
+                    
+                    <div id="guideList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 방어 공략 탭 -->
+        <div id="defense-tab" class="tab-content">
+            <div class="sub-tabs" style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 15px;">
+                <button class="sub-tab-btn defense-tab active" data-subtab="def-register" data-admin-only>방어팀 등록</button>
+                <button class="sub-tab-btn defense-tab" data-subtab="def-list">방어팀 목록</button>
+            </div>
+
+            <!-- 방어팀 등록 -->
+            <div id="def-register-content" class="sub-content active" data-admin-only>
+                <div class="card">
+                    <h2>🛡️ 방어팀 등록</h2>
+                    
+                    <form id="defenseForm" onsubmit="saveDefenseTeam(event)">
+                        <div class="form-group">
+                            <label>팀 이름</label>
+                            <input type="text" id="defenseName" placeholder="예: 메인 방어팀" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>방어 영웅 (3명)</label>
+                            <div class="hero-grid">
+                                <div>
+                                    <select onchange="updateDefTeamHero1Options(this.value)" style="margin-bottom: 8px;">
+                                        <option value="">등급 선택</option>
+                                        <option value="구세나">구세나</option>
+                                        <option value="찐스">찐스</option>
+                                        <option value="짭스">짭스</option>
+                                        <option value="희귀">희귀</option>
+                                    </select>
+                                    <select id="defTeamHero1" required onchange="updateDefenseEquipment()" disabled>
+                                        <option value="">영웅 선택</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select onchange="updateDefTeamHero2Options(this.value)" style="margin-bottom: 8px;">
+                                        <option value="">등급 선택</option>
+                                        <option value="구세나">구세나</option>
+                                        <option value="찐스">찐스</option>
+                                        <option value="짭스">짭스</option>
+                                        <option value="희귀">희귀</option>
+                                    </select>
+                                    <select id="defTeamHero2" required onchange="updateDefenseEquipment()" disabled>
+                                        <option value="">영웅 선택</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select onchange="updateDefTeamHero3Options(this.value)" style="margin-bottom: 8px;">
+                                        <option value="">등급 선택</option>
+                                        <option value="구세나">구세나</option>
+                                        <option value="찐스">찐스</option>
+                                        <option value="짭스">짭스</option>
+                                        <option value="희귀">희귀</option>
+                                    </select>
+                                    <select id="defTeamHero3" required onchange="updateDefenseEquipment()" disabled>
+                                        <option value="">영웅 선택</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="defenseEquipmentContainer"></div>
+
+                        <div class="form-group">
+                            <label>배치 전략 및 운용 팁</label>
+                            <textarea id="defenseTip" rows="3" placeholder="전체적인 운용법, 포지션 등"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">방어팀 저장하기</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 방어팀 목록 -->
+            <div id="def-list-content" class="sub-content">
+                <div class="card">
+                    <h2>📋 등록된 방어팀</h2>
+                    <div id="defenseList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
