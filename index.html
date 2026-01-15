@@ -159,16 +159,16 @@
             <!-- 공략 등록 -->
             <div id="register-content" class="sub-content active" data-admin-only>
                 <div class="card">
-                    <h2>✍️ 공략 등록하기</h2>
+                    <h2>✍️ 공격 공략 등록</h2>
                     
                     <form id="guideForm" onsubmit="saveGuide(event)">
                         <div class="form-group">
                             <label>공략 제목</label>
-                            <input type="text" id="guideTitle" placeholder="예: 아레나 상위권 공략법" required>
+                            <input type="text" id="guideTitle" placeholder="예: 카구라 피아 플로 숙주 공략" required>
                         </div>
 
                         <div class="form-group">
-                            <label>상대 방어팀 (3명)</label>
+                            <label>🛡️ 상대 방어팀 (3명)</label>
                             <div class="hero-grid">
                                 <div>
                                     <select onchange="updateEnemyHero1Options(this.value)" style="margin-bottom: 8px;">
@@ -207,55 +207,6 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>아군 공격팀 (3명)</label>
-                            <div class="hero-grid">
-                                <div>
-                                    <select onchange="updateAllyHero1Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="allyHero1" required onchange="updateEquipment()" disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <select onchange="updateAllyHero2Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="allyHero2" required onchange="updateEquipment()" disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <select onchange="updateAllyHero3Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="allyHero3" required onchange="updateEquipment()" disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="equipmentContainer"></div>
-
-                        <div class="form-group">
-                            <label>공략 상세 설명</label>
-                            <textarea id="guideDetail" rows="5" placeholder="공략 방법, 스킬 우선순위, 주의사항 등을 자세히 작성해주세요" required></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary">공략 저장하기</button>
