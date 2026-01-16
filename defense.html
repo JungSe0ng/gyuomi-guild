@@ -497,7 +497,7 @@
                 `;
             });
 
-            skillHtml += '<div class="equipment-grid" style="margin-top: 15px;">';
+            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">';
             skillHtml += `
                 <div class="form-group">
                     <label>1순위</label>
@@ -513,8 +513,6 @@
                         ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
                     </select>
                 </div>
-            `;
-            skillHtml += `
                 <div class="form-group">
                     <label>3순위</label>
                     <select id="skillOrder3">

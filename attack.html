@@ -536,15 +536,12 @@
         // 공격 영웅 선택
         window.updateAttack1Options = function(grade) {
             updateHeroSelect('attack1', grade);
-            updateStrategyEquipment();
         };
         window.updateAttack2Options = function(grade) {
             updateHeroSelect('attack2', grade);
-            updateStrategyEquipment();
         };
         window.updateAttack3Options = function(grade) {
             updateHeroSelect('attack3', grade);
-            updateStrategyEquipment();
         };
 
         function updateHeroSelect(selectId, grade) {
@@ -556,6 +553,8 @@
                     select.innerHTML += `<option value="${hero}">${hero}</option>`;
                 });
             }
+            // 영웅 선택 시 장비 UI 업데이트
+            select.onchange = updateStrategyEquipment;
         }
 
         // 전략 장비 설정 UI 업데이트
@@ -591,7 +590,7 @@
                 `;
             });
 
-            skillHtml += '<div class="equipment-grid" style="margin-top: 15px;">';
+            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">';
             skillHtml += `
                 <div class="form-group">
                     <label>1순위</label>
@@ -607,8 +606,6 @@
                         ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
                     </select>
                 </div>
-            `;
-            skillHtml += `
                 <div class="form-group">
                     <label>3순위</label>
                     <select id="strategySkillOrder3">
