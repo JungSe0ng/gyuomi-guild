@@ -103,53 +103,41 @@
             display: block;
         }
 
-        .card {
+        .form-container {
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-
-        .card h2 {
-            color: #B08AB0;
-            margin-bottom: 20px;
-            font-size: 1.8em;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
+            font-weight: 600;
             color: #555;
         }
 
-        input[type="text"],
-        textarea,
-        select {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 1em;
-            font-family: inherit;
-            transition: border 0.3s;
+            transition: all 0.3s;
         }
 
-        input:focus,
-        textarea:focus,
-        select:focus {
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
-            border-color: #B08AB0;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
+            border-color: #98D8C8;
+            box-shadow: 0 0 0 3px rgba(152,216,200,0.1);
         }
 
         .hero-grid {
@@ -158,204 +146,104 @@
             gap: 15px;
         }
 
-        .hero-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #B08AB0, #8B5A86);
-            color: white;
-            border-radius: 20px;
-            margin-right: 8px;
-            margin-bottom: 8px;
-            font-weight: bold;
-            box-shadow: 0 2px 8px rgba(176,138,176,0.3);
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #B08AB0, #8B5A86);
-            color: white;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(176,138,176,0.4);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #FFD93D, #FFC107);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #FF9AA2, #FF6B7A);
-            color: white;
-        }
-
-        .guide-item {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-
-        .guide-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .guide-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .guide-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .strategy-detail {
-            margin: 15px 0;
-            padding: 20px;
-            background: rgba(152,216,200,0.05);
-            border: 2px solid rgba(152,216,200,0.3);
-            border-radius: 12px;
-        }
-
-        .toggle-btn {
-            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: bold;
-            transition: all 0.3s;
-            margin-bottom: 10px;
-            width: 100%;
-            text-align: left;
-        }
-
-        .toggle-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(111,195,168,0.4);
-        }
-
-        .strategy-content {
-            display: none;
-            margin-top: 15px;
-        }
-
-        .strategy-content.show {
-            display: block;
-        }
-
-        .comment-section {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .comment-section h4 {
-            color: #B08AB0;
-            margin-bottom: 12px;
-            font-size: 1em;
-        }
-
-        .comment-list {
-            margin-bottom: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .comment-item {
-            background: white;
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 3px solid #B08AB0;
-        }
-
-        .comment-text {
-            color: #333;
-            margin-bottom: 6px;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .comment-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8em;
-            color: #999;
-        }
-
-        .comment-input {
+        .hero-select-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .comment-input textarea {
+        .equipment-section {
+            background: rgba(152,216,200,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #98D8C8;
+        }
+
+        .equipment-section h4 {
+            margin: 0 0 15px 0;
+            color: #98D8C8;
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .skill-order-section {
+            background: rgba(255,253,208,0.5);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 2px solid #ffd93d;
+        }
+
+        .skill-order-section h4 {
+            margin: 0 0 15px 0;
+            color: #666;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(152,216,200,0.4);
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .search-box input {
             width: 100%;
             padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-family: inherit;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 1em;
-            resize: vertical;
-            transition: border 0.3s;
-            min-height: 80px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
             background: white;
-            box-sizing: border-box;
-        }
-
-        .comment-input textarea:focus {
-            outline: none;
-            border-color: #B08AB0;
-        }
-
-        .comment-input button {
-            padding: 12px 20px;
-            white-space: nowrap;
-            font-size: 1em;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
             width: 100%;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .empty-state div {
-            font-size: 4em;
-            margin-bottom: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         @media (max-width: 768px) {
@@ -363,13 +251,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .guide-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .guide-actions {
-                width: 100%;
+            .equipment-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -378,14 +261,13 @@
     <div class="container">
         <header>
             <h1>⚔️ 공격 공략 관리</h1>
-            <p style="font-size: 1.2em; color: #FFD1DC;">상대 방어팀을 공략하는 전략을 등록하고 관리하세요</p>
-            <div id="userInfo"></div>
+            <p>상대 방어팀을 돌파하는 전략을 공유하세요</p>
+            <div class="nav-tabs">
+                <a href="main.html" class="nav-tab">📊 메인</a>
+                <a href="attack.html" class="nav-tab" style="background: rgba(255,255,255,0.3);">⚔️ 공격</a>
+                <a href="defense.html" class="nav-tab">🛡️ 방어</a>
+            </div>
         </header>
-
-        <div class="nav-tabs">
-            <a href="main.html" class="nav-tab">🏠 메인</a>
-            <a href="defense.html" class="nav-tab">🛡️ 방어 공략</a>
-        </div>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('register')">공략 등록</button>
@@ -394,52 +276,51 @@
 
         <!-- 공략 등록 탭 -->
         <div id="register-tab" class="tab-content active">
-            <div class="card" id="registerCard">
-                <h2>⚔️ 공격 공략 등록</h2>
-                <p style="color: #666; margin-bottom: 20px;">상대 방어 조합을 등록하세요. 공격 전략은 나중에 추가할 수 있습니다.</p>
+            <div class="form-container">
+                <h2 style="margin-bottom: 25px; color: #B08AB0;">⚔️ 공격 공략 등록</h2>
                 
                 <form id="guideForm" onsubmit="saveGuide(event)">
                     <div class="form-group">
                         <label>공략 이름</label>
-                        <input type="text" id="guideName" placeholder="예: 루디 + 카구라 + 카일 방어 공략" required>
+                        <input type="text" id="guideName" placeholder="예: 루디 + 카구라 + 카엘 방어 공략" required>
                     </div>
 
                     <div class="form-group">
                         <label>상대 방어 영웅 (3명)</label>
                         <div class="hero-grid">
-                            <div>
-                                <select onchange="updateDefHeroOptions(0, this.value)" style="margin-bottom: 8px;">
+                            <div class="hero-select-group">
+                                <select onchange="updateEnemy1Options(this.value)">
                                     <option value="">등급 선택</option>
                                     <option value="구세나">구세나</option>
                                     <option value="찐스">찐스</option>
                                     <option value="짭스">짭스</option>
                                     <option value="희귀">희귀</option>
                                 </select>
-                                <select id="defHero0" required disabled>
+                                <select id="enemy1" required disabled>
                                     <option value="">영웅 선택</option>
                                 </select>
                             </div>
-                            <div>
-                                <select onchange="updateDefHeroOptions(1, this.value)" style="margin-bottom: 8px;">
+                            <div class="hero-select-group">
+                                <select onchange="updateEnemy2Options(this.value)">
                                     <option value="">등급 선택</option>
                                     <option value="구세나">구세나</option>
                                     <option value="찐스">찐스</option>
                                     <option value="짭스">짭스</option>
                                     <option value="희귀">희귀</option>
                                 </select>
-                                <select id="defHero1" required disabled>
+                                <select id="enemy2" required disabled>
                                     <option value="">영웅 선택</option>
                                 </select>
                             </div>
-                            <div>
-                                <select onchange="updateDefHeroOptions(2, this.value)" style="margin-bottom: 8px;">
+                            <div class="hero-select-group">
+                                <select onchange="updateEnemy3Options(this.value)">
                                     <option value="">등급 선택</option>
                                     <option value="구세나">구세나</option>
                                     <option value="찐스">찐스</option>
                                     <option value="짭스">짭스</option>
                                     <option value="희귀">희귀</option>
                                 </select>
-                                <select id="defHero2" required disabled>
+                                <select id="enemy3" required disabled>
                                     <option value="">영웅 선택</option>
                                 </select>
                             </div>
@@ -447,100 +328,101 @@
                     </div>
 
                     <div class="form-group">
-                        <label>공략 설명 (선택)</label>
-                        <textarea id="description" placeholder="상대 방어팀의 특징이나 주의사항을 입력하세요"></textarea>
+                        <label>설명 (선택)</label>
+                        <textarea id="guideDescription" rows="3" placeholder="공략 설명, 주의사항 등..."></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">공략 등록</button>
+                    <button type="submit" class="btn">공략 등록하기</button>
                 </form>
             </div>
         </div>
 
         <!-- 공략 목록 탭 -->
         <div id="list-tab" class="tab-content">
-            <div class="card">
-                <h2>📚 등록된 공략 목록</h2>
-                
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <input type="text" id="searchInput" placeholder="🔍 공략 이름, 영웅 이름으로 검색..." 
-                           oninput="searchGuides()" style="width: 100%;">
-                </div>
-                
-                <div id="guideList"></div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 공략 이름, 영웅 이름으로 검색..." onkeyup="searchGuides()">
             </div>
+            <div id="guideList"></div>
         </div>
     </div>
 
     <!-- 전략 추가 모달 -->
-    <div id="strategyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; padding: 20px; overflow-y: auto;" onclick="if(event.target === this) closeStrategyModal()">
-        <div style="background: white; border-radius: 20px; padding: 30px; max-width: 800px; width: 100%; margin: 50px auto; max-height: calc(100vh - 100px); overflow-y: auto;" onclick="event.stopPropagation()">
-            <h2 style="margin: 0 0 25px 0; color: #98D8C8;">⚔️ 공격 전략 추가</h2>
+    <div id="strategyModal" class="modal" onclick="closeStrategyModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="margin-bottom: 25px; color: #98D8C8;">⚔️ 공격 전략 추가</h2>
             
             <form id="strategyForm" onsubmit="saveStrategy(event)">
                 <div class="form-group">
                     <label>전략 이름</label>
-                    <input type="text" id="strategyName" placeholder="예: 카구라 + 델론즈 + 스파이크" required>
+                    <input type="text" id="strategyName" placeholder="예: 스피드로 승부보기" required>
                 </div>
 
                 <div class="form-group">
                     <label>공격 영웅 (3명)</label>
                     <div class="hero-grid">
-                        <div>
-                            <select onchange="updateAtkHeroOptions(0, this.value)" style="margin-bottom: 8px;">
+                        <div class="hero-select-group">
+                            <select onchange="updateAttack1Options(this.value)">
                                 <option value="">등급 선택</option>
                                 <option value="구세나">구세나</option>
                                 <option value="찐스">찐스</option>
                                 <option value="짭스">짭스</option>
                                 <option value="희귀">희귀</option>
                             </select>
-                            <select id="atkHero0" required disabled>
+                            <select id="attack1" required disabled>
                                 <option value="">영웅 선택</option>
                             </select>
                         </div>
-                        <div>
-                            <select onchange="updateAtkHeroOptions(1, this.value)" style="margin-bottom: 8px;">
+                        <div class="hero-select-group">
+                            <select onchange="updateAttack2Options(this.value)">
                                 <option value="">등급 선택</option>
                                 <option value="구세나">구세나</option>
                                 <option value="찐스">찐스</option>
                                 <option value="짭스">짭스</option>
                                 <option value="희귀">희귀</option>
                             </select>
-                            <select id="atkHero1" required disabled>
+                            <select id="attack2" required disabled>
                                 <option value="">영웅 선택</option>
                             </select>
                         </div>
-                        <div>
-                            <select onchange="updateAtkHeroOptions(2, this.value)" style="margin-bottom: 8px;">
+                        <div class="hero-select-group">
+                            <select onchange="updateAttack3Options(this.value)">
                                 <option value="">등급 선택</option>
                                 <option value="구세나">구세나</option>
                                 <option value="찐스">찐스</option>
                                 <option value="짭스">짭스</option>
                                 <option value="희귀">희귀</option>
                             </select>
-                            <select id="atkHero2" required disabled>
+                            <select id="attack3" required disabled>
                                 <option value="">영웅 선택</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
+                <!-- 장비 설정 컨테이너 -->
+                <div id="strategyEquipmentContainer"></div>
+
+                <!-- 스킬 순서 -->
+                <div id="strategySkillContainer"></div>
+
                 <div class="form-group">
                     <label>운용 팁 (선택)</label>
-                    <textarea id="strategyTip" placeholder="공격팀 운용법, 스킬 사용 순서, 주의사항 등..."></textarea>
+                    <textarea id="strategyTip" rows="3" placeholder="전략 운용법, 주의사항 등..."></textarea>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="closeStrategyModal()" class="btn" style="flex: 1; background: #ddd;">취소</button>
-                    <button type="submit" class="btn btn-success" style="flex: 2;">저장하기</button>
+                    <button type="button" onclick="closeStrategyModal()" style="flex: 1; padding: 15px; background: #ddd; border: none; border-radius: 12px; cursor: pointer; font-size: 1em;">취소</button>
+                    <button type="submit" style="flex: 1; padding: 15px; background: linear-gradient(135deg, #98D8C8, #6FC3A8); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 1em; font-weight: bold;">전략 추가</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase 설정
         const firebaseConfig = {
@@ -549,113 +431,630 @@
             projectId: "gyuomi-guild",
             storageBucket: "gyuomi-guild.firebasestorage.app",
             messagingSenderId: "43293575259",
-            appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
+            appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e",
+            measurementId: "G-PT8DNQV1DY"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        window.db = db;
+        window.firestore = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy };
+
         let currentUser = null;
         let guides = [];
         let currentGuideId = null;
-        let editingStrategyIdx = null;
 
         // 영웅 데이터
         const heroData = {
-            '구세나': ['갤리두스', '로지', '밀리아', '쥬리', '파이'].sort(),
-            '찐스': ['카구라', '델론즈', '라이언', '레이첼', '루디', '린', '바네사', '브란즈&브란셀', '비스킷', '손오공', '스파이크', '실베스타', '아일린', '아킬라', '에이스', '엘리시아', '연희', '오를리', '제이브', '카르마', '카일', '키리엘', '클라한', '콜트', '태오', '프레이야', '플라튼', '트루드', '멜키르'].sort(),
-            '짭스': ['녹스', '니아', '데이지', '루리', '룩', '리나', '미호', '발리스타', '백각', '벨리카', '비담', '세인', '아라곤', '아멜리아', '에스파다', '엘리스', '유신', '지크', '첸슬러', '타카', '파스칼'].sort(),
-            '희귀': ['노호', '라니아', '라쿤', '레오', '레이', '리', '메이', '베인', '빅토리아', '블랙로즈', '사라', '세라', '소이', '스니퍼', '실비아', '아리엘', '아수라', '에반', '유이', '유리', '제인', '조커', '진', '쥬피', '카론', '카린', '캐티', '클레오', '클로에', '풍연', '헤브니아', '헬레니아', '호킨'].sort()
+            '구세나': ['밀리아', '갤리두스', '파이', '쥬리', '로지'],
+            '찐스': ['브란즈&브란셀', '손오공', '프레이야', '트루드', '라이언', '엘리시아', '키리엘', '카일', '아킬라', '카구라', '클라한', '오를리', '비스킷', '플라튼', '콜트', '린', '카르마', '멜키르', '연희', '태오', '바네사', '스파이크', '제이브', '레이첼', '아일린', '델론즈', '크리스', '루디', '실베스타', '에이스'],
+            '짭스': ['백각', '아멜리아', '미호', '데이지', '타카', '파스칼', '아라곤', '엘리스', '발리스타', '첸슬러', '룩', '지크', '세인', '에스파다', '니아', '루리', '벨리카', '리나', '비담', '유신', '녹스'],
+            '희귀': ['레이', '진', '캐티', '블랙로즈', '아수라', '노호', '클로에', '메이', '세라', '제인', '유이', '실비아', '루시', '빅토리아', '카론', '조커', '카린', '에반', '쥬피', '스니퍼', '소이', '풍연', '헤브니아', '헬레니아', '아리엘', '리', '사라', '라니아', '클레오', '베인', '레오', '유리', '라쿤', '호킨']
         };
 
-        // 인증 상태 확인
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userDocRef);
+        // 가나다순 정렬
+        Object.keys(heroData).forEach(grade => {
+            heroData[grade].sort((a, b) => a.localeCompare(b, 'ko'));
+        });
 
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    
-                    if (userData.role === 'pending') {
-                        await signOut(auth);
-                        window.location.href = 'login.html';
-                        return;
+        // 장비 옵션
+        const equipmentSets = ['모두', '선봉장', '성기사', '암살자', '복수자', '조율자', '수문장', '수호자', '추적자', '주술사'];
+        const weaponOptions = ['모두', '약점 공격 확률', '치명타 확률', '치명타 피해', '모든 공격력(%)', '모든 공격력', '방어력(%)', '방어력', '생명력(%)', '생명력', '효과 적중'];
+        const armorOptions = ['모두', '받는 피해 감소', '막기 확률', '모든 공격력(%)', '모든 공격력', '방어력(%)', '방어력', '생명력(%)', '생명력', '효과 저항'];
+
+        // 인증 확인
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                alert('로그인이 필요합니다.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const userDoc = await getDocs(query(collection(db, 'users')));
+                let userData = null;
+                userDoc.forEach(doc => {
+                    if (doc.data().email === user.email) {
+                        userData = { uid: doc.id, ...doc.data() };
                     }
-                    
-                    currentUser = {
-                        uid: user.uid,
-                        email: user.email,
-                        ...userData
-                    };
-                    
-                    updateUIForUser();
-                    loadGuides();
-                } else {
-                    await signOut(auth);
-                    window.location.href = 'login.html';
+                });
+
+                if (!userData) {
+                    alert('사용자 정보를 찾을 수 없습니다.');
+                    await auth.signOut();
+                    window.location.href = 'index.html';
+                    return;
                 }
-            } else {
-                window.location.href = 'login.html';
+
+                if (userData.role === 'pending') {
+                    alert('관리자의 승인을 기다리고 있습니다.');
+                    await auth.signOut();
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentUser = userData;
+                window.currentUser = currentUser;
+                loadData();
+                
+            } catch (error) {
+                console.error('사용자 정보 로드 오류:', error);
+                alert('사용자 정보를 불러오는데 실패했습니다.');
+                window.location.href = 'index.html';
             }
         });
 
-        function updateUIForUser() {
-            const userInfo = document.getElementById('userInfo');
-            const roleText = currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
-            const roleColor = currentUser.role === 'admin' ? '#FFB6C1' : '#98D8C8';
-
-            let html = `
-                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 15px; flex-wrap: wrap;">
-                    <div style="text-align: left;">
-                        <div style="font-size: 1.1em; font-weight: bold; color: white;">${currentUser.nickname}</div>
-                        <div style="font-size: 0.85em; color: ${roleColor};">${roleText}</div>
-                    </div>
-            `;
-
-            if (currentUser.role === 'admin') {
-                html += `
-                    <a href="admin.html" style="padding: 8px 16px; background: rgba(255,182,193,0.3); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; text-decoration: none; font-size: 0.9em; transition: all 0.3s;"
-                        onmouseover="this.style.background='rgba(255,182,193,0.5)'" onmouseout="this.style.background='rgba(255,182,193,0.3)'">
-                        👥 회원 관리
-                    </a>
-                `;
-            }
-
-            html += `
-                    <button onclick="handleLogout()" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: all 0.3s;"
-                        onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        로그아웃
-                    </button>
-                </div>
-            `;
-
-            userInfo.innerHTML = html;
-
-            // Admin이 아니면 등록 탭 숨기기
-            if (currentUser.role !== 'admin') {
-                document.getElementById('register-tab').style.display = 'none';
-                document.querySelector('.tab-btn').style.display = 'none';
-                switchTab('list');
-            }
-        }
-
-        async function loadGuides() {
+        // 데이터 로드
+        async function loadData() {
             try {
-                const guidesSnapshot = await getDocs(query(collection(db, 'guides'), orderBy('createdAt', 'desc')));
+                const snapshot = await getDocs(query(collection(db, 'guides'), orderBy('createdAt', 'desc')));
                 guides = [];
-                guidesSnapshot.forEach(doc => {
+                snapshot.forEach(doc => {
                     guides.push({ id: doc.id, ...doc.data() });
                 });
 
                 document.getElementById('guideCount').textContent = guides.length;
                 renderGuides();
             } catch (error) {
-                console.error('공략 로드 오류:', error);
-                alert('공략을 불러오는데 실패했습니다.');
+                console.error('데이터 로드 오류:', error);
             }
         }
+
+        // 상대 방어팀 영웅 선택
+        window.updateEnemy1Options = function(grade) {
+            updateHeroSelect('enemy1', grade);
+        };
+        window.updateEnemy2Options = function(grade) {
+            updateHeroSelect('enemy2', grade);
+        };
+        window.updateEnemy3Options = function(grade) {
+            updateHeroSelect('enemy3', grade);
+        };
+
+        // 공격 영웅 선택
+        window.updateAttack1Options = function(grade) {
+            updateHeroSelect('attack1', grade);
+            updateStrategyEquipment();
+        };
+        window.updateAttack2Options = function(grade) {
+            updateHeroSelect('attack2', grade);
+            updateStrategyEquipment();
+        };
+        window.updateAttack3Options = function(grade) {
+            updateHeroSelect('attack3', grade);
+            updateStrategyEquipment();
+        };
+
+        function updateHeroSelect(selectId, grade) {
+            const select = document.getElementById(selectId);
+            select.disabled = !grade;
+            select.innerHTML = '<option value="">영웅 선택</option>';
+            if (grade && heroData[grade]) {
+                heroData[grade].forEach(hero => {
+                    select.innerHTML += `<option value="${hero}">${hero}</option>`;
+                });
+            }
+        }
+
+        // 전략 장비 설정 UI 업데이트
+        function updateStrategyEquipment() {
+            const hero1 = document.getElementById('attack1').value;
+            const hero2 = document.getElementById('attack2').value;
+            const hero3 = document.getElementById('attack3').value;
+
+            const container = document.getElementById('strategyEquipmentContainer');
+            const skillContainer = document.getElementById('strategySkillContainer');
+
+            if (!hero1 && !hero2 && !hero3) {
+                container.innerHTML = '';
+                skillContainer.innerHTML = '';
+                return;
+            }
+
+            let equipHtml = '';
+            let skillHtml = '<div class="skill-order-section"><h4>😊 스킬 사용 순서</h4><p style="margin-bottom: 15px; color: #666;">각 영웅의 스킬 사용 순서를 선택하세요</p>';
+            
+            const selectedHeroes = [];
+            if (hero1) selectedHeroes.push({ num: 1, name: hero1 });
+            if (hero2) selectedHeroes.push({ num: 2, name: hero2 });
+            if (hero3) selectedHeroes.push({ num: 3, name: hero3 });
+
+            // 스킬 버튼 표시
+            selectedHeroes.forEach(hero => {
+                skillHtml += `
+                    <div style="display: inline-block; margin: 5px;">
+                        <span style="padding: 8px 16px; background: rgba(152,216,200,0.3); border-radius: 8px; font-size: 0.9em;">${hero.name} 스킬1</span>
+                        <span style="padding: 8px 16px; background: rgba(255,182,193,0.3); border-radius: 8px; font-size: 0.9em;">${hero.name} 스킬2</span>
+                    </div>
+                `;
+            });
+
+            skillHtml += '<div class="equipment-grid" style="margin-top: 15px;">';
+            skillHtml += `
+                <div class="form-group">
+                    <label>1순위</label>
+                    <select id="strategySkillOrder1">
+                        <option value="">선택</option>
+                        ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>2순위</label>
+                    <select id="strategySkillOrder2">
+                        <option value="">선택</option>
+                        ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
+                    </select>
+                </div>
+            `;
+            skillHtml += `
+                <div class="form-group">
+                    <label>3순위</label>
+                    <select id="strategySkillOrder3">
+                        <option value="">선택</option>
+                        ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
+                    </select>
+                </div>
+            `;
+            skillHtml += '</div></div>';
+
+            selectedHeroes.forEach(hero => {
+                equipHtml += `
+                    <div class="equipment-section">
+                        <h4>🎯 ${hero.name} 장비 세팅</h4>
+                        
+                        <div class="form-group">
+                            <label>공통 세트</label>
+                            <select id="strategyHero${hero.num}Set">
+                                ${equipmentSets.map(set => `<option value="${set}">${set}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div class="equipment-grid">
+                            <div class="form-group">
+                                <label>⚔️ 무기</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div>
+                                        <label style="font-size: 0.9em; color: #666;">무기1 옵션</label>
+                                        <select id="strategyHero${hero.num}Weapon1">
+                                            ${weaponOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.9em; color: #666;">무기2 옵션</label>
+                                        <select id="strategyHero${hero.num}Weapon2">
+                                            ${weaponOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>🛡️ 방어구</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div>
+                                        <label style="font-size: 0.9em; color: #666;">방어구1 옵션</label>
+                                        <select id="strategyHero${hero.num}Armor1">
+                                            ${armorOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.9em; color: #666;">방어구2 옵션</label>
+                                        <select id="strategyHero${hero.num}Armor2">
+                                            ${armorOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = equipHtml;
+            skillContainer.innerHTML = skillHtml;
+        }
+
+        // 공략 저장
+        window.saveGuide = async function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('guideName').value.trim();
+            const enemy1 = document.getElementById('enemy1').value;
+            const enemy2 = document.getElementById('enemy2').value;
+            const enemy3 = document.getElementById('enemy3').value;
+            const description = document.getElementById('guideDescription').value.trim();
+
+            if (!name || !enemy1 || !enemy2 || !enemy3) {
+                alert('공략 이름과 상대 방어 영웅 3명을 모두 입력해주세요.');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'guides'), {
+                    name: name,
+                    defenseHeroes: [enemy1, enemy2, enemy3],
+                    description: description,
+                    strategies: [],
+                    comments: [],
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser.nickname
+                });
+
+                alert('공략이 등록되었습니다! 이제 공격 전략을 추가하세요.');
+                document.getElementById('guideForm').reset();
+                document.querySelectorAll('#guideForm select[id^="enemy"]').forEach(s => s.disabled = true);
+                
+                await loadData();
+                switchTab('list');
+            } catch (error) {
+                console.error('저장 오류:', error);
+                alert('저장에 실패했습니다: ' + error.message);
+            }
+        };
+
+        // 전략 추가 모달 열기
+        window.showStrategyModal = function(guideId) {
+            currentGuideId = guideId;
+            document.getElementById('strategyModal').classList.add('active');
+            document.getElementById('strategyForm').reset();
+            document.getElementById('strategyEquipmentContainer').innerHTML = '';
+            document.getElementById('strategySkillContainer').innerHTML = '';
+            document.querySelectorAll('#strategyForm select[id^="attack"]').forEach(s => s.disabled = true);
+        };
+
+        window.closeStrategyModal = function() {
+            document.getElementById('strategyModal').classList.remove('active');
+            currentGuideId = null;
+        };
+
+        // 전략 저장
+        window.saveStrategy = async function(event) {
+            event.preventDefault();
+
+            const strategyName = document.getElementById('strategyName').value.trim();
+            const hero1 = document.getElementById('attack1').value;
+            const hero2 = document.getElementById('attack2').value;
+            const hero3 = document.getElementById('attack3').value;
+            const tip = document.getElementById('strategyTip').value.trim();
+
+            if (!strategyName || !hero1 || !hero2 || !hero3) {
+                alert('전략 이름과 공격 영웅 3명을 모두 입력해주세요.');
+                return;
+            }
+
+            const heroes = [];
+            [1, 2, 3].forEach(num => {
+                const heroName = document.getElementById(`attack${num}`).value;
+                if (heroName) {
+                    heroes.push({
+                        name: heroName,
+                        equipment: {
+                            set: document.getElementById(`strategyHero${num}Set`)?.value || '모두',
+                            weapon1: document.getElementById(`strategyHero${num}Weapon1`)?.value || '모두',
+                            weapon2: document.getElementById(`strategyHero${num}Weapon2`)?.value || '모두',
+                            armor1: document.getElementById(`strategyHero${num}Armor1`)?.value || '모두',
+                            armor2: document.getElementById(`strategyHero${num}Armor2`)?.value || '모두'
+                        }
+                    });
+                }
+            });
+
+            const skillOrder = [
+                document.getElementById('strategySkillOrder1')?.value,
+                document.getElementById('strategySkillOrder2')?.value,
+                document.getElementById('strategySkillOrder3')?.value
+            ].filter(s => s);
+
+            try {
+                const guide = guides.find(g => g.id === currentGuideId);
+                const strategies = guide.strategies || [];
+                
+                strategies.push({
+                    name: strategyName,
+                    heroes: heroes,
+                    skillOrder: skillOrder,
+                    tip: tip,
+                    comments: [],
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser.nickname
+                });
+
+                await updateDoc(doc(db, 'guides', currentGuideId), { strategies: strategies });
+
+                alert('공격 전략이 추가되었습니다!');
+                closeStrategyModal();
+                await loadData();
+            } catch (error) {
+                console.error('전략 저장 오류:', error);
+                alert('전략 저장에 실패했습니다: ' + error.message);
+            }
+        };
+
+        // 공략 렌더링
+        function renderGuides() {
+            const container = document.getElementById('guideList');
+            
+            if (guides.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px; background: white; border-radius: 15px;">등록된 공략이 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = guides.map(guide => {
+                const isAdmin = currentUser && currentUser.role === 'admin';
+                const strategies = guide.strategies || [];
+                const comments = guide.comments || [];
+                
+                return `
+                    <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                            <div>
+                                <h3 style="margin: 0 0 10px 0; color: #B08AB0;">${guide.name}</h3>
+                                <p style="margin: 0; font-size: 0.9em; color: #999;">작성자: ${guide.createdBy} | ${new Date(guide.createdAt).toLocaleDateString('ko-KR')}</p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                ${isAdmin ? `<button onclick="showStrategyModal('${guide.id}')" style="padding: 8px 16px; background: #98D8C8; color: white; border: none; border-radius: 8px; cursor: pointer;">➕ 전략 추가</button>` : ''}
+                                ${isAdmin ? `<button onclick="deleteGuide('${guide.id}')" style="padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer;">🗑️ 삭제</button>` : ''}
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(176,138,176,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #B08AB0;">🛡️ 상대 방어팀:</h4>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                ${guide.defenseHeroes.map(h => `<span style="padding: 8px 16px; background: rgba(255,182,193,0.3); border-radius: 8px; font-weight: 500;">${h}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        ${guide.description ? `
+                            <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                                <p style="margin: 0;">${guide.description}</p>
+                            </div>
+                        ` : ''}
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4 style="margin: 0; color: #98D8C8;">⚔️ 공격 전략 (${strategies.length}개)</h4>
+                                <button onclick="toggleStrategies('${guide.id}')" style="padding: 6px 12px; background: rgba(152,216,200,0.2); border: none; border-radius: 6px; cursor: pointer;">
+                                    <span id="toggle-${guide.id}">▼ 펼치기</span>
+                                </button>
+                            </div>
+                            
+                            <div id="strategies-${guide.id}" style="display: none;">
+                                ${strategies.length === 0 ? '<p style="text-align: center; color: #999; padding: 20px;">등록된 전략이 없습니다.</p>' : strategies.map((strategy, idx) => `
+                                    <div style="background: rgba(152,216,200,0.05); border: 2px solid rgba(152,216,200,0.3); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                            <div>
+                                                <h5 style="margin: 0 0 10px 0; color: #333;">${strategy.name}</h5>
+                                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                                    ${strategy.heroes.map(h => `<span style="padding: 6px 12px; background: rgba(152,216,200,0.3); border-radius: 6px; font-size: 0.9em;">${h.name}</span>`).join('')}
+                                                </div>
+                                            </div>
+                                            ${isAdmin ? `<button onclick="deleteStrategy('${guide.id}', ${idx})" style="padding: 6px 12px; background: #ff6b6b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em;">🗑️ 삭제</button>` : ''}
+                                        </div>
+
+                                        ${strategy.heroes.map(hero => `
+                                            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                                <h6 style="margin: 0 0 10px 0; color: #98D8C8;">${hero.name}:</h6>
+                                                <div style="font-size: 0.9em; color: #666;">
+                                                    <div>세트: ${hero.equipment.set}</div>
+                                                    <div>무기1: ${hero.equipment.weapon1} | 무기2: ${hero.equipment.weapon2}</div>
+                                                    <div>방어구1: ${hero.equipment.armor1} | 방어구2: ${hero.equipment.armor2}</div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+
+                                        ${strategy.skillOrder && strategy.skillOrder.length > 0 ? `
+                                            <div style="background: rgba(255,253,208,0.5); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                                                <span style="font-weight: 600;">😊 스킬 순서:</span> ${strategy.skillOrder.join(' → ')}
+                                            </div>
+                                        ` : ''}
+
+                                        ${strategy.tip ? `
+                                            <div style="background: rgba(255,253,208,0.5); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                                                <span style="font-weight: 600;">💡 운용 팁:</span> ${strategy.tip}
+                                            </div>
+                                        ` : ''}
+
+                                        <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
+                                            <h6 style="margin: 0 0 10px 0;">💬 전략 댓글 (${strategy.comments?.length || 0})</h6>
+                                            <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                                                ${(strategy.comments || []).map(c => `
+                                                    <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                            <span style="font-weight: 600; font-size: 0.9em; color: #B08AB0;">${c.user}</span>
+                                                            <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
+                                                        </div>
+                                                        <p style="margin: 0; font-size: 0.9em;">${c.text}</p>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <input type="text" id="strategy-comment-${guide.id}-${idx}" placeholder="전략 댓글 입력..." style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                                                <button onclick="addStrategyComment('${guide.id}', ${idx})" style="padding: 8px 16px; background: #98D8C8; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">댓글 작성</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div style="border-top: 2px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 20px;">
+                            <h5 style="margin: 0 0 10px 0;">💬 공략 댓글 (${comments.length})</h5>
+                            <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                                ${comments.map(c => `
+                                    <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                            <span style="font-weight: 600; font-size: 0.9em; color: #B08AB0;">${c.user}</span>
+                                            <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
+                                        </div>
+                                        <p style="margin: 0; font-size: 0.9em;">${c.text}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="guide-comment-${guide.id}" placeholder="공략 댓글 입력..." style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                                <button onclick="addGuideComment('${guide.id}')" style="padding: 8px 16px; background: #B08AB0; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">댓글 작성</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 토글
+        window.toggleStrategies = function(guideId) {
+            const container = document.getElementById(`strategies-${guideId}`);
+            const toggleBtn = document.getElementById(`toggle-${guideId}`);
+            
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                toggleBtn.textContent = '▲ 접기';
+            } else {
+                container.style.display = 'none';
+                toggleBtn.textContent = '▼ 펼치기';
+            }
+        };
+
+        // 공략 댓글
+        window.addGuideComment = async function(guideId) {
+            const input = document.getElementById(`guide-comment-${guideId}`);
+            const text = input.value.trim();
+            
+            if (!text) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const guide = guides.find(g => g.id === guideId);
+                const comments = guide.comments || [];
+                comments.push({
+                    user: currentUser.nickname,
+                    text: text,
+                    time: new Date().toISOString()
+                });
+
+                await updateDoc(doc(db, 'guides', guideId), { comments: comments });
+                input.value = '';
+                await loadData();
+            } catch (error) {
+                console.error('댓글 추가 오류:', error);
+                alert('댓글 추가에 실패했습니다.');
+            }
+        };
+
+        // 전략 댓글
+        window.addStrategyComment = async function(guideId, strategyIdx) {
+            const input = document.getElementById(`strategy-comment-${guideId}-${strategyIdx}`);
+            const text = input.value.trim();
+            
+            if (!text) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const guide = guides.find(g => g.id === guideId);
+                const strategies = guide.strategies || [];
+                
+                if (!strategies[strategyIdx].comments) {
+                    strategies[strategyIdx].comments = [];
+                }
+                
+                strategies[strategyIdx].comments.push({
+                    user: currentUser.nickname,
+                    text: text,
+                    time: new Date().toISOString()
+                });
+
+                await updateDoc(doc(db, 'guides', guideId), { strategies: strategies });
+                input.value = '';
+                await loadData();
+            } catch (error) {
+                console.error('댓글 추가 오류:', error);
+                alert('댓글 추가에 실패했습니다.');
+            }
+        };
+
+        // 삭제
+        window.deleteGuide = async function(guideId) {
+            if (!confirm('이 공략을 삭제하시겠습니까?')) return;
+
+            try {
+                await deleteDoc(doc(db, 'guides', guideId));
+                alert('공략이 삭제되었습니다.');
+                await loadData();
+            } catch (error) {
+                console.error('삭제 오류:', error);
+                alert('삭제에 실패했습니다.');
+            }
+        };
+
+        window.deleteStrategy = async function(guideId, strategyIdx) {
+            if (!confirm('이 전략을 삭제하시겠습니까?')) return;
+
+            try {
+                const guide = guides.find(g => g.id === guideId);
+                const strategies = guide.strategies || [];
+                strategies.splice(strategyIdx, 1);
+
+                await updateDoc(doc(db, 'guides', guideId), { strategies: strategies });
+                alert('전략이 삭제되었습니다.');
+                await loadData();
+            } catch (error) {
+                console.error('삭제 오류:', error);
+                alert('삭제에 실패했습니다.');
+            }
+        };
+
+        // 검색
+        window.searchGuides = function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderGuides();
+                return;
+            }
+
+            const filtered = guides.filter(guide => {
+                const nameMatch = guide.name.toLowerCase().includes(searchTerm);
+                const enemyMatch = guide.defenseHeroes.some(h => h.toLowerCase().includes(searchTerm));
+                const strategyMatch = (guide.strategies || []).some(s => 
+                    s.heroes.some(h => h.name.toLowerCase().includes(searchTerm))
+                );
+                return nameMatch || enemyMatch || strategyMatch;
+            });
+
+            const container = document.getElementById('guideList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px; background: white; border-radius: 15px;">검색 결과가 없습니다.</p>';
+            } else {
+                guides = filtered;
+                renderGuides();
+                loadData();
+            }
+        };
 
         // 탭 전환
         window.switchTab = function(tab) {
@@ -664,399 +1063,7 @@
             
             document.getElementById(tab + '-tab').classList.add('active');
             event.target.classList.add('active');
-            
-            if (tab === 'list') {
-                renderGuides();
-            }
-        }
-
-        // 방어 영웅 옵션 업데이트
-        window.updateDefHeroOptions = function(idx, grade) {
-            const select = document.getElementById(`defHero${idx}`);
-            select.disabled = !grade;
-            select.innerHTML = '<option value="">영웅 선택</option>';
-            if (grade && heroData[grade]) {
-                heroData[grade].forEach(hero => {
-                    select.innerHTML += `<option value="${hero}">${hero}</option>`;
-                });
-            }
-        }
-
-        // 공격 영웅 옵션 업데이트
-        window.updateAtkHeroOptions = function(idx, grade) {
-            const select = document.getElementById(`atkHero${idx}`);
-            select.disabled = !grade;
-            select.innerHTML = '<option value="">영웅 선택</option>';
-            if (grade && heroData[grade]) {
-                heroData[grade].forEach(hero => {
-                    select.innerHTML += `<option value="${hero}">${hero}</option>`;
-                });
-            }
-        }
-
-        // 공략 저장
-        window.saveGuide = async function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('guideName').value.trim();
-            const defHero0 = document.getElementById('defHero0').value;
-            const defHero1 = document.getElementById('defHero1').value;
-            const defHero2 = document.getElementById('defHero2').value;
-            const description = document.getElementById('description').value.trim();
-
-            try {
-                await addDoc(collection(db, 'guides'), {
-                    name: name,
-                    defenseHeroes: [defHero0, defHero1, defHero2],
-                    description: description,
-                    strategies: [],
-                    comments: [],
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUser.nickname
-                });
-
-                alert('공략이 저장되었습니다! 이제 공격 전략을 추가하세요.');
-                document.getElementById('guideForm').reset();
-                document.querySelectorAll('[id^="defHero"]').forEach(s => s.disabled = true);
-                
-                await loadGuides();
-                switchTab('list');
-            } catch (error) {
-                console.error('공략 저장 오류:', error);
-                alert('공략 저장에 실패했습니다.');
-            }
-        }
-
-        // 계속...
-        
-        // 공략 목록 렌더링
-        function renderGuides(filteredGuides = null) {
-            const container = document.getElementById('guideList');
-            const guidesToRender = filteredGuides || guides;
-            
-            if (guidesToRender.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div>🐰✨</div>
-                        <h3>${filteredGuides ? '검색 결과가 없습니다' : '등록된 공략이 없습니다'}</h3>
-                        <p>${filteredGuides ? '다른 검색어를 시도해보세요' : '첫 번째 공략을 등록해보세요!'}</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = guidesToRender.map(guide => {
-                const strategies = guide.strategies || [];
-                const guideComments = guide.comments || [];
-                const isAdmin = currentUser && currentUser.role === 'admin';
-                
-                return `
-                <div class="guide-item">
-                    <div class="guide-header">
-                        <div class="guide-title">${guide.name}</div>
-                        <div class="guide-actions">
-                            ${isAdmin ? `
-                                <button class="btn btn-success" onclick="openStrategyModal('${guide.id}')">+ 공격 전략 추가</button>
-                                <button class="btn btn-danger" onclick="deleteGuide('${guide.id}')">삭제</button>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <strong style="display: block; margin-bottom: 10px;">🛡️ 상대 방어:</strong>
-                        ${guide.defenseHeroes.map(h => `<span class="hero-badge">${h}</span>`).join('')}
-                    </div>
-                    
-                    ${guide.description ? `<p style="color: #666; margin-bottom: 15px;">${guide.description}</p>` : ''}
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                        <strong>⚔️ 공격 전략 (${strategies.length}개)</strong>
-                        ${strategies.length > 0 ? strategies.map((s, idx) => renderStrategy(guide.id, s, idx, isAdmin)).join('') : '<p style="color: #999; margin: 10px 0;">등록된 공격 전략이 없습니다.</p>'}
-                    </div>
-                    
-                    <div class="comment-section">
-                        <h4>💬 공략 댓글 (${guideComments.length})</h4>
-                        ${guideComments.length > 0 ? `
-                            <div class="comment-list">
-                                ${guideComments.map(c => `
-                                    <div class="comment-item">
-                                        <div class="comment-text">${c.text}</div>
-                                        <div class="comment-meta">
-                                            <span><strong>${c.user}</strong> · ${new Date(c.createdAt).toLocaleString('ko-KR')}</span>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                        <div class="comment-input">
-                            <textarea id="guide-comment-${guide.id}" placeholder="공략 댓글을 입력하세요..."></textarea>
-                            <button class="btn btn-success" onclick="addGuideComment('${guide.id}')">댓글 작성</button>
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: right; color: #999; font-size: 0.9em; margin-top: 15px;">
-                        작성: ${guide.createdBy} | ${new Date(guide.createdAt).toLocaleString('ko-KR')}
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function renderStrategy(guideId, strategy, idx, isAdmin) {
-            const strategyComments = strategy.comments || [];
-            
-            return `
-                <div class="strategy-detail" style="margin-top: 15px;">
-                    <button class="toggle-btn" onclick="toggleStrategy('${guideId}', ${idx})">
-                        <span id="toggle-${guideId}-${idx}">▼</span> ${strategy.name}
-                    </button>
-                    <div class="strategy-content" id="strategy-${guideId}-${idx}">
-                        ${isAdmin ? `
-                            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 8px;">
-                                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.9em;" onclick="deleteStrategy('${guideId}', ${idx})">삭제</button>
-                            </div>
-                        ` : ''}
-                        
-                        <div style="margin-bottom: 10px;">
-                            <strong style="color: #667eea;">공격 영웅:</strong> ${strategy.heroes.join(', ')}
-                        </div>
-                        
-                        ${strategy.tip ? `
-                            <div style="margin-top: 8px; padding: 10px; background: #e3f2fd; border-radius: 5px; border-left: 3px solid #2196f3; margin-bottom: 15px;">
-                                <strong>💡 운용 팁:</strong> ${strategy.tip}
-                            </div>
-                        ` : ''}
-                        
-                        <div class="comment-section">
-                            <h4>💬 전략 댓글 (${strategyComments.length})</h4>
-                            ${strategyComments.length > 0 ? `
-                                <div class="comment-list">
-                                    ${strategyComments.map(c => `
-                                        <div class="comment-item">
-                                            <div class="comment-text">${c.text}</div>
-                                            <div class="comment-meta">
-                                                <span><strong>${c.user}</strong> · ${new Date(c.createdAt).toLocaleString('ko-KR')}</span>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                            <div class="comment-input">
-                                <textarea id="strategy-comment-${guideId}-${idx}" placeholder="전략 댓글을 입력하세요..."></textarea>
-                                <button class="btn btn-success" onclick="addStrategyComment('${guideId}', ${idx})">댓글 작성</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 검색
-        window.searchGuides = function() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-            
-            if (!keyword) {
-                renderGuides();
-                return;
-            }
-
-            const filtered = guides.filter(guide => {
-                if (guide.name.toLowerCase().includes(keyword)) return true;
-                if (guide.defenseHeroes.some(h => h.toLowerCase().includes(keyword))) return true;
-                if (guide.strategies && guide.strategies.some(s => 
-                    s.name.toLowerCase().includes(keyword) ||
-                    s.heroes.some(h => h.toLowerCase().includes(keyword))
-                )) return true;
-                return false;
-            });
-
-            renderGuides(filtered);
-        }
-
-        // 토글
-        window.toggleStrategy = function(guideId, idx) {
-            const content = document.getElementById(`strategy-${guideId}-${idx}`);
-            const toggle = document.getElementById(`toggle-${guideId}-${idx}`);
-            
-            if (content.classList.contains('show')) {
-                content.classList.remove('show');
-                toggle.textContent = '▼';
-            } else {
-                content.classList.add('show');
-                toggle.textContent = '▲';
-            }
-        }
-
-        // 전략 모달 열기
-        window.openStrategyModal = function(guideId) {
-            currentGuideId = guideId;
-            editingStrategyIdx = null;
-            document.getElementById('strategyModal').style.display = 'flex';
-            document.getElementById('strategyForm').reset();
-            document.querySelectorAll('[id^="atkHero"]').forEach(s => s.disabled = true);
-        }
-
-        window.closeStrategyModal = function() {
-            document.getElementById('strategyModal').style.display = 'none';
-            currentGuideId = null;
-            editingStrategyIdx = null;
-        }
-
-        // 전략 저장
-        window.saveStrategy = async function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('strategyName').value.trim();
-            const atkHero0 = document.getElementById('atkHero0').value;
-            const atkHero1 = document.getElementById('atkHero1').value;
-            const atkHero2 = document.getElementById('atkHero2').value;
-            const tip = document.getElementById('strategyTip').value.trim();
-
-            try {
-                const guide = guides.find(g => g.id === currentGuideId);
-                if (!guide) return;
-
-                const strategy = {
-                    name: name,
-                    heroes: [atkHero0, atkHero1, atkHero2],
-                    tip: tip,
-                    comments: [],
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUser.nickname
-                };
-
-                const strategies = guide.strategies || [];
-                strategies.push(strategy);
-
-                await updateDoc(doc(db, 'guides', currentGuideId), {
-                    strategies: strategies
-                });
-
-                alert('공격 전략이 추가되었습니다!');
-                closeStrategyModal();
-                await loadGuides();
-            } catch (error) {
-                console.error('전략 저장 오류:', error);
-                alert('전략 저장에 실패했습니다.');
-            }
-        }
-
-        // 공략 댓글 추가
-        window.addGuideComment = async function(guideId) {
-            const textarea = document.getElementById(`guide-comment-${guideId}`);
-            const text = textarea.value.trim();
-            
-            if (!text) {
-                alert('댓글 내용을 입력하세요!');
-                return;
-            }
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                if (!guide) return;
-
-                const comments = guide.comments || [];
-                comments.push({
-                    text: text,
-                    user: currentUser.nickname,
-                    createdAt: new Date().toISOString()
-                });
-
-                await updateDoc(doc(db, 'guides', guideId), {
-                    comments: comments
-                });
-
-                textarea.value = '';
-                await loadGuides();
-            } catch (error) {
-                console.error('댓글 추가 오류:', error);
-                alert('댓글 추가에 실패했습니다.');
-            }
-        }
-
-        // 전략 댓글 추가
-        window.addStrategyComment = async function(guideId, strategyIdx) {
-            const textarea = document.getElementById(`strategy-comment-${guideId}-${strategyIdx}`);
-            const text = textarea.value.trim();
-            
-            if (!text) {
-                alert('댓글 내용을 입력하세요!');
-                return;
-            }
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                if (!guide || !guide.strategies[strategyIdx]) return;
-
-                const strategies = [...guide.strategies];
-                if (!strategies[strategyIdx].comments) {
-                    strategies[strategyIdx].comments = [];
-                }
-                
-                strategies[strategyIdx].comments.push({
-                    text: text,
-                    user: currentUser.nickname,
-                    createdAt: new Date().toISOString()
-                });
-
-                await updateDoc(doc(db, 'guides', guideId), {
-                    strategies: strategies
-                });
-
-                textarea.value = '';
-                await loadGuides();
-            } catch (error) {
-                console.error('댓글 추가 오류:', error);
-                alert('댓글 추가에 실패했습니다.');
-            }
-        }
-
-        // 공략 삭제
-        window.deleteGuide = async function(guideId) {
-            if (!confirm('이 공략을 삭제하시겠습니까?')) return;
-
-            try {
-                await deleteDoc(doc(db, 'guides', guideId));
-                alert('공략이 삭제되었습니다.');
-                await loadGuides();
-            } catch (error) {
-                console.error('공략 삭제 오류:', error);
-                alert('공략 삭제에 실패했습니다.');
-            }
-        }
-
-        // 전략 삭제
-        window.deleteStrategy = async function(guideId, strategyIdx) {
-            if (!confirm('이 전략을 삭제하시겠습니까?')) return;
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                if (!guide) return;
-
-                const strategies = [...guide.strategies];
-                strategies.splice(strategyIdx, 1);
-
-                await updateDoc(doc(db, 'guides', guideId), {
-                    strategies: strategies
-                });
-
-                alert('전략이 삭제되었습니다.');
-                await loadGuides();
-            } catch (error) {
-                console.error('전략 삭제 오류:', error);
-                alert('전략 삭제에 실패했습니다.');
-            }
-        }
-
-        window.handleLogout = async function() {
-            if (!confirm('로그아웃 하시겠습니까?')) return;
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('로그아웃 오류:', error);
-                alert('로그아웃 중 오류가 발생했습니다.');
-            }
-        }
+        };
     </script>
 </body>
 </html>
