@@ -580,17 +580,24 @@
             if (hero2) selectedHeroes.push({ num: 2, name: hero2 });
             if (hero3) selectedHeroes.push({ num: 3, name: hero3 });
 
-            // 스킬 버튼 표시
+            // 스킬 표시 (2행 3열 텍스트)
+            skillHtml += '<div style="margin-bottom: 15px;">';
+            // 첫 번째 줄: 스킬2
+            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;">';
             selectedHeroes.forEach(hero => {
-                skillHtml += `
-                    <div style="display: inline-block; margin: 5px;">
-                        <span style="padding: 8px 16px; background: rgba(152,216,200,0.3); border-radius: 8px; font-size: 0.9em;">${hero.name} 스킬1</span>
-                        <span style="padding: 8px 16px; background: rgba(255,182,193,0.3); border-radius: 8px; font-size: 0.9em;">${hero.name} 스킬2</span>
-                    </div>
-                `;
+                skillHtml += `<div style="padding: 8px; background: rgba(255,182,193,0.2); border-radius: 8px; text-align: center; font-size: 0.9em; color: #666;">${hero.name} 스킬2</div>`;
             });
+            skillHtml += '</div>';
+            // 두 번째 줄: 스킬1
+            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">';
+            selectedHeroes.forEach(hero => {
+                skillHtml += `<div style="padding: 8px; background: rgba(152,216,200,0.2); border-radius: 8px; text-align: center; font-size: 0.9em; color: #666;">${hero.name} 스킬1</div>`;
+            });
+            skillHtml += '</div>';
+            skillHtml += '</div>';
 
-            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">';
+            skillHtml += '<p style="margin-bottom: 10px; font-weight: 600; color: #666;">스킬 순서 (3개 선택)</p>';
+            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">';
             skillHtml += `
                 <div class="form-group">
                     <label>1순위</label>
@@ -876,11 +883,14 @@
                                         <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
                                             <h6 style="margin: 0 0 10px 0;">💬 전략 댓글 (${strategy.comments?.length || 0})</h6>
                                             <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
-                                                ${(strategy.comments || []).map(c => `
+                                                ${(strategy.comments || []).map((c, cIdx) => `
                                                     <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
                                                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                                                             <span style="font-weight: 600; font-size: 0.9em; color: #B08AB0;">${c.user}</span>
-                                                            <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
+                                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                                <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
+                                                                ${(isAdmin || c.user === currentUser.nickname) ? `<button onclick="deleteStrategyComment('${guide.id}', ${idx}, ${cIdx})" style="padding: 2px 8px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">🗑️</button>` : ''}
+                                                            </div>
                                                         </div>
                                                         <p style="margin: 0; font-size: 0.9em;">${c.text}</p>
                                                     </div>
@@ -899,11 +909,14 @@
                         <div style="border-top: 2px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 20px;">
                             <h5 style="margin: 0 0 10px 0;">💬 공략 댓글 (${comments.length})</h5>
                             <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
-                                ${comments.map(c => `
+                                ${comments.map((c, cIdx) => `
                                     <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
                                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                                             <span style="font-weight: 600; font-size: 0.9em; color: #B08AB0;">${c.user}</span>
-                                            <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
+                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
+                                                ${(isAdmin || c.user === currentUser.nickname) ? `<button onclick="deleteGuideComment('${guide.id}', ${cIdx})" style="padding: 2px 8px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">🗑️</button>` : ''}
+                                            </div>
                                         </div>
                                         <p style="margin: 0; font-size: 0.9em;">${c.text}</p>
                                     </div>
@@ -1022,6 +1035,42 @@
             } catch (error) {
                 console.error('삭제 오류:', error);
                 alert('삭제에 실패했습니다.');
+            }
+        };
+
+        // 공략 댓글 삭제
+        window.deleteGuideComment = async function(guideId, commentIdx) {
+            if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+
+            try {
+                const guide = guides.find(g => g.id === guideId);
+                const comments = guide.comments || [];
+                comments.splice(commentIdx, 1);
+
+                await updateDoc(doc(db, 'guides', guideId), { comments: comments });
+                await loadData();
+            } catch (error) {
+                console.error('댓글 삭제 오류:', error);
+                alert('댓글 삭제에 실패했습니다.');
+            }
+        };
+
+        // 전략 댓글 삭제
+        window.deleteStrategyComment = async function(guideId, strategyIdx, commentIdx) {
+            if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+
+            try {
+                const guide = guides.find(g => g.id === guideId);
+                const strategies = guide.strategies || [];
+                const comments = strategies[strategyIdx].comments || [];
+                comments.splice(commentIdx, 1);
+                strategies[strategyIdx].comments = comments;
+
+                await updateDoc(doc(db, 'guides', guideId), { strategies: strategies });
+                await loadData();
+            } catch (error) {
+                console.error('댓글 삭제 오류:', error);
+                alert('댓글 삭제에 실패했습니다.');
             }
         };
 
