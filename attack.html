@@ -418,6 +418,74 @@
         </div>
     </div>
 
+    <!-- 공략 수정 모달 -->
+    <div id="editGuideModal" class="modal" onclick="closeEditGuideModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="margin-bottom: 25px; color: #B08AB0;">✏️ 공략 수정</h2>
+            
+            <form id="editGuideForm" onsubmit="updateGuide(event)">
+                <input type="hidden" id="editGuideId">
+                
+                <div class="form-group">
+                    <label>공략 이름</label>
+                    <input type="text" id="editGuideName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>상대 방어 영웅 (3명)</label>
+                    <div class="hero-grid">
+                        <div class="hero-select-group">
+                            <select onchange="updateEditEnemy1Options(this.value)">
+                                <option value="">등급 선택</option>
+                                <option value="구세나">구세나</option>
+                                <option value="찐스">찐스</option>
+                                <option value="짭스">짭스</option>
+                                <option value="희귀">희귀</option>
+                            </select>
+                            <select id="editEnemy1" required disabled>
+                                <option value="">영웅 선택</option>
+                            </select>
+                        </div>
+                        <div class="hero-select-group">
+                            <select onchange="updateEditEnemy2Options(this.value)">
+                                <option value="">등급 선택</option>
+                                <option value="구세나">구세나</option>
+                                <option value="찐스">찐스</option>
+                                <option value="짭스">짭스</option>
+                                <option value="희귀">희귀</option>
+                            </select>
+                            <select id="editEnemy2" required disabled>
+                                <option value="">영웅 선택</option>
+                            </select>
+                        </div>
+                        <div class="hero-select-group">
+                            <select onchange="updateEditEnemy3Options(this.value)">
+                                <option value="">등급 선택</option>
+                                <option value="구세나">구세나</option>
+                                <option value="찐스">찐스</option>
+                                <option value="짭스">짭스</option>
+                                <option value="희귀">희귀</option>
+                            </select>
+                            <select id="editEnemy3" required disabled>
+                                <option value="">영웅 선택</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>설명 (선택)</label>
+                    <textarea id="editGuideDescription" rows="3"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="closeEditGuideModal()" style="flex: 1; padding: 15px; background: #ddd; border: none; border-radius: 12px; cursor: pointer; font-size: 1em;">취소</button>
+                    <button type="submit" style="flex: 1; padding: 15px; background: linear-gradient(135deg, #ffd93d, #ffb627); color: #333; border: none; border-radius: 12px; cursor: pointer; font-size: 1em; font-weight: bold;">수정 완료</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -731,6 +799,12 @@
         window.closeStrategyModal = function() {
             document.getElementById('strategyModal').classList.remove('active');
             currentGuideId = null;
+            delete window.editingStrategyIndex;
+            
+            // 모달 제목/버튼 초기화
+            document.querySelector('#strategyModal h2').textContent = '⚔️ 공격 전략 추가';
+            document.querySelector('#strategyForm button[type="submit"]').textContent = '전략 추가';
+            document.querySelector('#strategyForm button[type="submit"]').style.background = 'linear-gradient(135deg, #98D8C8, #6FC3A8)';
         };
 
         // 전략 저장
@@ -775,19 +849,32 @@
                 const guide = guides.find(g => g.id === currentGuideId);
                 const strategies = guide.strategies || [];
                 
-                strategies.push({
+                const strategyData = {
                     name: strategyName,
                     heroes: heroes,
                     skillOrder: skillOrder,
                     tip: tip,
-                    comments: [],
                     createdAt: new Date().toISOString(),
                     createdBy: currentUser.nickname
-                });
+                };
+                
+                // 수정 모드인지 확인
+                if (window.editingStrategyIndex !== undefined) {
+                    // 기존 댓글 유지
+                    strategyData.comments = strategies[window.editingStrategyIndex].comments || [];
+                    strategyData.createdAt = strategies[window.editingStrategyIndex].createdAt;
+                    strategyData.createdBy = strategies[window.editingStrategyIndex].createdBy;
+                    strategies[window.editingStrategyIndex] = strategyData;
+                    delete window.editingStrategyIndex;
+                } else {
+                    // 새로 추가
+                    strategyData.comments = [];
+                    strategies.push(strategyData);
+                }
 
                 await updateDoc(doc(db, 'guides', currentGuideId), { strategies: strategies });
 
-                alert('공격 전략이 추가되었습니다!');
+                alert(window.editingStrategyIndex !== undefined ? '전략이 수정되었습니다!' : '공격 전략이 추가되었습니다!');
                 closeStrategyModal();
                 await loadData();
             } catch (error) {
@@ -819,6 +906,7 @@
                             </div>
                             <div style="display: flex; gap: 8px;">
                                 ${isAdmin ? `<button onclick="showStrategyModal('${guide.id}')" style="padding: 8px 16px; background: #98D8C8; color: white; border: none; border-radius: 8px; cursor: pointer;">➕ 전략 추가</button>` : ''}
+                                ${isAdmin ? `<button onclick="editGuide('${guide.id}')" style="padding: 8px 16px; background: #ffd93d; color: #333; border: none; border-radius: 8px; cursor: pointer;">✏️ 수정</button>` : ''}
                                 ${isAdmin ? `<button onclick="deleteGuide('${guide.id}')" style="padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer;">🗑️ 삭제</button>` : ''}
                             </div>
                         </div>
@@ -854,7 +942,12 @@
                                                     ${strategy.heroes.map(h => `<span style="padding: 6px 12px; background: rgba(152,216,200,0.3); border-radius: 6px; font-size: 0.9em;">${h.name}</span>`).join('')}
                                                 </div>
                                             </div>
-                                            ${isAdmin ? `<button onclick="deleteStrategy('${guide.id}', ${idx})" style="padding: 6px 12px; background: #ff6b6b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em;">🗑️ 삭제</button>` : ''}
+                                            ${isAdmin ? `
+                                                <div style="display: flex; gap: 8px;">
+                                                    <button onclick="editStrategy('${guide.id}', ${idx})" style="padding: 6px 12px; background: #ffd93d; color: #333; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em;">✏️ 수정</button>
+                                                    <button onclick="deleteStrategy('${guide.id}', ${idx})" style="padding: 6px 12px; background: #ff6b6b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em;">🗑️ 삭제</button>
+                                                </div>
+                                            ` : ''}
                                         </div>
 
                                         ${strategy.heroes.map(hero => `
@@ -1007,6 +1100,88 @@
             }
         };
 
+        // 공략 수정
+        window.editGuide = function(guideId) {
+            const guide = guides.find(g => g.id === guideId);
+            if (!guide) return;
+
+            document.getElementById('editGuideId').value = guideId;
+            document.getElementById('editGuideName').value = guide.name;
+            document.getElementById('editGuideDescription').value = guide.description || '';
+
+            // 상대 영웅 선택
+            guide.defenseHeroes.forEach((hero, idx) => {
+                const gradeSelect = document.querySelectorAll('#editGuideModal .hero-select-group')[idx].querySelector('select');
+                const heroSelect = document.getElementById(`editEnemy${idx + 1}`);
+                
+                // 등급 찾기
+                let heroGrade = '';
+                Object.keys(heroData).forEach(grade => {
+                    if (heroData[grade].includes(hero)) {
+                        heroGrade = grade;
+                    }
+                });
+                
+                gradeSelect.value = heroGrade;
+                
+                // 영웅 목록 업데이트
+                if (idx === 0) updateEditEnemy1Options(heroGrade);
+                else if (idx === 1) updateEditEnemy2Options(heroGrade);
+                else if (idx === 2) updateEditEnemy3Options(heroGrade);
+                
+                setTimeout(() => {
+                    heroSelect.value = hero;
+                }, 100);
+            });
+
+            document.getElementById('editGuideModal').classList.add('active');
+        };
+
+        window.closeEditGuideModal = function() {
+            document.getElementById('editGuideModal').classList.remove('active');
+        };
+
+        window.updateEditEnemy1Options = function(grade) {
+            updateHeroSelect('editEnemy1', grade);
+        };
+        window.updateEditEnemy2Options = function(grade) {
+            updateHeroSelect('editEnemy2', grade);
+        };
+        window.updateEditEnemy3Options = function(grade) {
+            updateHeroSelect('editEnemy3', grade);
+        };
+
+        window.updateGuide = async function(event) {
+            event.preventDefault();
+
+            const guideId = document.getElementById('editGuideId').value;
+            const name = document.getElementById('editGuideName').value.trim();
+            const enemy1 = document.getElementById('editEnemy1').value;
+            const enemy2 = document.getElementById('editEnemy2').value;
+            const enemy3 = document.getElementById('editEnemy3').value;
+            const description = document.getElementById('editGuideDescription').value.trim();
+
+            if (!name || !enemy1 || !enemy2 || !enemy3) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+
+            try {
+                await updateDoc(doc(db, 'guides', guideId), {
+                    name: name,
+                    defenseHeroes: [enemy1, enemy2, enemy3],
+                    description: description
+                });
+
+                alert('공략이 수정되었습니다!');
+                closeEditGuideModal();
+                await loadData();
+            } catch (error) {
+                console.error('수정 오류:', error);
+                alert('수정에 실패했습니다: ' + error.message);
+            }
+        };
+
         // 삭제
         window.deleteGuide = async function(guideId) {
             if (!confirm('이 공략을 삭제하시겠습니까?')) return;
@@ -1019,6 +1194,79 @@
                 console.error('삭제 오류:', error);
                 alert('삭제에 실패했습니다.');
             }
+        };
+
+        // 전략 수정
+        window.editStrategy = function(guideId, strategyIdx) {
+            const guide = guides.find(g => g.id === guideId);
+            if (!guide || !guide.strategies || !guide.strategies[strategyIdx]) return;
+
+            const strategy = guide.strategies[strategyIdx];
+            
+            // 모달 열기
+            currentGuideId = guideId;
+            document.getElementById('strategyModal').classList.add('active');
+            
+            // 폼 초기화
+            document.getElementById('strategyForm').reset();
+            
+            // 전략 이름
+            document.getElementById('strategyName').value = strategy.name;
+            
+            // 영웅 선택
+            strategy.heroes.forEach((hero, idx) => {
+                const gradeSelect = document.querySelectorAll('#strategyModal .hero-select-group')[idx].querySelector('select');
+                const heroSelect = document.getElementById(`attack${idx + 1}`);
+                
+                let heroGrade = '';
+                Object.keys(heroData).forEach(grade => {
+                    if (heroData[grade].includes(hero.name)) {
+                        heroGrade = grade;
+                    }
+                });
+                
+                gradeSelect.value = heroGrade;
+                
+                if (idx === 0) updateAttack1Options(heroGrade);
+                else if (idx === 1) updateAttack2Options(heroGrade);
+                else if (idx === 2) updateAttack3Options(heroGrade);
+                
+                setTimeout(() => {
+                    heroSelect.value = hero.name;
+                    updateStrategyEquipment();
+                    
+                    // 장비 설정
+                    setTimeout(() => {
+                        if (document.getElementById(`strategyHero${idx + 1}Set`)) {
+                            document.getElementById(`strategyHero${idx + 1}Set`).value = hero.equipment.set;
+                            document.getElementById(`strategyHero${idx + 1}Weapon1`).value = hero.equipment.weapon1;
+                            document.getElementById(`strategyHero${idx + 1}Weapon2`).value = hero.equipment.weapon2;
+                            document.getElementById(`strategyHero${idx + 1}Armor1`).value = hero.equipment.armor1;
+                            document.getElementById(`strategyHero${idx + 1}Armor2`).value = hero.equipment.armor2;
+                        }
+                    }, 200);
+                }, 100);
+            });
+            
+            // 스킬 순서
+            setTimeout(() => {
+                if (strategy.skillOrder && strategy.skillOrder.length > 0) {
+                    document.getElementById('strategySkillOrder1').value = strategy.skillOrder[0] || '';
+                    document.getElementById('strategySkillOrder2').value = strategy.skillOrder[1] || '';
+                    document.getElementById('strategySkillOrder3').value = strategy.skillOrder[2] || '';
+                }
+            }, 300);
+            
+            // 운용 팁
+            document.getElementById('strategyTip').value = strategy.tip || '';
+            
+            // 수정 모드 표시
+            document.querySelector('#strategyModal h2').textContent = '✏️ 공격 전략 수정';
+            document.querySelector('#strategyForm button[type="submit"]').textContent = '수정 완료';
+            document.querySelector('#strategyForm button[type="submit"]').style.background = 'linear-gradient(135deg, #ffd93d, #ffb627)';
+            
+            // 수정 인덱스 저장
+            window.editingStrategyIndex = strategyIdx;
         };
 
         window.deleteStrategy = async function(guideId, strategyIdx) {

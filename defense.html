@@ -626,21 +626,34 @@
             ].filter(s => s);
 
             try {
-                await addDoc(collection(db, 'defenseTeams'), {
+                const teamData = {
                     name: name,
                     heroes: heroes,
                     skillOrder: skillOrder,
-                    tip: tip,
-                    comments: [],
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUser.nickname
-                });
+                    tip: tip
+                };
 
-                alert('방어팀이 저장되었습니다!');
+                if (window.editingTeamId) {
+                    // 수정 모드
+                    await updateDoc(doc(db, 'defenseTeams', window.editingTeamId), teamData);
+                    alert('방어팀이 수정되었습니다!');
+                    delete window.editingTeamId;
+                } else {
+                    // 추가 모드
+                    teamData.comments = [];
+                    teamData.createdAt = new Date().toISOString();
+                    teamData.createdBy = currentUser.nickname;
+                    await addDoc(collection(db, 'defenseTeams'), teamData);
+                    alert('방어팀이 저장되었습니다!');
+                }
+
                 document.getElementById('defenseForm').reset();
                 document.getElementById('equipmentContainer').innerHTML = '';
                 document.getElementById('skillOrderContainer').innerHTML = '';
                 document.querySelectorAll('#defenseForm select[id^="hero"]').forEach(s => s.disabled = true);
+                document.querySelector('#defenseForm button[type="submit"]').textContent = '저장하기';
+                document.querySelector('#defenseForm button[type="submit"]').style.background = 'linear-gradient(135deg, #98D8C8, #6FC3A8)';
+                document.getElementById('cancelEditBtn')?.remove();
                 
                 await loadData();
                 switchTab('list');
@@ -670,7 +683,12 @@
                                 <h3 style="margin: 0 0 10px 0; color: #98D8C8;">${team.name}</h3>
                                 <p style="margin: 0; font-size: 0.9em; color: #999;">작성자: ${team.createdBy} | ${new Date(team.createdAt).toLocaleDateString('ko-KR')}</p>
                             </div>
-                            ${isAdmin ? `<button onclick="deleteTeam('${team.id}')" style="padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer;">🗑️ 삭제</button>` : ''}
+                            ${isAdmin ? `
+                                <div style="display: flex; gap: 8px;">
+                                    <button onclick="editTeam('${team.id}')" style="padding: 8px 16px; background: #ffd93d; color: #333; border: none; border-radius: 8px; cursor: pointer;">✏️ 수정</button>
+                                    <button onclick="deleteTeam('${team.id}')" style="padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer;">🗑️ 삭제</button>
+                                </div>
+                            ` : ''}
                         </div>
 
                         <div style="background: rgba(152,216,200,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
@@ -760,6 +778,99 @@
         };
 
         // 삭제
+        // 방어팀 수정
+        window.editTeam = async function(teamId) {
+            const team = defenseTeams.find(t => t.id === teamId);
+            if (!team) return;
+
+            // 탭 전환
+            switchTab('register');
+
+            // 팀 이름
+            document.getElementById('teamName').value = team.name;
+
+            // 영웅 선택
+            team.heroes.forEach((hero, idx) => {
+                const gradeSelect = document.querySelectorAll('#defenseForm .hero-select-group')[idx].querySelector('select');
+                const heroSelect = document.getElementById(`hero${idx + 1}`);
+                
+                let heroGrade = '';
+                Object.keys(heroData).forEach(grade => {
+                    if (heroData[grade].includes(hero.name)) {
+                        heroGrade = grade;
+                    }
+                });
+                
+                gradeSelect.value = heroGrade;
+                
+                if (idx === 0) updateHero1Options(heroGrade);
+                else if (idx === 1) updateHero2Options(heroGrade);
+                else if (idx === 2) updateHero3Options(heroGrade);
+                
+                setTimeout(() => {
+                    heroSelect.value = hero.name;
+                }, 100);
+            });
+
+            // 장비 & 스킬 업데이트
+            setTimeout(() => {
+                updateEquipment();
+                
+                setTimeout(() => {
+                    team.heroes.forEach((hero, idx) => {
+                        if (document.getElementById(`hero${idx + 1}Set`)) {
+                            document.getElementById(`hero${idx + 1}Set`).value = hero.equipment.set;
+                            document.getElementById(`hero${idx + 1}Weapon1`).value = hero.equipment.weapon1;
+                            document.getElementById(`hero${idx + 1}Weapon2`).value = hero.equipment.weapon2;
+                            document.getElementById(`hero${idx + 1}Armor1`).value = hero.equipment.armor1;
+                            document.getElementById(`hero${idx + 1}Armor2`).value = hero.equipment.armor2;
+                        }
+                    });
+                    
+                    // 스킬 순서
+                    if (team.skillOrder && team.skillOrder.length > 0) {
+                        document.getElementById('skillOrder1').value = team.skillOrder[0] || '';
+                        document.getElementById('skillOrder2').value = team.skillOrder[1] || '';
+                        document.getElementById('skillOrder3').value = team.skillOrder[2] || '';
+                    }
+                }, 200);
+            }, 200);
+
+            // 운용 팁
+            document.getElementById('tip').value = team.tip || '';
+
+            // 수정 모드 표시
+            window.editingTeamId = teamId;
+            document.querySelector('#defenseForm button[type="submit"]').textContent = '수정 완료';
+            document.querySelector('#defenseForm button[type="submit"]').style.background = 'linear-gradient(135deg, #ffd93d, #ffb627)';
+            
+            // 취소 버튼 추가
+            if (!document.getElementById('cancelEditBtn')) {
+                const submitBtn = document.querySelector('#defenseForm button[type="submit"]');
+                const cancelBtn = document.createElement('button');
+                cancelBtn.id = 'cancelEditBtn';
+                cancelBtn.type = 'button';
+                cancelBtn.textContent = '취소';
+                cancelBtn.className = 'btn';
+                cancelBtn.style.background = '#ddd';
+                cancelBtn.style.color = '#333';
+                cancelBtn.style.marginTop = '10px';
+                cancelBtn.onclick = cancelEdit;
+                submitBtn.parentNode.insertBefore(cancelBtn, submitBtn);
+            }
+        };
+
+        window.cancelEdit = function() {
+            delete window.editingTeamId;
+            document.getElementById('defenseForm').reset();
+            document.getElementById('equipmentContainer').innerHTML = '';
+            document.getElementById('skillOrderContainer').innerHTML = '';
+            document.querySelectorAll('#defenseForm select[id^="hero"]').forEach(s => s.disabled = true);
+            document.querySelector('#defenseForm button[type="submit"]').textContent = '저장하기';
+            document.querySelector('#defenseForm button[type="submit"]').style.background = 'linear-gradient(135deg, #98D8C8, #6FC3A8)';
+            document.getElementById('cancelEditBtn')?.remove();
+        };
+
         window.deleteTeam = async function(teamId) {
             if (!confirm('이 방어팀을 삭제하시겠습니까?')) return;
 
