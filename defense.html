@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방어 공략 - 귀요미 길드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #6B4966 0%, #8B5A86 50%, #B08AB0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #FFB6C1, #FFC0CB);
+            color: #6B4966;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #B08AB0;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #B08AB0;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            color: white;
+            border-radius: 20px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(176,138,176,0.3);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(176,138,176,0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #FF9AA2, #FF6B7A);
+            color: white;
+        }
+
+        .guide-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .guide-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .guide-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .comment-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .comment-section h4 {
+            color: #B08AB0;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+
+        .comment-list {
+            margin-bottom: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #B08AB0;
+        }
+
+        .comment-text {
+            color: #333;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .comment-input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .comment-input textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            transition: border 0.3s;
+            min-height: 80px;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .comment-input textarea:focus {
+            outline: none;
+            border-color: #B08AB0;
+        }
+
+        .comment-input button {
+            padding: 12px 20px;
+            white-space: nowrap;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state div {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .guide-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .guide-actions {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ 방어 공략 관리</h1>
+            <p style="font-size: 1.2em; color: #FFD1DC;">나의 방어팀을 구성하고 관리하세요</p>
+            <div id="userInfo"></div>
+        </header>
+
+        <div class="nav-tabs">
+            <a href="main.html" class="nav-tab">🏠 메인</a>
+            <a href="attack.html" class="nav-tab">⚔️ 공격 공략</a>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('register')">방어팀 등록</button>
+            <button class="tab-btn" onclick="switchTab('list')">방어팀 목록 (<span id="teamCount">0</span>)</button>
+        </div>
+
+        <!-- 방어팀 등록 탭 -->
+        <div id="register-tab" class="tab-content active">
+            <div class="card">
+                <h2>🛡️ 방어팀 등록</h2>
+                
+                <form id="defenseForm" onsubmit="saveTeam(event)">
+                    <div class="form-group">
+                        <label>팀 이름</label>
+                        <input type="text" id="teamName" placeholder="예: 카구라 방어팀" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>방어 영웅 (3명)</label>
+                        <div class="hero-grid">
+                            <div>
+                                <select onchange="updateHeroOptions(0, this.value)" style="margin-bottom: 8px;">
+                                    <option value="">등급 선택</option>
+                                    <option value="구세나">구세나</option>
+                                    <option value="찐스">찐스</option>
+                                    <option value="짭스">짭스</option>
+                                    <option value="희귀">희귀</option>
+                                </select>
+                                <select id="hero0" required disabled>
+                                    <option value="">영웅 선택</option>
+                                </select>
+                            </div>
+                            <div>
+                                <select onchange="updateHeroOptions(1, this.value)" style="margin-bottom: 8px;">
+                                    <option value="">등급 선택</option>
+                                    <option value="구세나">구세나</option>
+                                    <option value="찐스">찐스</option>
+                                    <option value="짭스">짭스</option>
+                                    <option value="희귀">희귀</option>
+                                </select>
+                                <select id="hero1" required disabled>
+                                    <option value="">영웅 선택</option>
+                                </select>
+                            </div>
+                            <div>
+                                <select onchange="updateHeroOptions(2, this.value)" style="margin-bottom: 8px;">
+                                    <option value="">등급 선택</option>
+                                    <option value="구세나">구세나</option>
+                                    <option value="찐스">찐스</option>
+                                    <option value="짭스">짭스</option>
+                                    <option value="희귀">희귀</option>
+                                </select>
+                                <select id="hero2" required disabled>
+                                    <option value="">영웅 선택</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>운용 팁 (선택)</label>
+                        <textarea id="tip" placeholder="방어팀 운용 팁을 입력하세요"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">방어팀 등록</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 방어팀 목록 탭 -->
+        <div id="list-tab" class="tab-content">
+            <div class="card">
+                <h2>📋 등록된 방어팀</h2>
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <input type="text" id="searchInput" placeholder="🔍 팀 이름, 영웅 이름으로 검색..." 
+                           oninput="searchTeams()" style="width: 100%;">
+                </div>
+                
+                <div id="teamList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1UuCCISKN5zYPIH3-0A01fAkJJ7HMu",
+            authDomain: "gyuomi-guild.firebaseapp.com",
+            projectId: "gyuomi-guild",
+            storageBucket: "gyuomi-guild.firebasestorage.app",
+            messagingSenderId: "614352357629",
+            appId: "1:614352357629:web:2ac38d0d9fecda6a2be17fe"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let teams = [];
+
+        // 영웅 데이터
+        const heroData = {
+            '구세나': ['갤리두스', '로지', '밀리아', '쥬리', '파이'].sort(),
+            '찐스': ['카구라', '델론즈', '라이언', '레이첼', '루디', '린', '바네사', '브란즈&브란셀', '비스킷', '손오공', '스파이크', '실베스타', '아일린', '아킬라', '에이스', '엘리시아', '연희', '오를리', '제이브', '카르마', '카일', '키리엘', '클라한', '콜트', '태오', '프레이야', '플라튼', '트루드', '멜키르'].sort(),
+            '짭스': ['녹스', '니아', '데이지', '루리', '룩', '리나', '미호', '발리스타', '백각', '벨리카', '비담', '세인', '아라곤', '아멜리아', '에스파다', '엘리스', '유신', '지크', '첸슬러', '타카', '파스칼'].sort(),
+            '희귀': ['노호', '라니아', '라쿤', '레오', '레이', '리', '메이', '베인', '빅토리아', '블랙로즈', '사라', '세라', '소이', '스니퍼', '실비아', '아리엘', '아수라', '에반', '유이', '유리', '제인', '조커', '진', '쥬피', '카론', '카린', '캐티', '클레오', '클로에', '풍연', '헤브니아', '헬레니아', '호킨'].sort()
+        };
+
+        // 인증 상태 확인
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    
+                    if (userData.role === 'pending') {
+                        await signOut(auth);
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    currentUser = {
+                        uid: user.uid,
+                        email: user.email,
+                        ...userData
+                    };
+                    
+                    updateUIForUser();
+                    loadTeams();
+                } else {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function updateUIForUser() {
+            const userInfo = document.getElementById('userInfo');
+            const roleText = currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
+            const roleColor = currentUser.role === 'admin' ? '#FFB6C1' : '#98D8C8';
+
+            let html = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 15px; flex-wrap: wrap;">
+                    <div style="text-align: left;">
+                        <div style="font-size: 1.1em; font-weight: bold; color: white;">${currentUser.nickname}</div>
+                        <div style="font-size: 0.85em; color: ${roleColor};">${roleText}</div>
+                    </div>
+            `;
+
+            if (currentUser.role === 'admin') {
+                html += `
+                    <a href="admin.html" style="padding: 8px 16px; background: rgba(255,182,193,0.3); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; text-decoration: none; font-size: 0.9em; transition: all 0.3s;"
+                        onmouseover="this.style.background='rgba(255,182,193,0.5)'" onmouseout="this.style.background='rgba(255,182,193,0.3)'">
+                        👥 회원 관리
+                    </a>
+                `;
+            }
+
+            html += `
+                    <button onclick="handleLogout()" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: all 0.3s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        로그아웃
+                    </button>
+                </div>
+            `;
+
+            userInfo.innerHTML = html;
+
+            // Admin이 아니면 등록 탭 숨기기
+            if (currentUser.role !== 'admin') {
+                document.getElementById('register-tab').style.display = 'none';
+                document.querySelector('.tab-btn').style.display = 'none';
+                switchTab('list');
+            }
+        }
+
+        async function loadTeams() {
+            try {
+                const teamsSnapshot = await getDocs(query(collection(db, 'defenseTeams'), orderBy('createdAt', 'desc')));
+                teams = [];
+                teamsSnapshot.forEach(doc => {
+                    teams.push({ id: doc.id, ...doc.data() });
+                });
+
+                document.getElementById('teamCount').textContent = teams.length;
+                renderTeams();
+            } catch (error) {
+                console.error('방어팀 로드 오류:', error);
+                alert('방어팀을 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 탭 전환
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tab + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tab === 'list') {
+                renderTeams();
+            }
+        }
+
+        // 영웅 옵션 업데이트
+        window.updateHeroOptions = function(idx, grade) {
+            const select = document.getElementById(`hero${idx}`);
+            select.disabled = !grade;
+            select.innerHTML = '<option value="">영웅 선택</option>';
+            if (grade && heroData[grade]) {
+                heroData[grade].forEach(hero => {
+                    select.innerHTML += `<option value="${hero}">${hero}</option>`;
+                });
+            }
+        }
+
+        // 방어팀 저장
+        window.saveTeam = async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('teamName').value.trim();
+            const hero0 = document.getElementById('hero0').value;
+            const hero1 = document.getElementById('hero1').value;
+            const hero2 = document.getElementById('hero2').value;
+            const tip = document.getElementById('tip').value.trim();
+
+            try {
+                await addDoc(collection(db, 'defenseTeams'), {
+                    name: name,
+                    heroes: [hero0, hero1, hero2],
+                    tip: tip,
+                    comments: [],
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser.nickname
+                });
+
+                alert('방어팀이 저장되었습니다!');
+                document.getElementById('defenseForm').reset();
+                document.querySelectorAll('[id^="hero"]').forEach(s => s.disabled = true);
+                
+                await loadTeams();
+                switchTab('list');
+            } catch (error) {
+                console.error('방어팀 저장 오류:', error);
+                alert('방어팀 저장에 실패했습니다.');
+            }
+        }
+
+        // 방어팀 목록 렌더링
+        function renderTeams(filteredTeams = null) {
+            const container = document.getElementById('teamList');
+            const teamsToRender = filteredTeams || teams;
+            
+            if (teamsToRender.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div>🐰✨</div>
+                        <h3>${filteredTeams ? '검색 결과가 없습니다' : '등록된 방어팀이 없습니다'}</h3>
+                        <p>${filteredTeams ? '다른 검색어를 시도해보세요' : '첫 번째 방어팀을 등록해보세요!'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = teamsToRender.map(team => {
+                const comments = team.comments || [];
+                const isAdmin = currentUser && currentUser.role === 'admin';
+                
+                return `
+                <div class="guide-item">
+                    <div class="guide-header">
+                        <div class="guide-title">${team.name}</div>
+                        <div class="guide-actions">
+                            ${isAdmin ? `
+                                <button class="btn btn-danger" onclick="deleteTeam('${team.id}')">삭제</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 10px;">🛡️ 방어 영웅:</strong>
+                        ${team.heroes.map(h => `<span class="hero-badge">${h}</span>`).join('')}
+                    </div>
+                    
+                    ${team.tip ? `
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3; margin-bottom: 20px;">
+                            <strong>💡 운용 팁:</strong><br>${team.tip}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="comment-section">
+                        <h4>💬 댓글 (${comments.length})</h4>
+                        ${comments.length > 0 ? `
+                            <div class="comment-list">
+                                ${comments.map(c => `
+                                    <div class="comment-item">
+                                        <div class="comment-text">${c.text}</div>
+                                        <div class="comment-meta">
+                                            <span><strong>${c.user}</strong> · ${new Date(c.createdAt).toLocaleString('ko-KR')}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="comment-input">
+                            <textarea id="comment-${team.id}" placeholder="댓글을 입력하세요..."></textarea>
+                            <button class="btn btn-success" onclick="addComment('${team.id}')">댓글 작성</button>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: right; color: #999; font-size: 0.9em; margin-top: 15px;">
+                        작성: ${team.createdBy} | ${new Date(team.createdAt).toLocaleString('ko-KR')}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // 검색
+        window.searchTeams = function() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!keyword) {
+                renderTeams();
+                return;
+            }
+
+            const filtered = teams.filter(team => {
+                if (team.name.toLowerCase().includes(keyword)) return true;
+                if (team.heroes.some(h => h.toLowerCase().includes(keyword))) return true;
+                return false;
+            });
+
+            renderTeams(filtered);
+        }
+
+        // 댓글 추가
+        window.addComment = async function(teamId) {
+            const textarea = document.getElementById(`comment-${teamId}`);
+            const text = textarea.value.trim();
+            
+            if (!text) {
+                alert('댓글 내용을 입력하세요!');
+                return;
+            }
+
+            try {
+                const team = teams.find(t => t.id === teamId);
+                if (!team) return;
+
+                const comments = team.comments || [];
+                comments.push({
+                    text: text,
+                    user: currentUser.nickname,
+                    createdAt: new Date().toISOString()
+                });
+
+                await updateDoc(doc(db, 'defenseTeams', teamId), {
+                    comments: comments
+                });
+
+                textarea.value = '';
+                await loadTeams();
+            } catch (error) {
+                console.error('댓글 추가 오류:', error);
+                alert('댓글 추가에 실패했습니다.');
+            }
+        }
+
+        // 방어팀 삭제
+        window.deleteTeam = async function(teamId) {
+            if (!confirm('이 방어팀을 삭제하시겠습니까?')) return;
+
+            try {
+                await deleteDoc(doc(db, 'defenseTeams', teamId));
+                alert('방어팀이 삭제되었습니다.');
+                await loadTeams();
+            } catch (error) {
+                console.error('방어팀 삭제 오류:', error);
+                alert('방어팀 삭제에 실패했습니다.');
+            }
+        }
+
+        window.handleLogout = async function() {
+            if (!confirm('로그아웃 하시겠습니까?')) return;
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('로그아웃 오류:', error);
+                alert('로그아웃 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
+</body>
+</html>

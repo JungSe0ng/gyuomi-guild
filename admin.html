@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 관리 - 귀요미 길드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #6B4966 0%, #8B5A86 50%, #B08AB0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #B08AB0;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .member-table thead {
+            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            color: white;
+        }
+
+        .member-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .member-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .member-table tbody tr:hover {
+            background: rgba(176,138,176,0.05);
+        }
+
+        .member-table td {
+            padding: 15px;
+        }
+
+        .role-select {
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #98D8C8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #6FC3A8;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .status-badge.pending {
+            background: #ffc107;
+            color: white;
+        }
+
+        .status-badge.member {
+            background: #98D8C8;
+            color: white;
+        }
+
+        .status-badge.admin {
+            background: #FFB6C1;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .member-table {
+                font-size: 0.9em;
+            }
+
+            .member-table th,
+            .member-table td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👥 회원 관리</h1>
+            <p style="font-size: 1.2em; color: #FFD1DC;">길드원 권한을 관리하세요</p>
+            <div id="userInfo"></div>
+        </header>
+
+        <div class="nav-tabs">
+            <a href="main.html" class="nav-tab">🏠 메인</a>
+            <a href="attack.html" class="nav-tab">⚔️ 공격 공략</a>
+            <a href="defense.html" class="nav-tab">🛡️ 방어 공략</a>
+        </div>
+
+        <div class="card">
+            <h2>회원 목록</h2>
+            <div id="membersList">
+                <p style="text-align: center; color: #999; padding: 40px;">로딩중...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1UuCCISKN5zYPIH3-0A01fAkJJ7HMu",
+            authDomain: "gyuomi-guild.firebaseapp.com",
+            projectId: "gyuomi-guild",
+            storageBucket: "gyuomi-guild.firebasestorage.app",
+            messagingSenderId: "614352357629",
+            appId: "1:614352357629:web:2ac38d0d9fecda6a2be17fe"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // 인증 상태 확인
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    
+                    // 관리자가 아니면 메인으로
+                    if (userData.role !== 'admin') {
+                        alert('관리자만 접근 가능합니다.');
+                        window.location.href = 'main.html';
+                        return;
+                    }
+                    
+                    currentUser = {
+                        uid: user.uid,
+                        email: user.email,
+                        ...userData
+                    };
+                    
+                    updateUIForUser();
+                    loadMembers();
+                } else {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function updateUIForUser() {
+            const userInfo = document.getElementById('userInfo');
+            userInfo.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 15px; flex-wrap: wrap;">
+                    <div style="text-align: left;">
+                        <div style="font-size: 1.1em; font-weight: bold; color: white;">${currentUser.nickname}</div>
+                        <div style="font-size: 0.85em; color: #FFB6C1;">👑 관리자</div>
+                    </div>
+                    <button onclick="handleLogout()" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: all 0.3s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        로그아웃
+                    </button>
+                </div>
+            `;
+        }
+
+        async function loadMembers() {
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const users = [];
+                
+                usersSnapshot.forEach(doc => {
+                    users.push({ uid: doc.id, ...doc.data() });
+                });
+
+                // 역할별 정렬 (pending > admin > member), 같은 역할이면 가입일순
+                users.sort((a, b) => {
+                    const roleOrder = { pending: 0, admin: 1, member: 2 };
+                    const roleCompare = roleOrder[a.role] - roleOrder[b.role];
+                    if (roleCompare !== 0) return roleCompare;
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                });
+
+                const container = document.getElementById('membersList');
+                
+                if (users.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999;">등록된 회원이 없습니다.</p>';
+                    return;
+                }
+
+                let html = `
+                    <table class="member-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">번호</th>
+                                <th>닉네임</th>
+                                <th>이메일</th>
+                                <th style="width: 150px; text-align: center;">현재 권한</th>
+                                <th style="width: 150px; text-align: center;">권한 변경</th>
+                                <th style="width: 150px;">가입일</th>
+                                <th style="width: 120px; text-align: center;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                users.forEach((user, index) => {
+                    const isCurrentUser = user.uid === currentUser.uid;
+                    const roleText = {
+                        'pending': '⏳ 승인대기',
+                        'member': '👤 멤버',
+                        'admin': '👑 관리자'
+                    };
+
+                    html += `
+                        <tr style="${isCurrentUser ? 'background: rgba(255,182,193,0.1);' : ''}">
+                            <td style="text-align: center; color: #999;">${index + 1}</td>
+                            <td style="font-weight: ${isCurrentUser ? 'bold' : 'normal'};">
+                                ${user.nickname}${isCurrentUser ? ' (나)' : ''}
+                            </td>
+                            <td style="color: #666; font-size: 0.9em;">${user.email}</td>
+                            <td style="text-align: center;">
+                                <span class="status-badge ${user.role}">${roleText[user.role]}</span>
+                            </td>
+                            <td style="text-align: center;">
+                                ${!isCurrentUser ? `
+                                    <select id="role-${user.uid}" class="role-select">
+                                        <option value="pending" ${user.role === 'pending' ? 'selected' : ''}>⏳ 승인대기</option>
+                                        <option value="member" ${user.role === 'member' ? 'selected' : ''}>👤 멤버</option>
+                                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 관리자</option>
+                                    </select>
+                                ` : '<span style="color: #999; font-size: 0.9em;">-</span>'}
+                            </td>
+                            <td style="color: #666; font-size: 0.9em;">
+                                ${new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                            </td>
+                            <td style="text-align: center;">
+                                ${!isCurrentUser ? `
+                                    <button class="btn btn-primary" onclick="updateUserRole('${user.uid}', '${user.nickname}')" style="margin-right: 5px;">
+                                        변경
+                                    </button>
+                                    <button class="btn btn-danger" onclick="deleteUser('${user.uid}', '${user.nickname}')">
+                                        삭제
+                                    </button>
+                                ` : '<span style="color: #999; font-size: 0.9em;">-</span>'}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('회원 목록 로드 오류:', error);
+                document.getElementById('membersList').innerHTML = '<p style="text-align: center; color: #ff6b6b;">회원 목록을 불러오는데 실패했습니다.</p>';
+            }
+        }
+
+        window.updateUserRole = async function(uid, nickname) {
+            const newRole = document.getElementById(`role-${uid}`).value;
+            
+            if (!confirm(`${nickname}님의 권한을 변경하시겠습니까?`)) return;
+            
+            try {
+                const userDocRef = doc(db, 'users', uid);
+                await updateDoc(userDocRef, {
+                    role: newRole
+                });
+                
+                const roleText = {
+                    'pending': '승인대기',
+                    'member': '멤버',
+                    'admin': '관리자'
+                };
+                alert(`권한이 ${roleText[newRole]}로 변경되었습니다.`);
+                loadMembers();
+            } catch (error) {
+                console.error('권한 변경 오류:', error);
+                alert('권한 변경에 실패했습니다.');
+            }
+        }
+
+        window.deleteUser = async function(uid, nickname) {
+            if (!confirm(`${nickname}님을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+            
+            try {
+                await deleteDoc(doc(db, 'users', uid));
+                alert(`${nickname}님이 삭제되었습니다.`);
+                loadMembers();
+            } catch (error) {
+                console.error('사용자 삭제 오류:', error);
+                alert('사용자 삭제에 실패했습니다.');
+            }
+        }
+
+        window.handleLogout = async function() {
+            if (!confirm('로그아웃 하시겠습니까?')) return;
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('로그아웃 오류:', error);
+                alert('로그아웃 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
+</body>
+</html>

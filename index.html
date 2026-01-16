@@ -3,396 +3,385 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>귀요미 길드 세븐나이츠 공략집 ✨</title>
-    <link rel="stylesheet" href="style.css">
+    <title>로그인 - 귀요미 길드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, sans-serif;
+            background: linear-gradient(135deg, rgba(107, 73, 102, 0.97), rgba(139, 90, 134, 0.97));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(176,138,176,0.4);
+        }
+
+        .logo span {
+            font-size: 3em;
+        }
+
+        h2 {
+            color: #B08AB0;
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .subtitle {
+            color: #999;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            color: #666;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            color: white;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input[type="email"],
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #B08AB0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+            accent-color: #B08AB0;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(176,138,176,0.4);
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(176,138,176,0.5);
+        }
+
+        .btn-submit.signup {
+            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
+            box-shadow: 0 4px 15px rgba(152,216,200,0.4);
+        }
+
+        .btn-submit.signup:hover {
+            box-shadow: 0 6px 20px rgba(152,216,200,0.5);
+        }
+    </style>
 </head>
 <body>
-<!-- 로그인/회원가입 오버레이 -->
-<div id="authOverlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(107, 73, 102, 0.97), rgba(139, 90, 134, 0.97)); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: white; border-radius: 25px; padding: 40px; max-width: 450px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: fadeInUp 0.5s ease;">
-        <!-- 로고 -->
-        <div style="text-align: center; margin-bottom: 30px;">
-            <div style="width: 100px; height: 100px; margin: 0 auto 15px; background: linear-gradient(135deg, #B08AB0, #8B5A86); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(176,138,176,0.4);">
-                <span style="font-size: 3em;">⚔️</span>
+    <div class="auth-container">
+        <div class="logo-section">
+            <div class="logo">
+                <span>⚔️</span>
             </div>
-            <h2 style="color: #B08AB0; margin: 0; font-size: 1.8em;">귀요미 길드 공략집</h2>
-            <p style="color: #999; margin-top: 8px; font-size: 0.9em;">길드원 전용 공간입니다</p>
+            <h2>귀요미 길드 공략집</h2>
+            <p class="subtitle">길드원 전용 공간입니다</p>
         </div>
         
-        <!-- 탭 버튼 -->
-        <div style="display: flex; gap: 10px; margin-bottom: 25px; background: #f0f0f0; padding: 5px; border-radius: 12px;">
-            <button id="loginTabBtn" onclick="switchAuthTab('login')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #B08AB0, #8B5A86); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s;">로그인</button>
-            <button id="signupTabBtn" onclick="switchAuthTab('signup')" style="flex: 1; padding: 12px; background: transparent; color: #666; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s;">회원가입</button>
+        <div class="tabs">
+            <button id="loginTabBtn" class="tab-btn active" onclick="switchTab('login')">로그인</button>
+            <button id="signupTabBtn" class="tab-btn" onclick="switchTab('signup')">회원가입</button>
         </div>
         
         <!-- 로그인 폼 -->
-        <div id="loginForm">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">이메일</label>
-                <input type="email" id="loginEmail" placeholder="이메일을 입력하세요" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#B08AB0'" onblur="this.style.borderColor='#e0e0e0'">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">비밀번호</label>
-                <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#B08AB0'" onblur="this.style.borderColor='#e0e0e0'">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #555;">
-                    <input type="checkbox" id="rememberMe" style="width: 18px; height: 18px; cursor: pointer;">
-                    <span>자동 로그인</span>
-                </label>
-            </div>
-            <button onclick="handleLogin()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #B08AB0, #8B5A86); color: white; border: none; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(176,138,176,0.4); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(176,138,176,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(176,138,176,0.4)'">
-                로그인 하기
-            </button>
+        <div id="loginForm" class="form-container active">
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" id="loginEmail" placeholder="이메일을 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="rememberMe">
+                        <span style="color: #666; font-size: 0.95em;">자동 로그인</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-submit">로그인 하기</button>
+            </form>
         </div>
         
         <!-- 회원가입 폼 -->
-        <div id="signupForm" style="display: none;">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">이메일</label>
-                <input type="email" id="signupEmail" placeholder="이메일" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#98D8C8'" onblur="this.style.borderColor='#e0e0e0'">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">닉네임</label>
-                <input type="text" id="signupNickname" placeholder="닉네임 (2-10자)" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#98D8C8'" onblur="this.style.borderColor='#e0e0e0'">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">비밀번호</label>
-                <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#98D8C8'" onblur="this.style.borderColor='#e0e0e0'">
-            </div>
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 8px; color: #555; font-weight: bold;">비밀번호 확인</label>
-                <input type="password" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; transition: border 0.3s;" onfocus="this.style.borderColor='#98D8C8'" onblur="this.style.borderColor='#e0e0e0'">
-            </div>
-            <button onclick="handleRegister()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #98D8C8, #6FC3A8); color: white; border: none; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(152,216,200,0.4); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(152,216,200,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(152,216,200,0.4)'">
-                회원가입 하기
-            </button>
-        </div>
-    </div>
-</div>
-
-<style>
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-</style>
-
-    <div class="container">
-        <header>
-            <div class="logo-container" style="margin-bottom: 20px;">
-                <div style="width: 120px; height: 120px; margin: 0 auto; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                    <span style="font-size: 4em;">⚔️</span>
+        <div id="signupForm" class="form-container">
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" id="signupEmail" placeholder="이메일 주소" required>
                 </div>
-            </div>
-            <h1>🌸 귀요미 길드 🌸</h1>
-            <p style="font-size: 1.2em; opacity: 0.95; margin-top: 10px;">세븐나이츠 공략 공유 플랫폼</p>
-        </header>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('main', event)">🏠 메인</button>
-            <button class="tab-btn" onclick="switchTab('attack', event)">⚔️ 공격 공략</button>
-            <button class="tab-btn" onclick="switchTab('defense', event)">🛡️ 방어 공략</button>
-        </div>
-
-        <!-- 메인 탭 -->
-        <div id="main-tab" class="tab-content active">
-            <div class="card">
-                <h2 style="text-align: center; margin-bottom: 30px;">🌸 환영합니다! 🌸</h2>
-                
-                <div style="background: linear-gradient(135deg, rgba(176,138,176,0.1), rgba(152,216,200,0.1)); padding: 25px; border-radius: 15px; margin-bottom: 25px;">
-                    <h3 style="margin-top: 0; color: #B08AB0;">📋 길드 소개</h3>
-                    <p style="line-height: 1.8; color: #555;">
-                        귀요미 길드는 세븐나이츠를 함께 즐기는 길드입니다!<br>
-                        공격 공략과 방어 팀 구성을 공유하며 함께 성장해요! 💪
-                    </p>
+                <div class="form-group">
+                    <label>닉네임</label>
+                    <input type="text" id="signupNickname" placeholder="닉네임 (2-10자)" required minlength="2" maxlength="10">
                 </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
-                    <div style="background: linear-gradient(135deg, rgba(176,138,176,0.15), rgba(139,90,134,0.15)); padding: 20px; border-radius: 12px; border: 2px solid rgba(176,138,176,0.3);">
-                        <div style="font-size: 2em; margin-bottom: 10px;">⚔️</div>
-                        <h4 style="margin: 0 0 10px 0; color: #B08AB0;">공격 공략</h4>
-                        <p style="margin: 0; font-size: 0.9em; color: #666;">상대 방어팀을 상대할 공략을 등록하고 확인하세요!</p>
-                    </div>
-                    
-                    <div style="background: linear-gradient(135deg, rgba(152,216,200,0.15), rgba(111,195,168,0.15)); padding: 20px; border-radius: 12px; border: 2px solid rgba(152,216,200,0.3);">
-                        <div style="font-size: 2em; margin-bottom: 10px;">🛡️</div>
-                        <h4 style="margin: 0 0 10px 0; color: #98D8C8;">방어 공략</h4>
-                        <p style="margin: 0; font-size: 0.9em; color: #666;">강력한 방어 팀 구성을 공유하고 배워보세요!</p>
-                    </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" required minlength="6">
                 </div>
-
-                <div style="background: rgba(255,255,255,0.5); padding: 20px; border-radius: 12px; border: 2px dashed rgba(176,138,176,0.3); margin-bottom: 25px;">
-                    <h4 style="margin-top: 0; color: #B08AB0;">💡 이용 팁</h4>
-                    <ul style="line-height: 1.8; color: #555;">
-                        <li>각 탭에서 공략을 확인하고 배워보세요</li>
-                        <li>검색 기능으로 원하는 영웅 공략을 빠르게 찾을 수 있어요</li>
-                        <li>관리자는 새로운 공략을 등록할 수 있습니다</li>
-                    </ul>
+                <div class="form-group">
+                    <label>비밀번호 확인</label>
+                    <input type="password" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
                 </div>
-
-                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                    <h3 style="margin-top: 0; color: #B08AB0; display: flex; align-items: center; gap: 10px;">
-                        <span>👥</span>
-                        <span>길드원 목록</span>
-                    </h3>
-                    <div id="guildMembersList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                        <!-- 길드원 목록이 여기에 표시됩니다 -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 공격 공략 탭 -->
-        <div id="attack-tab" class="tab-content">
-            <div class="sub-tabs" style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 15px;">
-                <button class="sub-tab-btn attack-tab active" onclick="switchSubTab('register', event)" data-admin-only>공략 등록</button>
-                <button class="sub-tab-btn attack-tab" onclick="switchSubTab('list', event)">공략 목록</button>
-            </div>
-
-            <!-- 공략 등록 -->
-            <div id="register-content" class="sub-content active" data-admin-only>
-                <div class="card">
-                    <h2>✍️ 공격 공략 등록</h2>
-                    
-                    <form id="guideForm" onsubmit="saveGuide(event)">
-                        <div class="form-group">
-                            <label>공략 제목</label>
-                            <input type="text" id="guideTitle" placeholder="예: 카구라 피아 플로 숙주 공략" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>🛡️ 상대 방어팀 (3명)</label>
-                            <div class="hero-grid">
-                                <div>
-                                    <select onchange="updateEnemyHero1Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="enemyHero1" required disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <select onchange="updateEnemyHero2Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="enemyHero2" required disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <select onchange="updateEnemyHero3Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="enemyHero3" required disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">공략 저장하기</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- 공략 목록 -->
-            <div id="list-content" class="sub-content">
-                <div class="card">
-                    <h2>📚 등록된 공략</h2>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <input type="text" id="searchInput" placeholder="🔍 영웅 이름으로 검색..." style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em;" oninput="searchGuides()">
-                    </div>
-                    
-                    <div id="guideList"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 방어 공략 탭 -->
-        <div id="defense-tab" class="tab-content">
-            <div class="sub-tabs" style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 15px;">
-                <button class="sub-tab-btn defense-tab active" onclick="switchDefenseSubTab('def-register', event)" data-admin-only>방어팀 등록</button>
-                <button class="sub-tab-btn defense-tab" onclick="switchDefenseSubTab('def-list', event)">방어팀 목록</button>
-            </div>
-
-            <!-- 방어팀 등록 -->
-            <div id="def-register-content" class="sub-content active" data-admin-only>
-                <div class="card">
-                    <h2>🛡️ 방어팀 등록</h2>
-                    
-                    <form id="defenseForm" onsubmit="saveDefenseTeam(event)">
-                        <div class="form-group">
-                            <label>팀 이름</label>
-                            <input type="text" id="defenseName" placeholder="예: 메인 방어팀" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>방어 영웅 (3명)</label>
-                            <div class="hero-grid">
-                                <div>
-                                    <select onchange="updateDefTeamHero1Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="defTeamHero1" required onchange="updateDefenseEquipment()" disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <select onchange="updateDefTeamHero2Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="defTeamHero2" required onchange="updateDefenseEquipment()" disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <select onchange="updateDefTeamHero3Options(this.value)" style="margin-bottom: 8px;">
-                                        <option value="">등급 선택</option>
-                                        <option value="구세나">구세나</option>
-                                        <option value="찐스">찐스</option>
-                                        <option value="짭스">짭스</option>
-                                        <option value="희귀">희귀</option>
-                                    </select>
-                                    <select id="defTeamHero3" required onchange="updateDefenseEquipment()" disabled>
-                                        <option value="">영웅 선택</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="defenseEquipmentContainer"></div>
-
-                        <div class="form-group">
-                            <label>배치 전략 및 운용 팁</label>
-                            <textarea id="defenseTip" rows="3" placeholder="전체적인 운용법, 포지션 등"></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-success">방어팀 저장하기</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- 방어팀 목록 -->
-            <div id="def-list-content" class="sub-content">
-                <div class="card">
-                    <h2>📋 등록된 방어팀</h2>
-                    <div id="defenseList"></div>
-                </div>
-            </div>
+                <button type="submit" class="btn-submit signup">회원가입 하기</button>
+            </form>
         </div>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        console.log('🔥 Firebase 모듈 로드 시작');
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase 설정
         const firebaseConfig = {
-            apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
+            apiKey: "AIzaSyA1UuCCISKN5zYPIH3-0A01fAkJJ7HMu",
             authDomain: "gyuomi-guild.firebaseapp.com",
             projectId: "gyuomi-guild",
             storageBucket: "gyuomi-guild.firebasestorage.app",
-            messagingSenderId: "43293575259",
-            appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e",
-            measurementId: "G-PT8DNQV1DY"
+            messagingSenderId: "614352357629",
+            appId: "1:614352357629:web:2ac38d0d9fecda6a2be17fe"
         };
 
-        // Firebase 초기화
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        console.log('🔥 Firebase 초기화 완료:', { auth, db });
-
-        // 전역으로 export
-        window.auth = auth;
-        window.db = db;
-        window.firebaseAuth = { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut };
-        window.firestore = { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc };
-
-        console.log('✅ window.auth:', window.auth);
-        console.log('✅ window.db:', window.db);
-        
-        // Firebase 초기화 완료 이벤트 발생
-        window.dispatchEvent(new Event('firebaseReady'));
-        console.log('📢 firebaseReady 이벤트 발생');
-    </script>
-    
-    <script>
-        // Firebase가 준비될 때까지 대기
-        console.log('⏳ Firebase 대기 중...');
-        
-        function waitForFirebase() {
-            return new Promise((resolve) => {
-                if (window.auth && window.db) {
-                    console.log('✅ Firebase 이미 준비됨');
-                    resolve();
-                } else {
-                    console.log('⏳ firebaseReady 이벤트 대기 중...');
-                    window.addEventListener('firebaseReady', () => {
-                        console.log('✅ firebaseReady 이벤트 수신');
-                        resolve();
-                    });
-                }
-            });
+        // 탭 전환
+        window.switchTab = function(tab) {
+            const loginTabBtn = document.getElementById('loginTabBtn');
+            const signupTabBtn = document.getElementById('signupTabBtn');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            
+            if (tab === 'login') {
+                loginTabBtn.classList.add('active');
+                signupTabBtn.classList.remove('active');
+                loginForm.classList.add('active');
+                signupForm.classList.remove('active');
+            } else {
+                signupTabBtn.classList.add('active');
+                loginTabBtn.classList.remove('active');
+                loginForm.classList.remove('active');
+                signupForm.classList.add('active');
+            }
         }
 
-        // Firebase 준비 후 스크립트 로드
-        waitForFirebase().then(() => {
-            console.log('📦 auth.js 로드 시작');
-            const authScript = document.createElement('script');
-            authScript.src = 'auth.js';
-            authScript.onload = () => {
-                console.log('✅ auth.js 로드 완료');
-                
-                console.log('📦 script.js 로드 시작');
-                const scriptJs = document.createElement('script');
-                scriptJs.src = 'script.js';
-                scriptJs.onload = () => {
-                    console.log('✅ script.js 로드 완료');
-                    console.log('🎉 모든 스크립트 로드 완료!');
-                };
-                scriptJs.onerror = (e) => {
-                    console.error('❌ script.js 로드 실패:', e);
-                };
-                document.body.appendChild(scriptJs);
-            };
-            authScript.onerror = (e) => {
-                console.error('❌ auth.js 로드 실패:', e);
-            };
-            document.body.appendChild(authScript);
+        // 로그인 처리
+        window.handleLogin = async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    
+                    if (userData.role === 'pending') {
+                        alert('아직 관리자 승인이 완료되지 않았습니다. 승인 후 로그인 가능합니다.');
+                        await auth.signOut();
+                        return;
+                    }
+                    
+                    if (rememberMe) {
+                        localStorage.setItem('autoLogin', 'true');
+                        localStorage.setItem('userEmail', email);
+                    }
+                    
+                    window.location.href = 'main.html';
+                } else {
+                    alert('사용자 정보를 찾을 수 없습니다.');
+                    await auth.signOut();
+                }
+            } catch (error) {
+                console.error('로그인 오류:', error);
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                    alert('이메일 또는 비밀번호가 일치하지 않습니다.');
+                } else if (error.code === 'auth/user-not-found') {
+                    alert('존재하지 않는 계정입니다.');
+                } else {
+                    alert('로그인 중 오류가 발생했습니다: ' + error.message);
+                }
+            }
+        }
+
+        // 회원가입 처리
+        window.handleRegister = async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('signupEmail').value.trim();
+            const nickname = document.getElementById('signupNickname').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+            if (password !== passwordConfirm) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                await setDoc(doc(db, 'users', user.uid), {
+                    email: email,
+                    nickname: nickname,
+                    role: 'pending',
+                    createdAt: new Date().toISOString()
+                });
+
+                alert('회원가입이 완료되었습니다! 관리자 승인 후 로그인 가능합니다.');
+                switchTab('login');
+
+                document.getElementById('signupEmail').value = '';
+                document.getElementById('signupNickname').value = '';
+                document.getElementById('signupPassword').value = '';
+                document.getElementById('signupPasswordConfirm').value = '';
+
+            } catch (error) {
+                console.error('회원가입 오류:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('이미 사용 중인 이메일입니다.');
+                } else if (error.code === 'auth/invalid-email') {
+                    alert('올바르지 않은 이메일 형식입니다.');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('비밀번호가 너무 약합니다. 6자 이상 입력해주세요.');
+                } else {
+                    alert('회원가입 중 오류가 발생했습니다: ' + error.message);
+                }
+            }
+        }
+
+        // 자동 로그인 체크
+        window.addEventListener('DOMContentLoaded', () => {
+            const autoLogin = localStorage.getItem('autoLogin');
+            const savedEmail = localStorage.getItem('userEmail');
+            
+            if (autoLogin === 'true' && savedEmail) {
+                document.getElementById('loginEmail').value = savedEmail;
+                document.getElementById('rememberMe').checked = true;
+            }
         });
     </script>
 </body>

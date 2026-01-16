@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>귀요미 길드 공략집</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #6B4966 0%, #8B5A86 50%, #B08AB0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 20px;
+            border-radius: 20px;
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: #FFD1DC;
+            font-size: 1.2em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 15px 40px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #FFB6C1, #FFC0CB);
+            color: #6B4966;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .welcome-card h2 {
+            color: #B08AB0;
+            font-size: 2em;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #FFE5EC 0%, #FFF0F5 100%);
+            border: 3px solid #FFB6C1;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.4);
+        }
+
+        .feature-card.attack {
+            background: linear-gradient(135deg, #FFE5E5 0%, #FFF5F5 100%);
+            border-color: #FF9AA2;
+        }
+
+        .feature-card.defense {
+            background: linear-gradient(135deg, #E5F5F0 0%, #F0FFF5 100%);
+            border-color: #98D8C8;
+        }
+
+        .feature-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #B08AB0;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .feature-stats {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #FFB6C1;
+            font-weight: bold;
+            color: #B08AB0;
+        }
+
+        /* 길드원 목록 테이블 */
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .member-table thead {
+            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            color: white;
+        }
+
+        .member-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .member-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.3s;
+        }
+
+        .member-table tbody tr:hover {
+            background: rgba(176,138,176,0.05);
+        }
+
+        .member-table td {
+            padding: 15px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .role-badge.admin {
+            background: linear-gradient(135deg, #FFB6C1, #FFC0CB);
+            color: #6B4966;
+        }
+
+        .role-badge.member {
+            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .nav-tab {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🐰</div>
+        <h1>⚔️ 귀요미 길드 공략집 ⚔️</h1>
+        <p class="subtitle">세븐나이츠 길드전 전략 모음집</p>
+        <div id="userInfo"></div>
+    </div>
+
+    <div class="nav-tabs">
+        <a href="main.html" class="nav-tab active">메인</a>
+        <a href="attack.html" class="nav-tab">공격 공략</a>
+        <a href="defense.html" class="nav-tab">방어 공략</a>
+    </div>
+
+    <div class="container">
+        <div class="welcome-card">
+            <h2>⚔️ 세븐나이츠 길드전 ⚔️</h2>
+            <p style="text-align: center; color: #666; font-size: 1.1em; line-height: 1.8;">
+                공격과 방어 전략을 체계적으로 관리하세요
+            </p>
+
+            <div class="feature-grid">
+                <a href="attack.html" class="feature-card attack">
+                    <div class="feature-icon">⚔️</div>
+                    <div class="feature-title">공격 공략집</div>
+                    <div class="feature-desc">
+                        상대 방어팀을 공략하는<br>
+                        전략을 등록하고 관리
+                    </div>
+                    <div class="feature-stats" id="attackCount">로딩중...</div>
+                </a>
+
+                <a href="defense.html" class="feature-card defense">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-title">방어 공략집</div>
+                    <div class="feature-desc">
+                        나의 방어팀을<br>
+                        구성하고 관리
+                    </div>
+                    <div class="feature-stats" id="defenseCount">로딩중...</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 길드원 목록 -->
+        <div class="welcome-card">
+            <h2>👥 길드원 목록</h2>
+            <div id="guildMembersList" style="display: grid; gap: 10px;">
+                <p style="text-align: center; color: #999;">로딩중...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase 설정 (실제 프로젝트 설정으로 교체 필요)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1UuCCISKN5zYPIH3-0A01fAkJJ7HMu",
+            authDomain: "gyuomi-guild.firebaseapp.com",
+            projectId: "gyuomi-guild",
+            storageBucket: "gyuomi-guild.firebasestorage.app",
+            messagingSenderId: "614352357629",
+            appId: "1:614352357629:web:2ac38d0d9fecda6a2be17fe"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 전역 변수로 내보내기
+        window.auth = auth;
+        window.db = db;
+        window.firebaseAuth = { onAuthStateChanged, signOut };
+        window.firestore = { collection, getDocs, doc, getDoc };
+        window.currentUser = null;
+
+        // 인증 상태 확인
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    
+                    if (userData.role === 'pending') {
+                        await signOut(auth);
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    window.currentUser = {
+                        uid: user.uid,
+                        email: user.email,
+                        ...userData
+                    };
+                    
+                    updateUIForUser();
+                    loadCounts();
+                    loadGuildMembers();
+                } else {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function updateUIForUser() {
+            const userInfo = document.getElementById('userInfo');
+            const roleText = window.currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
+            const roleColor = window.currentUser.role === 'admin' ? '#FFB6C1' : '#98D8C8';
+
+            let html = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 15px; flex-wrap: wrap;">
+                    <div style="text-align: left;">
+                        <div style="font-size: 1.1em; font-weight: bold; color: white;">${window.currentUser.nickname}</div>
+                        <div style="font-size: 0.85em; color: ${roleColor};">${roleText}</div>
+                    </div>
+            `;
+
+            if (window.currentUser.role === 'admin') {
+                html += `
+                    <a href="admin.html" style="padding: 8px 16px; background: rgba(255,182,193,0.3); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; text-decoration: none; font-size: 0.9em; transition: all 0.3s;"
+                        onmouseover="this.style.background='rgba(255,182,193,0.5)'" onmouseout="this.style.background='rgba(255,182,193,0.3)'">
+                        👥 회원 관리
+                    </a>
+                `;
+            }
+
+            html += `
+                    <button onclick="handleLogout()" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: all 0.3s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        로그아웃
+                    </button>
+                </div>
+            `;
+
+            userInfo.innerHTML = html;
+        }
+
+        async function loadCounts() {
+            try {
+                const guidesSnapshot = await getDocs(collection(db, 'guides'));
+                const defenseSnapshot = await getDocs(collection(db, 'defenseTeams'));
+                
+                document.getElementById('attackCount').textContent = `${guidesSnapshot.size}개 등록`;
+                document.getElementById('defenseCount').textContent = `${defenseSnapshot.size}개 등록`;
+            } catch (error) {
+                console.error('카운트 로드 오류:', error);
+                document.getElementById('attackCount').textContent = '0개 등록';
+                document.getElementById('defenseCount').textContent = '0개 등록';
+            }
+        }
+
+        async function loadGuildMembers() {
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const users = [];
+                
+                usersSnapshot.forEach(doc => {
+                    const userData = doc.data();
+                    if (userData.role !== 'pending') {
+                        users.push({ uid: doc.id, ...userData });
+                    }
+                });
+
+                // 관리자 먼저, 그 다음 가입일순 정렬
+                users.sort((a, b) => {
+                    if (a.role === 'admin' && b.role !== 'admin') return -1;
+                    if (a.role !== 'admin' && b.role === 'admin') return 1;
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                });
+
+                const container = document.getElementById('guildMembersList');
+                
+                if (users.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999;">등록된 길드원이 없습니다.</p>';
+                    return;
+                }
+
+                let html = `
+                    <table class="member-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px; text-align: center;">순번</th>
+                                <th>닉네임</th>
+                                <th style="width: 120px; text-align: center;">권한</th>
+                                <th style="width: 150px;">가입일</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                users.forEach((user, index) => {
+                    const isCurrentUser = window.currentUser && user.uid === window.currentUser.uid;
+                    const roleClass = user.role === 'admin' ? 'admin' : 'member';
+                    const roleText = user.role === 'admin' ? '👑 관리자' : '👤 멤버';
+                    
+                    html += `
+                        <tr style="${isCurrentUser ? 'background: rgba(176,138,176,0.1); font-weight: bold;' : ''}">
+                            <td style="text-align: center; color: #999;">${index + 1}</td>
+                            <td style="color: #333;">
+                                ${user.nickname}${isCurrentUser ? ' (나)' : ''}
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="role-badge ${roleClass}">${roleText}</span>
+                            </td>
+                            <td style="color: #666; font-size: 0.9em;">
+                                ${new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('길드원 목록 로드 오류:', error);
+                document.getElementById('guildMembersList').innerHTML = '<p style="text-align: center; color: #ff6b6b;">길드원 목록을 불러오는데 실패했습니다.</p>';
+            }
+        }
+
+        window.handleLogout = async function() {
+            if (!confirm('로그아웃 하시겠습니까?')) return;
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('로그아웃 오류:', error);
+                alert('로그아웃 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
+</body>
+</html>
