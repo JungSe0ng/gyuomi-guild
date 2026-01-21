@@ -969,7 +969,7 @@
 
                                         ${strategy.tip ? `
                                             <div style="background: rgba(255,253,208,0.5); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                                                <span style="font-weight: 600;">💡 운용 팁:</span> ${strategy.tip}
+                                                <span style="font-weight: 600;">💡 운용 팁:</span> ${strategy.tip.replace(/\n/g, '<br>')}
                                             </div>
                                         ` : ''}
 

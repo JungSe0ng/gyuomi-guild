@@ -719,7 +719,7 @@
                         ${team.tip ? `
                             <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                                 <h5 style="margin: 0 0 8px 0;">💡 운용 팁:</h5>
-                                <p style="margin: 0;">${team.tip}</p>
+                                <p style="margin: 0;">${team.tip.replace(/\n/g, '<br>')}</p>
                             </div>
                         ` : ''}
 
