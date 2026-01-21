@@ -920,9 +920,82 @@
             if (filtered.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px; background: white; border-radius: 15px;">검색 결과가 없습니다.</p>';
             } else {
-                defenseTeams = filtered;
-                renderDefenseTeams();
-                loadData();
+                // 원본 데이터 보존하고 필터링된 결과만 렌더링
+                container.innerHTML = filtered.map(team => {
+                    const isAdmin = currentUser && currentUser.role === 'admin';
+                    const comments = team.comments || [];
+                    
+                    return `
+                        <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                                <div>
+                                    <h3 style="margin: 0 0 10px 0; color: #98D8C8;">${team.name}</h3>
+                                    <p style="margin: 0; font-size: 0.9em; color: #999;">작성자: ${team.createdBy} | ${new Date(team.createdAt).toLocaleDateString('ko-KR')}</p>
+                                </div>
+                                ${isAdmin ? `
+                                    <div style="display: flex; gap: 8px;">
+                                        <button onclick="editTeam('${team.id}')" style="padding: 8px 16px; background: #ffd93d; color: #333; border: none; border-radius: 8px; cursor: pointer;">✏️ 수정</button>
+                                        <button onclick="deleteTeam('${team.id}')" style="padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer;">🗑️ 삭제</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div style="background: rgba(152,216,200,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                                <h4 style="margin: 0 0 10px 0; color: #98D8C8;">🛡️ 방어 영웅:</h4>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    ${team.heroes.map(h => `<span style="padding: 8px 16px; background: rgba(152,216,200,0.3); border-radius: 8px; font-weight: 500;">${h.name}</span>`).join('')}
+                                </div>
+                            </div>
+
+                            ${team.heroes.map(hero => `
+                                <div style="background: rgba(152,216,200,0.05); padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #98D8C8;">
+                                    <h4 style="margin: 0 0 15px 0; color: #98D8C8;">${hero.name}:</h4>
+                                    <div style="margin-bottom: 10px;"><span style="font-weight: 600;">세트:</span> ${hero.equipment.set}</div>
+                                    <div style="margin-bottom: 10px;"><span style="font-weight: 600;">무기1:</span> ${hero.equipment.weapon1}</div>
+                                    <div style="margin-bottom: 10px;"><span style="font-weight: 600;">무기2:</span> ${hero.equipment.weapon2}</div>
+                                    <div style="margin-bottom: 10px;"><span style="font-weight: 600;">방어구1:</span> ${hero.equipment.armor1}</div>
+                                    <div style="margin-bottom: 10px;"><span style="font-weight: 600;">방어구2:</span> ${hero.equipment.armor2}</div>
+                                </div>
+                            `).join('')}
+
+                            ${team.skillOrder && team.skillOrder.length > 0 ? `
+                                <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                                    <h5 style="margin: 0 0 8px 0;">😊 스킬 순서:</h5>
+                                    <p style="margin: 0;">${team.skillOrder.join(' → ')}</p>
+                                </div>
+                            ` : ''}
+
+                            ${team.tip ? `
+                                <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                                    <h5 style="margin: 0 0 8px 0;">💡 운용 팁:</h5>
+                                    <p style="margin: 0;">${team.tip.replace(/\n/g, '<br>')}</p>
+                                </div>
+                            ` : ''}
+
+                            <div style="border-top: 2px solid rgba(0,0,0,0.1); padding-top: 15px;">
+                                <h5 style="margin: 0 0 10px 0;">💬 댓글 (${comments.length})</h5>
+                                <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                                    ${comments.map((c, cIdx) => `
+                                        <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                                <span style="font-weight: 600; font-size: 0.9em; color: #98D8C8;">${c.user}</span>
+                                                <div style="display: flex; gap: 8px; align-items: center;">
+                                                    <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
+                                                    ${(isAdmin || c.user === currentUser.nickname) ? `<button onclick="deleteComment('${team.id}', ${cIdx})" style="padding: 2px 8px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">🗑️</button>` : ''}
+                                                </div>
+                                            </div>
+                                            <p style="margin: 0; font-size: 0.9em;">${c.text}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="comment-${team.id}" placeholder="댓글을 입력하세요..." style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                                    <button onclick="addComment('${team.id}')" style="padding: 8px 16px; background: #98D8C8; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">댓글 작성</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
         };
 
