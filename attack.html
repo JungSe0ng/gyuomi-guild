@@ -5,255 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>공격 공략 - 귀요미 길드</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Noto Sans KR', -apple-system, sans-serif;
             background: linear-gradient(135deg, #6B4966 0%, #8B5A86 50%, #B08AB0 100%);
-            min-height: 100vh;
-            padding: 20px;
+            min-height: 100vh; padding: 20px;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 1200px; margin: 0 auto; }
         header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 20px;
+            text-align: center; color: white; margin-bottom: 40px;
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            padding: 30px; border-radius: 20px;
         }
-
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
+        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .nav-tabs { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
         .nav-tab {
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-            transition: all 0.3s;
+            padding: 10px 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            border: none; border-radius: 10px; color: white; font-weight: bold;
+            text-decoration: none; transition: all 0.3s;
         }
-
-        .nav-tab:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            background: rgba(255,255,255,0.2);
-            padding: 10px;
-            border-radius: 15px;
-        }
-
+        .nav-tab:hover { background: rgba(255,255,255,0.3); }
+        .tabs { display: flex; gap: 15px; margin-bottom: 30px; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 15px; }
         .tab-btn {
-            flex: 1;
-            padding: 15px;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s;
+            flex: 1; padding: 15px; background: transparent; border: none; color: white;
+            font-size: 1.1em; font-weight: bold; cursor: pointer; border-radius: 10px; transition: all 0.3s;
         }
-
-        .tab-btn:hover {
-            background: rgba(255,255,255,0.2);
+        .tab-btn:hover { background: rgba(255,255,255,0.2); }
+        .tab-btn.active { background: linear-gradient(135deg, #FFB6C1, #FFC0CB); color: #6B4966; box-shadow: 0 4px 12px rgba(255,182,193,0.4); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-container { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+        .section { margin-bottom: 35px; }
+        .section-title {
+            font-size: 1.4em; font-weight: bold; margin-bottom: 20px;
+            color: #6B4966; padding-bottom: 10px; border-bottom: 3px solid #B08AB0;
         }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #FFB6C1, #FFC0CB);
-            color: #6B4966;
-            box-shadow: 0 4px 12px rgba(255,182,193,0.4);
+        .defense-section { background: rgba(255,182,193,0.15); padding: 25px; border-radius: 15px; border: 2px solid #FFB6C1; margin-bottom: 30px; }
+        .attack-section { background: rgba(152,216,200,0.1); padding: 25px; border-radius: 15px; border: 2px solid #98D8C8; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 1em; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px;
+            font-size: 1em; transition: all 0.3s; font-family: inherit;
         }
-
-        .tab-content {
-            display: none;
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #98D8C8; box-shadow: 0 0 0 3px rgba(152,216,200,0.1);
         }
-
-        .tab-content.active {
-            display: block;
+        .hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .hero-select-group { display: flex; flex-direction: column; gap: 8px; }
+        .hero-select-group label { font-size: 0.95em; color: #666; font-weight: 600; }
+        .equipment-title {
+            font-size: 1.2em; font-weight: 600; color: #333; margin: 25px 0 15px 0; padding: 12px;
+            background: rgba(152,216,200,0.2); border-radius: 10px; border-left: 4px solid #98D8C8;
+            display: flex; align-items: center; justify-content: space-between;
         }
-
-        .form-container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        .equipment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .equipment-item { background: #f8f8f8; padding: 15px; border-radius: 10px; border: 2px solid #e0e0e0; }
+        .equipment-item-title { font-weight: 600; color: #666; margin-bottom: 12px; font-size: 0.95em; }
+        .equipment-options { display: flex; flex-direction: column; gap: 10px; }
+        .hero-equipment-layout { display: grid; grid-template-columns: 300px 1fr; gap: 25px; margin-bottom: 25px; }
+        .image-preview-container { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .image-preview-item {
+            position: relative; height: 200px; border-radius: 10px; overflow: hidden;
+            border: 2px dashed #e0e0e0; background: #f9f9f9;
+            display: flex; align-items: center; justify-content: center;
+            color: #999; font-size: 0.9em;
         }
-
-        .form-group {
-            margin-bottom: 25px;
+        .image-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .image-remove-btn {
+            position: absolute; top: 5px; right: 5px; background: rgba(255,59,48,0.9);
+            color: white; border: none; border-radius: 50%; width: 30px; height: 30px;
+            cursor: pointer; font-weight: bold; font-size: 1.2em; display: flex;
+            align-items: center; justify-content: center;
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
+        .upload-btn-inline { display: inline-flex; position: relative; overflow: hidden; margin-left: 15px; }
+        .upload-btn-inline input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .upload-btn {
+            padding: 8px 20px; font-size: 0.85em; display: inline-flex;
+            border: 2px dashed #B08AB0; background: white; color: #6B4966;
+            border-radius: 8px; cursor: pointer; align-items: center; gap: 6px; font-weight: bold;
         }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #98D8C8;
-            box-shadow: 0 0 0 3px rgba(152,216,200,0.1);
-        }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .hero-select-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .equipment-section {
-            background: rgba(152,216,200,0.1);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border-left: 4px solid #98D8C8;
-        }
-
-        .equipment-section h4 {
-            margin: 0 0 15px 0;
-            color: #98D8C8;
-        }
-
-        .equipment-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .skill-order-section {
-            background: rgba(255,253,208,0.5);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border: 2px solid #ffd93d;
-        }
-
-        .skill-order-section h4 {
-            margin: 0 0 15px 0;
-            color: #666;
-        }
-
+        .skill-order-section { background: rgba(255,253,208,0.7); padding: 20px; border-radius: 12px; margin-top: 25px; border: 2px solid #ffd93d; }
+        .skill-order-section h4 { margin: 0 0 10px 0; color: #666; font-size: 1.1em; }
+        .skill-order-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .btn {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
+            width: 100%; padding: 18px; background: linear-gradient(135deg, #98D8C8, #6FC3A8);
+            color: white; border: none; border-radius: 12px; font-size: 1.2em;
+            font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 30px;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(152,216,200,0.4);
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(152,216,200,0.4); }
+        .search-box { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .search-box input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; }
+        .strategy-list { display: grid; gap: 20px; }
+        .strategy-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .strategy-header {
+            display: flex; justify-content: space-between; align-items: start;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;
         }
-
-        .search-box {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
+        .strategy-title { font-size: 1.3em; font-weight: bold; color: #6B4966; }
+        .strategy-actions { display: flex; gap: 10px; }
+        .btn-delete { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9em; background: #ff3b30; color: white; }
+        .hero-info { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .hero-badge { padding: 8px 15px; background: #f0f0f0; border-radius: 8px; font-weight: 600; color: #555; }
+        .hero-images { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .hero-images img { width: 150px; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid #e0e0e0; }
         @media (max-width: 768px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .equipment-grid {
-                grid-template-columns: 1fr;
-            }
+            .hero-grid { grid-template-columns: 1fr; }
+            .equipment-grid { grid-template-columns: 1fr; }
+            .skill-order-grid { grid-template-columns: 1fr; }
+            .hero-equipment-layout { grid-template-columns: 1fr !important; }
+            .form-container { padding: 25px; }
         }
     </style>
 </head>
@@ -261,7 +122,7 @@
     <div class="container">
         <header>
             <h1>⚔️ 공격 공략 관리</h1>
-            <p>상대 방어팀을 돌파하는 전략을 공유하세요</p>
+            <p>상대 방어팀을 돌파하는 전략을 공유하세요 (1:1 매칭)</p>
             <div class="nav-tabs">
                 <a href="main.html" class="nav-tab">📊 메인</a>
                 <a href="attack.html" class="nav-tab" style="background: rgba(255,255,255,0.3);">⚔️ 공격</a>
@@ -271,68 +132,467 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('register')">공략 등록</button>
-            <button class="tab-btn" onclick="switchTab('list')">공략 목록 (<span id="guideCount">0</span>)</button>
+            <button class="tab-btn" onclick="switchTab('list')">공략 목록 (<span id="strategyCount">0</span>)</button>
         </div>
 
         <!-- 공략 등록 탭 -->
         <div id="register-tab" class="tab-content active">
             <div class="form-container">
-                <h2 style="margin-bottom: 25px; color: #B08AB0;">⚔️ 공격 공략 등록</h2>
+                <h2 style="margin-bottom: 10px; color: #B08AB0;">⚔️ 공격 공략 등록</h2>
+                <p style="color: #999; margin-bottom: 30px;">1:1 매칭 방식 - 방어팀과 공격팀을 한 번에 등록합니다</p>
                 
-                <form id="guideForm" onsubmit="saveGuide(event)">
-                    <div class="form-group">
-                        <label>공략 이름</label>
-                        <input type="text" id="guideName" placeholder="예: 루디 + 카구라 + 카엘 방어 공략" required>
+                <form id="strategyForm" onsubmit="saveStrategy(event)">
+                    <div class="section">
+                        <div class="form-group">
+                            <label>📝 공략 이름</label>
+                            <input type="text" id="strategyName" placeholder="예: 루나 + 카구라 + 카를로 공략법" required>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>상대 방어 영웅 (3명)</label>
+                    <div class="defense-section">
+                        <div class="section-title">🛡️ 상대 방어팀 (3명)</div>
                         <div class="hero-grid">
                             <div class="hero-select-group">
-                                <select onchange="updateEnemy1Options(this.value)">
+                                <label>방어 유닛 1</label>
+                                <select onchange="updateDefenseHero(1, this.value)" required>
                                     <option value="">등급 선택</option>
                                     <option value="구세나">구세나</option>
                                     <option value="찐스">찐스</option>
                                     <option value="짭스">짭스</option>
                                     <option value="희귀">희귀</option>
                                 </select>
-                                <select id="enemy1" required disabled>
+                                <select id="defenseHero1" required disabled>
                                     <option value="">영웅 선택</option>
                                 </select>
                             </div>
                             <div class="hero-select-group">
-                                <select onchange="updateEnemy2Options(this.value)">
+                                <label>방어 유닛 2</label>
+                                <select onchange="updateDefenseHero(2, this.value)" required>
                                     <option value="">등급 선택</option>
                                     <option value="구세나">구세나</option>
                                     <option value="찐스">찐스</option>
                                     <option value="짭스">짭스</option>
                                     <option value="희귀">희귀</option>
                                 </select>
-                                <select id="enemy2" required disabled>
+                                <select id="defenseHero2" required disabled>
                                     <option value="">영웅 선택</option>
                                 </select>
                             </div>
                             <div class="hero-select-group">
-                                <select onchange="updateEnemy3Options(this.value)">
+                                <label>방어 유닛 3</label>
+                                <select onchange="updateDefenseHero(3, this.value)" required>
                                     <option value="">등급 선택</option>
                                     <option value="구세나">구세나</option>
                                     <option value="찐스">찐스</option>
                                     <option value="짭스">짭스</option>
                                     <option value="희귀">희귀</option>
                                 </select>
-                                <select id="enemy3" required disabled>
+                                <select id="defenseHero3" required disabled>
                                     <option value="">영웅 선택</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>설명 (선택)</label>
-                        <textarea id="guideDescription" rows="3" placeholder="공략 설명, 주의사항 등..."></textarea>
+                    <div class="attack-section">
+                        <div class="section-title">⚔️ 공격팀 (3명)</div>
+                        
+                        <div class="hero-grid">
+                            <div class="hero-select-group">
+                                <label>공격 유닛 1</label>
+                                <select onchange="updateAttackHero(1, this.value)" required>
+                                    <option value="">등급 선택</option>
+                                    <option value="구세나">구세나</option>
+                                    <option value="찐스">찐스</option>
+                                    <option value="짭스">짭스</option>
+                                    <option value="희귀">희귀</option>
+                                </select>
+                                <select id="attackHero1" required disabled>
+                                    <option value="">영웅 선택</option>
+                                </select>
+                            </div>
+                            <div class="hero-select-group">
+                                <label>공격 유닛 2</label>
+                                <select onchange="updateAttackHero(2, this.value)" required>
+                                    <option value="">등급 선택</option>
+                                    <option value="구세나">구세나</option>
+                                    <option value="찐스">찐스</option>
+                                    <option value="짭스">짭스</option>
+                                    <option value="희귀">희귀</option>
+                                </select>
+                                <select id="attackHero2" required disabled>
+                                    <option value="">영웅 선택</option>
+                                </select>
+                            </div>
+                            <div class="hero-select-group">
+                                <label>공격 유닛 3</label>
+                                <select onchange="updateAttackHero(3, this.value)" required>
+                                    <option value="">등급 선택</option>
+                                    <option value="구세나">구세나</option>
+                                    <option value="찐스">찐스</option>
+                                    <option value="짭스">짭스</option>
+                                    <option value="희귀">희귀</option>
+                                </select>
+                                <select id="attackHero3" required disabled>
+                                    <option value="">영웅 선택</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 영웅 1 장비 -->
+                        <div class="equipment-title">
+                            <span>🎯 영웅1 장비 세팅</span>
+                            <div class="upload-btn-inline">
+                                <div class="upload-btn"><span>📁</span><span>사진등록</span></div>
+                                <input type="file" accept="image/*" multiple onchange="handleImageUpload(1, this.files)">
+                            </div>
+                        </div>
+                        
+                        <div class="hero-equipment-layout">
+                            <div>
+                                <div id="hero1Images" class="image-preview-container">
+                                    <div class="image-preview-item">사진을 선택하세요</div>
+                                    <div class="image-preview-item">사진을 선택하세요</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <label>공통 세트</label>
+                                    <select id="hero1Set">
+                                        <option value="모두">모두</option>
+                                        <option value="선봉장">선봉장</option>
+                                        <option value="성기사">성기사</option>
+                                        <option value="암살자">암살자</option>
+                                        <option value="복수자">복수자</option>
+                                        <option value="조율자">조율자</option>
+                                        <option value="수문장">수문장</option>
+                                        <option value="수호자">수호자</option>
+                                        <option value="추적자">추적자</option>
+                                        <option value="주술사">주술사</option>
+                                    </select>
+                                </div>
+                                <div class="equipment-grid">
+                                    <div class="equipment-item">
+                                        <div class="equipment-item-title">⚔️ 무기</div>
+                                        <div class="equipment-options">
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">무기1 옵션</label>
+                                                <select id="hero1Weapon1">
+                                                    <option value="모두">모두</option>
+                                                    <option value="약점 공격 확률">약점 공격 확률</option>
+                                                    <option value="치명타 확률">치명타 확률</option>
+                                                    <option value="치명타 피해">치명타 피해</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 적중">효과 적중</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">무기2 옵션</label>
+                                                <select id="hero1Weapon2">
+                                                    <option value="모두">모두</option>
+                                                    <option value="약점 공격 확률">약점 공격 확률</option>
+                                                    <option value="치명타 확률">치명타 확률</option>
+                                                    <option value="치명타 피해">치명타 피해</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 적중">효과 적중</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="equipment-item">
+                                        <div class="equipment-item-title">🛡️ 방어구</div>
+                                        <div class="equipment-options">
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">방어구1 옵션</label>
+                                                <select id="hero1Armor1">
+                                                    <option value="모두">모두</option>
+                                                    <option value="받는 피해 감소">받는 피해 감소</option>
+                                                    <option value="막기 확률">막기 확률</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 저항">효과 저항</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">방어구2 옵션</label>
+                                                <select id="hero1Armor2">
+                                                    <option value="모두">모두</option>
+                                                    <option value="받는 피해 감소">받는 피해 감소</option>
+                                                    <option value="막기 확률">막기 확률</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 저항">효과 저항</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-top: 15px; margin-bottom: 0;">
+                                    <label>💬 장비 설명</label>
+                                    <textarea id="hero1Desc" rows="2" placeholder="이 공격 유닛의 장비 특징, 세팅 이유 등을 작성하세요"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 영웅 2 장비 (동일 구조) -->
+                        <div class="equipment-title">
+                            <span>🎯 영웅2 장비 세팅</span>
+                            <div class="upload-btn-inline">
+                                <div class="upload-btn"><span>📁</span><span>사진등록</span></div>
+                                <input type="file" accept="image/*" multiple onchange="handleImageUpload(2, this.files)">
+                            </div>
+                        </div>
+                        
+                        <div class="hero-equipment-layout">
+                            <div>
+                                <div id="hero2Images" class="image-preview-container">
+                                    <div class="image-preview-item">사진을 선택하세요</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <label>공통 세트</label>
+                                    <select id="hero2Set">
+                                        <option value="모두">모두</option>
+                                        <option value="선봉장">선봉장</option>
+                                        <option value="성기사">성기사</option>
+                                        <option value="암살자">암살자</option>
+                                        <option value="복수자">복수자</option>
+                                        <option value="조율자">조율자</option>
+                                        <option value="수문장">수문장</option>
+                                        <option value="수호자">수호자</option>
+                                        <option value="추적자">추적자</option>
+                                        <option value="주술사">주술사</option>
+                                    </select>
+                                </div>
+                                <div class="equipment-grid">
+                                    <div class="equipment-item">
+                                        <div class="equipment-item-title">⚔️ 무기</div>
+                                        <div class="equipment-options">
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">무기1 옵션</label>
+                                                <select id="hero2Weapon1">
+                                                    <option value="모두">모두</option>
+                                                    <option value="약점 공격 확률">약점 공격 확률</option>
+                                                    <option value="치명타 확률">치명타 확률</option>
+                                                    <option value="치명타 피해">치명타 피해</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 적중">효과 적중</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">무기2 옵션</label>
+                                                <select id="hero2Weapon2">
+                                                    <option value="모두">모두</option>
+                                                    <option value="약점 공격 확률">약점 공격 확률</option>
+                                                    <option value="치명타 확률">치명타 확률</option>
+                                                    <option value="치명타 피해">치명타 피해</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 적중">효과 적중</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="equipment-item">
+                                        <div class="equipment-item-title">🛡️ 방어구</div>
+                                        <div class="equipment-options">
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">방어구1 옵션</label>
+                                                <select id="hero2Armor1">
+                                                    <option value="모두">모두</option>
+                                                    <option value="받는 피해 감소">받는 피해 감소</option>
+                                                    <option value="막기 확률">막기 확률</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 저항">효과 저항</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">방어구2 옵션</label>
+                                                <select id="hero2Armor2">
+                                                    <option value="모두">모두</option>
+                                                    <option value="받는 피해 감소">받는 피해 감소</option>
+                                                    <option value="막기 확률">막기 확률</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 저항">효과 저항</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-top: 15px; margin-bottom: 0;">
+                                    <label>💬 장비 설명</label>
+                                    <textarea id="hero2Desc" rows="2" placeholder="이 공격 유닛의 장비 특징, 세팅 이유 등을 작성하세요"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 영웅 3 장비 (동일 구조) -->
+                        <div class="equipment-title">
+                            <span>🎯 영웅3 장비 세팅</span>
+                            <div class="upload-btn-inline">
+                                <div class="upload-btn"><span>📁</span><span>사진등록</span></div>
+                                <input type="file" accept="image/*" multiple onchange="handleImageUpload(3, this.files)">
+                            </div>
+                        </div>
+                        
+                        <div class="hero-equipment-layout">
+                            <div>
+                                <div id="hero3Images" class="image-preview-container">
+                                    <div class="image-preview-item">사진을 선택하세요</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <label>공통 세트</label>
+                                    <select id="hero3Set">
+                                        <option value="모두">모두</option>
+                                        <option value="선봉장">선봉장</option>
+                                        <option value="성기사">성기사</option>
+                                        <option value="암살자">암살자</option>
+                                        <option value="복수자">복수자</option>
+                                        <option value="조율자">조율자</option>
+                                        <option value="수문장">수문장</option>
+                                        <option value="수호자">수호자</option>
+                                        <option value="추적자">추적자</option>
+                                        <option value="주술사">주술사</option>
+                                    </select>
+                                </div>
+                                <div class="equipment-grid">
+                                    <div class="equipment-item">
+                                        <div class="equipment-item-title">⚔️ 무기</div>
+                                        <div class="equipment-options">
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">무기1 옵션</label>
+                                                <select id="hero3Weapon1">
+                                                    <option value="모두">모두</option>
+                                                    <option value="약점 공격 확률">약점 공격 확률</option>
+                                                    <option value="치명타 확률">치명타 확률</option>
+                                                    <option value="치명타 피해">치명타 피해</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 적중">효과 적중</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">무기2 옵션</label>
+                                                <select id="hero3Weapon2">
+                                                    <option value="모두">모두</option>
+                                                    <option value="약점 공격 확률">약점 공격 확률</option>
+                                                    <option value="치명타 확률">치명타 확률</option>
+                                                    <option value="치명타 피해">치명타 피해</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 적중">효과 적중</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="equipment-item">
+                                        <div class="equipment-item-title">🛡️ 방어구</div>
+                                        <div class="equipment-options">
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">방어구1 옵션</label>
+                                                <select id="hero3Armor1">
+                                                    <option value="모두">모두</option>
+                                                    <option value="받는 피해 감소">받는 피해 감소</option>
+                                                    <option value="막기 확률">막기 확률</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 저항">효과 저항</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">방어구2 옵션</label>
+                                                <select id="hero3Armor2">
+                                                    <option value="모두">모두</option>
+                                                    <option value="받는 피해 감소">받는 피해 감소</option>
+                                                    <option value="막기 확률">막기 확률</option>
+                                                    <option value="모든 공격력(%)">모든 공격력(%)</option>
+                                                    <option value="모든 공격력">모든 공격력</option>
+                                                    <option value="방어력(%)">방어력(%)</option>
+                                                    <option value="방어력">방어력</option>
+                                                    <option value="생명력(%)">생명력(%)</option>
+                                                    <option value="생명력">생명력</option>
+                                                    <option value="효과 저항">효과 저항</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-top: 15px; margin-bottom: 0;">
+                                    <label>💬 장비 설명</label>
+                                    <textarea id="hero3Desc" rows="2" placeholder="이 공격 유닛의 장비 특징, 세팅 이유 등을 작성하세요"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="skill-order-section">
+                            <h4>⭐ 스킬 사용 순서</h4>
+                            <p>각 영웅의 스킬을 사용할 순서를 입력하세요</p>
+                            <div class="skill-order-grid">
+                                <input type="text" id="skill1" placeholder="1순위 스킬">
+                                <input type="text" id="skill2" placeholder="2순위 스킬">
+                                <input type="text" id="skill3" placeholder="3순위 스킬">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 25px;">
+                            <label>💡 운용 팁</label>
+                            <textarea id="operationTip" rows="4" placeholder="전략 운용법, 주의사항, 팁 등을 자세히 작성해주세요"></textarea>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn">공략 등록하기</button>
+                    <button type="submit" class="btn">✅ 공략 등록하기</button>
                 </form>
             </div>
         </div>
@@ -340,181 +600,38 @@
         <!-- 공략 목록 탭 -->
         <div id="list-tab" class="tab-content">
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 공략 이름, 영웅 이름으로 검색..." onkeyup="searchGuides()">
+                <input type="text" id="searchInput" placeholder="🔍 공략 이름, 영웅 이름으로 검색..." onkeyup="searchStrategies()">
             </div>
-            <div id="guideList"></div>
+            <div id="strategyList" class="strategy-list"></div>
         </div>
     </div>
 
-    <!-- 전략 추가 모달 -->
-    <div id="strategyModal" class="modal" onclick="closeStrategyModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="margin-bottom: 25px; color: #98D8C8;">⚔️ 공격 전략 추가</h2>
-            
-            <form id="strategyForm" onsubmit="saveStrategy(event)">
-                <div class="form-group">
-                    <label>전략 이름</label>
-                    <input type="text" id="strategyName" placeholder="예: 스피드로 승부보기" required>
-                </div>
-
-                <div class="form-group">
-                    <label>공격 영웅 (3명)</label>
-                    <div class="hero-grid">
-                        <div class="hero-select-group">
-                            <select onchange="updateAttack1Options(this.value)">
-                                <option value="">등급 선택</option>
-                                <option value="구세나">구세나</option>
-                                <option value="찐스">찐스</option>
-                                <option value="짭스">짭스</option>
-                                <option value="희귀">희귀</option>
-                            </select>
-                            <select id="attack1" required disabled>
-                                <option value="">영웅 선택</option>
-                            </select>
-                        </div>
-                        <div class="hero-select-group">
-                            <select onchange="updateAttack2Options(this.value)">
-                                <option value="">등급 선택</option>
-                                <option value="구세나">구세나</option>
-                                <option value="찐스">찐스</option>
-                                <option value="짭스">짭스</option>
-                                <option value="희귀">희귀</option>
-                            </select>
-                            <select id="attack2" required disabled>
-                                <option value="">영웅 선택</option>
-                            </select>
-                        </div>
-                        <div class="hero-select-group">
-                            <select onchange="updateAttack3Options(this.value)">
-                                <option value="">등급 선택</option>
-                                <option value="구세나">구세나</option>
-                                <option value="찐스">찐스</option>
-                                <option value="짭스">짭스</option>
-                                <option value="희귀">희귀</option>
-                            </select>
-                            <select id="attack3" required disabled>
-                                <option value="">영웅 선택</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 장비 설정 컨테이너 -->
-                <div id="strategyEquipmentContainer"></div>
-
-                <!-- 스킬 순서 -->
-                <div id="strategySkillContainer"></div>
-
-                <div class="form-group">
-                    <label>운용 팁 (선택)</label>
-                    <textarea id="strategyTip" rows="3" placeholder="전략 운용법, 주의사항 등..."></textarea>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="closeStrategyModal()" style="flex: 1; padding: 15px; background: #ddd; border: none; border-radius: 12px; cursor: pointer; font-size: 1em;">취소</button>
-                    <button type="submit" style="flex: 1; padding: 15px; background: linear-gradient(135deg, #98D8C8, #6FC3A8); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 1em; font-weight: bold;">전략 추가</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 공략 수정 모달 -->
-    <div id="editGuideModal" class="modal" onclick="closeEditGuideModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="margin-bottom: 25px; color: #B08AB0;">✏️ 공략 수정</h2>
-            
-            <form id="editGuideForm" onsubmit="updateGuide(event)">
-                <input type="hidden" id="editGuideId">
-                
-                <div class="form-group">
-                    <label>공략 이름</label>
-                    <input type="text" id="editGuideName" required>
-                </div>
-
-                <div class="form-group">
-                    <label>상대 방어 영웅 (3명)</label>
-                    <div class="hero-grid">
-                        <div class="hero-select-group">
-                            <select onchange="updateEditEnemy1Options(this.value)">
-                                <option value="">등급 선택</option>
-                                <option value="구세나">구세나</option>
-                                <option value="찐스">찐스</option>
-                                <option value="짭스">짭스</option>
-                                <option value="희귀">희귀</option>
-                            </select>
-                            <select id="editEnemy1" required disabled>
-                                <option value="">영웅 선택</option>
-                            </select>
-                        </div>
-                        <div class="hero-select-group">
-                            <select onchange="updateEditEnemy2Options(this.value)">
-                                <option value="">등급 선택</option>
-                                <option value="구세나">구세나</option>
-                                <option value="찐스">찐스</option>
-                                <option value="짭스">짭스</option>
-                                <option value="희귀">희귀</option>
-                            </select>
-                            <select id="editEnemy2" required disabled>
-                                <option value="">영웅 선택</option>
-                            </select>
-                        </div>
-                        <div class="hero-select-group">
-                            <select onchange="updateEditEnemy3Options(this.value)">
-                                <option value="">등급 선택</option>
-                                <option value="구세나">구세나</option>
-                                <option value="찐스">찐스</option>
-                                <option value="짭스">짭스</option>
-                                <option value="희귀">희귀</option>
-                            </select>
-                            <select id="editEnemy3" required disabled>
-                                <option value="">영웅 선택</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>설명 (선택)</label>
-                    <textarea id="editGuideDescription" rows="3"></textarea>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="closeEditGuideModal()" style="flex: 1; padding: 15px; background: #ddd; border: none; border-radius: 12px; cursor: pointer; font-size: 1em;">취소</button>
-                    <button type="submit" style="flex: 1; padding: 15px; background: linear-gradient(135deg, #ffd93d, #ffb627); color: #333; border: none; border-radius: 12px; cursor: pointer; font-size: 1em; font-weight: bold;">수정 완료</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
-        // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
             authDomain: "gyuomi-guild.firebaseapp.com",
             projectId: "gyuomi-guild",
             storageBucket: "gyuomi-guild.firebasestorage.app",
             messagingSenderId: "43293575259",
-            appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e",
-            measurementId: "G-PT8DNQV1DY"
+            appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        window.db = db;
-        window.firestore = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy };
+        const storage = getStorage(app);
 
         let currentUser = null;
-        let guides = [];
-        let currentGuideId = null;
+        let strategies = [];
+        const hero1Images = [];
+        const hero2Images = [];
+        const hero3Images = [];
 
-        // 영웅 데이터
         const heroData = {
             '구세나': ['밀리아', '갤리두스', '파이', '쥬리', '로지'],
             '찐스': ['브란즈&브란셀', '손오공', '프레이야', '트루드', '라이언', '엘리시아', '키리엘', '카일', '아킬라', '카구라', '클라한', '오를리', '비스킷', '플라튼', '콜트', '린', '카르마', '멜키르', '연희', '태오', '바네사', '스파이크', '제이브', '레이첼', '아일린', '델론즈', '크리스', '루디', '실베스타', '에이스'],
@@ -522,17 +639,10 @@
             '희귀': ['레이', '진', '캐티', '블랙로즈', '아수라', '노호', '클로에', '메이', '세라', '제인', '유이', '실비아', '루시', '빅토리아', '카론', '조커', '카린', '에반', '쥬피', '스니퍼', '소이', '풍연', '헤브니아', '헬레니아', '아리엘', '리', '사라', '라니아', '클레오', '베인', '레오', '유리', '라쿤', '호킨']
         };
 
-        // 가나다순 정렬
         Object.keys(heroData).forEach(grade => {
             heroData[grade].sort((a, b) => a.localeCompare(b, 'ko'));
         });
 
-        // 장비 옵션
-        const equipmentSets = ['모두', '선봉장', '성기사', '암살자', '복수자', '조율자', '수문장', '수호자', '추적자', '주술사'];
-        const weaponOptions = ['모두', '약점 공격 확률', '치명타 확률', '치명타 피해', '모든 공격력(%)', '모든 공격력', '방어력(%)', '방어력', '생명력(%)', '생명력', '효과 적중'];
-        const armorOptions = ['모두', '받는 피해 감소', '막기 확률', '모든 공격력(%)', '모든 공격력', '방어력(%)', '방어력', '생명력(%)', '생명력', '효과 저항'];
-
-        // 인증 확인
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 alert('로그인이 필요합니다.');
@@ -549,816 +659,289 @@
                     }
                 });
 
-                if (!userData) {
-                    alert('사용자 정보를 찾을 수 없습니다.');
-                    await auth.signOut();
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                if (userData.role === 'pending') {
-                    alert('관리자의 승인을 기다리고 있습니다.');
+                if (!userData || userData.role === 'pending') {
+                    alert('승인 대기 중이거나 권한이 없습니다.');
                     await auth.signOut();
                     window.location.href = 'index.html';
                     return;
                 }
 
                 currentUser = userData;
-                window.currentUser = currentUser;
-                loadData();
-                
+                loadStrategies();
             } catch (error) {
                 console.error('사용자 정보 로드 오류:', error);
-                alert('사용자 정보를 불러오는데 실패했습니다.');
                 window.location.href = 'index.html';
             }
         });
 
-        // 데이터 로드
-        async function loadData() {
-            try {
-                const snapshot = await getDocs(query(collection(db, 'guides'), orderBy('createdAt', 'desc')));
-                guides = [];
-                snapshot.forEach(doc => {
-                    guides.push({ id: doc.id, ...doc.data() });
-                });
-
-                document.getElementById('guideCount').textContent = guides.length;
-                renderGuides();
-            } catch (error) {
-                console.error('데이터 로드 오류:', error);
-            }
-        }
-
-        // 상대 방어팀 영웅 선택
-        window.updateEnemy1Options = function(grade) {
-            updateHeroSelect('enemy1', grade);
-        };
-        window.updateEnemy2Options = function(grade) {
-            updateHeroSelect('enemy2', grade);
-        };
-        window.updateEnemy3Options = function(grade) {
-            updateHeroSelect('enemy3', grade);
-        };
-
-        // 공격 영웅 선택
-        window.updateAttack1Options = function(grade) {
-            updateHeroSelect('attack1', grade);
-        };
-        window.updateAttack2Options = function(grade) {
-            updateHeroSelect('attack2', grade);
-        };
-        window.updateAttack3Options = function(grade) {
-            updateHeroSelect('attack3', grade);
-        };
-
-        function updateHeroSelect(selectId, grade) {
-            const select = document.getElementById(selectId);
-            select.disabled = !grade;
-            select.innerHTML = '<option value="">영웅 선택</option>';
-            if (grade && heroData[grade]) {
-                heroData[grade].forEach(hero => {
-                    select.innerHTML += `<option value="${hero}">${hero}</option>`;
-                });
-            }
-            // 영웅 선택 시 장비 UI 업데이트
-            select.onchange = updateStrategyEquipment;
-        }
-
-        // 전략 장비 설정 UI 업데이트
-        function updateStrategyEquipment() {
-            const hero1 = document.getElementById('attack1').value;
-            const hero2 = document.getElementById('attack2').value;
-            const hero3 = document.getElementById('attack3').value;
-
-            const container = document.getElementById('strategyEquipmentContainer');
-            const skillContainer = document.getElementById('strategySkillContainer');
-
-            if (!hero1 && !hero2 && !hero3) {
-                container.innerHTML = '';
-                skillContainer.innerHTML = '';
-                return;
-            }
-
-            let equipHtml = '';
-            let skillHtml = '<div class="skill-order-section"><h4>😊 스킬 사용 순서</h4><p style="margin-bottom: 15px; color: #666;">각 영웅의 스킬 사용 순서를 선택하세요</p>';
-            
-            const selectedHeroes = [];
-            if (hero1) selectedHeroes.push({ num: 1, name: hero1 });
-            if (hero2) selectedHeroes.push({ num: 2, name: hero2 });
-            if (hero3) selectedHeroes.push({ num: 3, name: hero3 });
-
-            // 스킬 표시 (2행 3열 텍스트)
-            skillHtml += '<div style="margin-bottom: 15px;">';
-            // 첫 번째 줄: 스킬2
-            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;">';
-            selectedHeroes.forEach(hero => {
-                skillHtml += `<div style="padding: 8px; background: rgba(255,182,193,0.2); border-radius: 8px; text-align: center; font-size: 0.9em; color: #666;">${hero.name} 스킬2</div>`;
-            });
-            skillHtml += '</div>';
-            // 두 번째 줄: 스킬1
-            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">';
-            selectedHeroes.forEach(hero => {
-                skillHtml += `<div style="padding: 8px; background: rgba(152,216,200,0.2); border-radius: 8px; text-align: center; font-size: 0.9em; color: #666;">${hero.name} 스킬1</div>`;
-            });
-            skillHtml += '</div>';
-            skillHtml += '</div>';
-
-            skillHtml += '<p style="margin-bottom: 10px; font-weight: 600; color: #666;">스킬 순서 (3개 선택)</p>';
-            skillHtml += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">';
-            skillHtml += `
-                <div class="form-group">
-                    <label>1순위</label>
-                    <select id="strategySkillOrder1">
-                        <option value="">선택</option>
-                        ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>2순위</label>
-                    <select id="strategySkillOrder2">
-                        <option value="">선택</option>
-                        ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>3순위</label>
-                    <select id="strategySkillOrder3">
-                        <option value="">선택</option>
-                        ${selectedHeroes.map(h => `<option value="${h.name} 스킬1">${h.name} 스킬1</option><option value="${h.name} 스킬2">${h.name} 스킬2</option>`).join('')}
-                    </select>
-                </div>
-            `;
-            skillHtml += '</div></div>';
-
-            selectedHeroes.forEach(hero => {
-                equipHtml += `
-                    <div class="equipment-section">
-                        <h4>🎯 ${hero.name} 장비 세팅</h4>
-                        
-                        <div class="form-group">
-                            <label>공통 세트</label>
-                            <select id="strategyHero${hero.num}Set">
-                                ${equipmentSets.map(set => `<option value="${set}">${set}</option>`).join('')}
-                            </select>
-                        </div>
-
-                        <div class="equipment-grid">
-                            <div class="form-group">
-                                <label>⚔️ 무기</label>
-                                <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <div>
-                                        <label style="font-size: 0.9em; color: #666;">무기1 옵션</label>
-                                        <select id="strategyHero${hero.num}Weapon1">
-                                            ${weaponOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="font-size: 0.9em; color: #666;">무기2 옵션</label>
-                                        <select id="strategyHero${hero.num}Weapon2">
-                                            ${weaponOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>🛡️ 방어구</label>
-                                <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <div>
-                                        <label style="font-size: 0.9em; color: #666;">방어구1 옵션</label>
-                                        <select id="strategyHero${hero.num}Armor1">
-                                            ${armorOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="font-size: 0.9em; color: #666;">방어구2 옵션</label>
-                                        <select id="strategyHero${hero.num}Armor2">
-                                            ${armorOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = equipHtml;
-            skillContainer.innerHTML = skillHtml;
-        }
-
-        // 공략 저장
-        window.saveGuide = async function(event) {
-            event.preventDefault();
-
-            const name = document.getElementById('guideName').value.trim();
-            const enemy1 = document.getElementById('enemy1').value;
-            const enemy2 = document.getElementById('enemy2').value;
-            const enemy3 = document.getElementById('enemy3').value;
-            const description = document.getElementById('guideDescription').value.trim();
-
-            if (!name || !enemy1 || !enemy2 || !enemy3) {
-                alert('공략 이름과 상대 방어 영웅 3명을 모두 입력해주세요.');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, 'guides'), {
-                    name: name,
-                    defenseHeroes: [enemy1, enemy2, enemy3],
-                    description: description,
-                    strategies: [],
-                    comments: [],
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUser.nickname
-                });
-
-                alert('공략이 등록되었습니다! 이제 공격 전략을 추가하세요.');
-                document.getElementById('guideForm').reset();
-                document.querySelectorAll('#guideForm select[id^="enemy"]').forEach(s => s.disabled = true);
-                
-                await loadData();
-                switchTab('list');
-            } catch (error) {
-                console.error('저장 오류:', error);
-                alert('저장에 실패했습니다: ' + error.message);
-            }
-        };
-
-        // 전략 추가 모달 열기
-        window.showStrategyModal = function(guideId) {
-            currentGuideId = guideId;
-            document.getElementById('strategyModal').classList.add('active');
-            document.getElementById('strategyForm').reset();
-            document.getElementById('strategyEquipmentContainer').innerHTML = '';
-            document.getElementById('strategySkillContainer').innerHTML = '';
-            document.querySelectorAll('#strategyForm select[id^="attack"]').forEach(s => s.disabled = true);
-        };
-
-        window.closeStrategyModal = function() {
-            document.getElementById('strategyModal').classList.remove('active');
-            currentGuideId = null;
-            delete window.editingStrategyIndex;
-            
-            // 모달 제목/버튼 초기화
-            document.querySelector('#strategyModal h2').textContent = '⚔️ 공격 전략 추가';
-            document.querySelector('#strategyForm button[type="submit"]').textContent = '전략 추가';
-            document.querySelector('#strategyForm button[type="submit"]').style.background = 'linear-gradient(135deg, #98D8C8, #6FC3A8)';
-        };
-
-        // 전략 저장
-        window.saveStrategy = async function(event) {
-            event.preventDefault();
-
-            const strategyName = document.getElementById('strategyName').value.trim();
-            const hero1 = document.getElementById('attack1').value;
-            const hero2 = document.getElementById('attack2').value;
-            const hero3 = document.getElementById('attack3').value;
-            const tip = document.getElementById('strategyTip').value.trim();
-
-            if (!strategyName || !hero1 || !hero2 || !hero3) {
-                alert('전략 이름과 공격 영웅 3명을 모두 입력해주세요.');
-                return;
-            }
-
-            const heroes = [];
-            [1, 2, 3].forEach(num => {
-                const heroName = document.getElementById(`attack${num}`).value;
-                if (heroName) {
-                    heroes.push({
-                        name: heroName,
-                        equipment: {
-                            set: document.getElementById(`strategyHero${num}Set`)?.value || '모두',
-                            weapon1: document.getElementById(`strategyHero${num}Weapon1`)?.value || '모두',
-                            weapon2: document.getElementById(`strategyHero${num}Weapon2`)?.value || '모두',
-                            armor1: document.getElementById(`strategyHero${num}Armor1`)?.value || '모두',
-                            armor2: document.getElementById(`strategyHero${num}Armor2`)?.value || '모두'
-                        }
-                    });
-                }
-            });
-
-            const skillOrder = [
-                document.getElementById('strategySkillOrder1')?.value,
-                document.getElementById('strategySkillOrder2')?.value,
-                document.getElementById('strategySkillOrder3')?.value
-            ].filter(s => s);
-
-            try {
-                const guide = guides.find(g => g.id === currentGuideId);
-                const strategies = guide.strategies || [];
-                
-                const strategyData = {
-                    name: strategyName,
-                    heroes: heroes,
-                    skillOrder: skillOrder,
-                    tip: tip,
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUser.nickname
-                };
-                
-                // 수정 모드인지 확인
-                if (window.editingStrategyIndex !== undefined) {
-                    // 기존 댓글 유지
-                    strategyData.comments = strategies[window.editingStrategyIndex].comments || [];
-                    strategyData.createdAt = strategies[window.editingStrategyIndex].createdAt;
-                    strategyData.createdBy = strategies[window.editingStrategyIndex].createdBy;
-                    strategies[window.editingStrategyIndex] = strategyData;
-                    delete window.editingStrategyIndex;
-                } else {
-                    // 새로 추가
-                    strategyData.comments = [];
-                    strategies.push(strategyData);
-                }
-
-                await updateDoc(doc(db, 'guides', currentGuideId), { strategies: strategies });
-
-                alert(window.editingStrategyIndex !== undefined ? '전략이 수정되었습니다!' : '공격 전략이 추가되었습니다!');
-                closeStrategyModal();
-                await loadData();
-            } catch (error) {
-                console.error('전략 저장 오류:', error);
-                alert('전략 저장에 실패했습니다: ' + error.message);
-            }
-        };
-
-        // 공략 렌더링
-        function renderGuides() {
-            const container = document.getElementById('guideList');
-            
-            if (guides.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px; background: white; border-radius: 15px;">등록된 공략이 없습니다.</p>';
-                return;
-            }
-
-            container.innerHTML = guides.map(guide => {
-                const isAdmin = currentUser && currentUser.role === 'admin';
-                const strategies = guide.strategies || [];
-                const comments = guide.comments || [];
-                
-                return `
-                    <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
-                            <div>
-                                <h3 style="margin: 0 0 10px 0; color: #B08AB0;">${guide.name}</h3>
-                                <p style="margin: 0; font-size: 0.9em; color: #999;">작성자: ${guide.createdBy} | ${new Date(guide.createdAt).toLocaleDateString('ko-KR')}</p>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                ${isAdmin ? `<button onclick="showStrategyModal('${guide.id}')" style="padding: 8px 16px; background: #98D8C8; color: white; border: none; border-radius: 8px; cursor: pointer;">➕ 전략 추가</button>` : ''}
-                                ${isAdmin ? `<button onclick="editGuide('${guide.id}')" style="padding: 8px 16px; background: #ffd93d; color: #333; border: none; border-radius: 8px; cursor: pointer;">✏️ 수정</button>` : ''}
-                                ${isAdmin ? `<button onclick="deleteGuide('${guide.id}')" style="padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer;">🗑️ 삭제</button>` : ''}
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(176,138,176,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                            <h4 style="margin: 0 0 10px 0; color: #B08AB0;">🛡️ 상대 방어팀:</h4>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                ${guide.defenseHeroes.map(h => `<span style="padding: 8px 16px; background: rgba(255,182,193,0.3); border-radius: 8px; font-weight: 500;">${h}</span>`).join('')}
-                            </div>
-                        </div>
-
-                        ${guide.description ? `
-                            <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                                <p style="margin: 0;">${guide.description}</p>
-                            </div>
-                        ` : ''}
-
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <h4 style="margin: 0; color: #98D8C8;">⚔️ 공격 전략 (${strategies.length}개)</h4>
-                                <button onclick="toggleStrategies('${guide.id}')" style="padding: 6px 12px; background: rgba(152,216,200,0.2); border: none; border-radius: 6px; cursor: pointer;">
-                                    <span id="toggle-${guide.id}">▼ 펼치기</span>
-                                </button>
-                            </div>
-                            
-                            <div id="strategies-${guide.id}" style="display: none;">
-                                ${strategies.length === 0 ? '<p style="text-align: center; color: #999; padding: 20px;">등록된 전략이 없습니다.</p>' : strategies.map((strategy, idx) => `
-                                    <div style="background: rgba(152,216,200,0.05); border: 2px solid rgba(152,216,200,0.3); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
-                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                                            <div>
-                                                <h5 style="margin: 0 0 10px 0; color: #333;">${strategy.name}</h5>
-                                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                                    ${strategy.heroes.map(h => `<span style="padding: 6px 12px; background: rgba(152,216,200,0.3); border-radius: 6px; font-size: 0.9em;">${h.name}</span>`).join('')}
-                                                </div>
-                                            </div>
-                                            ${isAdmin ? `
-                                                <div style="display: flex; gap: 8px;">
-                                                    <button onclick="editStrategy('${guide.id}', ${idx})" style="padding: 6px 12px; background: #ffd93d; color: #333; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em;">✏️ 수정</button>
-                                                    <button onclick="deleteStrategy('${guide.id}', ${idx})" style="padding: 6px 12px; background: #ff6b6b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em;">🗑️ 삭제</button>
-                                                </div>
-                                            ` : ''}
-                                        </div>
-
-                                        ${strategy.heroes.map(hero => `
-                                            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                                                <h6 style="margin: 0 0 10px 0; color: #98D8C8;">${hero.name}:</h6>
-                                                <div style="font-size: 0.9em; color: #666;">
-                                                    <div>세트: ${hero.equipment.set}</div>
-                                                    <div>무기1: ${hero.equipment.weapon1} | 무기2: ${hero.equipment.weapon2}</div>
-                                                    <div>방어구1: ${hero.equipment.armor1} | 방어구2: ${hero.equipment.armor2}</div>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-
-                                        ${strategy.skillOrder && strategy.skillOrder.length > 0 ? `
-                                            <div style="background: rgba(255,253,208,0.5); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                                                <span style="font-weight: 600;">😊 스킬 순서:</span> ${strategy.skillOrder.join(' → ')}
-                                            </div>
-                                        ` : ''}
-
-                                        ${strategy.tip ? `
-                                            <div style="background: rgba(255,253,208,0.5); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                                                <span style="font-weight: 600;">💡 운용 팁:</span> ${strategy.tip.replace(/\n/g, '<br>')}
-                                            </div>
-                                        ` : ''}
-
-                                        <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
-                                            <h6 style="margin: 0 0 10px 0;">💬 전략 댓글 (${strategy.comments?.length || 0})</h6>
-                                            <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
-                                                ${(strategy.comments || []).map((c, cIdx) => `
-                                                    <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
-                                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                                            <span style="font-weight: 600; font-size: 0.9em; color: #B08AB0;">${c.user}</span>
-                                                            <div style="display: flex; gap: 8px; align-items: center;">
-                                                                <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
-                                                                ${(isAdmin || c.user === currentUser.nickname) ? `<button onclick="deleteStrategyComment('${guide.id}', ${idx}, ${cIdx})" style="padding: 2px 8px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">🗑️</button>` : ''}
-                                                            </div>
-                                                        </div>
-                                                        <p style="margin: 0; font-size: 0.9em;">${c.text}</p>
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                            <div style="display: flex; gap: 8px;">
-                                                <input type="text" id="strategy-comment-${guide.id}-${idx}" placeholder="전략 댓글 입력..." style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
-                                                <button onclick="addStrategyComment('${guide.id}', ${idx})" style="padding: 8px 16px; background: #98D8C8; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">댓글 작성</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-
-                        <div style="border-top: 2px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 20px;">
-                            <h5 style="margin: 0 0 10px 0;">💬 공략 댓글 (${comments.length})</h5>
-                            <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
-                                ${comments.map((c, cIdx) => `
-                                    <div style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
-                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                            <span style="font-weight: 600; font-size: 0.9em; color: #B08AB0;">${c.user}</span>
-                                            <div style="display: flex; gap: 8px; align-items: center;">
-                                                <span style="font-size: 0.75em; color: #999;">${new Date(c.time).toLocaleString('ko-KR')}</span>
-                                                ${(isAdmin || c.user === currentUser.nickname) ? `<button onclick="deleteGuideComment('${guide.id}', ${cIdx})" style="padding: 2px 8px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">🗑️</button>` : ''}
-                                            </div>
-                                        </div>
-                                        <p style="margin: 0; font-size: 0.9em;">${c.text}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="guide-comment-${guide.id}" placeholder="공략 댓글 입력..." style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
-                                <button onclick="addGuideComment('${guide.id}')" style="padding: 8px 16px; background: #B08AB0; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">댓글 작성</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // 토글
-        window.toggleStrategies = function(guideId) {
-            const container = document.getElementById(`strategies-${guideId}`);
-            const toggleBtn = document.getElementById(`toggle-${guideId}`);
-            
-            if (container.style.display === 'none') {
-                container.style.display = 'block';
-                toggleBtn.textContent = '▲ 접기';
-            } else {
-                container.style.display = 'none';
-                toggleBtn.textContent = '▼ 펼치기';
-            }
-        };
-
-        // 공략 댓글
-        window.addGuideComment = async function(guideId) {
-            const input = document.getElementById(`guide-comment-${guideId}`);
-            const text = input.value.trim();
-            
-            if (!text) {
-                alert('댓글 내용을 입력해주세요.');
-                return;
-            }
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                const comments = guide.comments || [];
-                comments.push({
-                    user: currentUser.nickname,
-                    text: text,
-                    time: new Date().toISOString()
-                });
-
-                await updateDoc(doc(db, 'guides', guideId), { comments: comments });
-                input.value = '';
-                await loadData();
-            } catch (error) {
-                console.error('댓글 추가 오류:', error);
-                alert('댓글 추가에 실패했습니다.');
-            }
-        };
-
-        // 전략 댓글
-        window.addStrategyComment = async function(guideId, strategyIdx) {
-            const input = document.getElementById(`strategy-comment-${guideId}-${strategyIdx}`);
-            const text = input.value.trim();
-            
-            if (!text) {
-                alert('댓글 내용을 입력해주세요.');
-                return;
-            }
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                const strategies = guide.strategies || [];
-                
-                if (!strategies[strategyIdx].comments) {
-                    strategies[strategyIdx].comments = [];
-                }
-                
-                strategies[strategyIdx].comments.push({
-                    user: currentUser.nickname,
-                    text: text,
-                    time: new Date().toISOString()
-                });
-
-                await updateDoc(doc(db, 'guides', guideId), { strategies: strategies });
-                input.value = '';
-                await loadData();
-            } catch (error) {
-                console.error('댓글 추가 오류:', error);
-                alert('댓글 추가에 실패했습니다.');
-            }
-        };
-
-        // 공략 수정
-        window.editGuide = function(guideId) {
-            const guide = guides.find(g => g.id === guideId);
-            if (!guide) return;
-
-            document.getElementById('editGuideId').value = guideId;
-            document.getElementById('editGuideName').value = guide.name;
-            document.getElementById('editGuideDescription').value = guide.description || '';
-
-            // 상대 영웅 선택
-            guide.defenseHeroes.forEach((hero, idx) => {
-                const gradeSelect = document.querySelectorAll('#editGuideModal .hero-select-group')[idx].querySelector('select');
-                const heroSelect = document.getElementById(`editEnemy${idx + 1}`);
-                
-                // 등급 찾기
-                let heroGrade = '';
-                Object.keys(heroData).forEach(grade => {
-                    if (heroData[grade].includes(hero)) {
-                        heroGrade = grade;
-                    }
-                });
-                
-                gradeSelect.value = heroGrade;
-                
-                // 영웅 목록 업데이트
-                if (idx === 0) updateEditEnemy1Options(heroGrade);
-                else if (idx === 1) updateEditEnemy2Options(heroGrade);
-                else if (idx === 2) updateEditEnemy3Options(heroGrade);
-                
-                setTimeout(() => {
-                    heroSelect.value = hero;
-                }, 100);
-            });
-
-            document.getElementById('editGuideModal').classList.add('active');
-        };
-
-        window.closeEditGuideModal = function() {
-            document.getElementById('editGuideModal').classList.remove('active');
-        };
-
-        window.updateEditEnemy1Options = function(grade) {
-            updateHeroSelect('editEnemy1', grade);
-        };
-        window.updateEditEnemy2Options = function(grade) {
-            updateHeroSelect('editEnemy2', grade);
-        };
-        window.updateEditEnemy3Options = function(grade) {
-            updateHeroSelect('editEnemy3', grade);
-        };
-
-        window.updateGuide = async function(event) {
-            event.preventDefault();
-
-            const guideId = document.getElementById('editGuideId').value;
-            const name = document.getElementById('editGuideName').value.trim();
-            const enemy1 = document.getElementById('editEnemy1').value;
-            const enemy2 = document.getElementById('editEnemy2').value;
-            const enemy3 = document.getElementById('editEnemy3').value;
-            const description = document.getElementById('editGuideDescription').value.trim();
-
-            if (!name || !enemy1 || !enemy2 || !enemy3) {
-                alert('모든 필드를 입력해주세요.');
-                return;
-            }
-
-            try {
-                await updateDoc(doc(db, 'guides', guideId), {
-                    name: name,
-                    defenseHeroes: [enemy1, enemy2, enemy3],
-                    description: description
-                });
-
-                alert('공략이 수정되었습니다!');
-                closeEditGuideModal();
-                await loadData();
-            } catch (error) {
-                console.error('수정 오류:', error);
-                alert('수정에 실패했습니다: ' + error.message);
-            }
-        };
-
-        // 삭제
-        window.deleteGuide = async function(guideId) {
-            if (!confirm('이 공략을 삭제하시겠습니까?')) return;
-
-            try {
-                await deleteDoc(doc(db, 'guides', guideId));
-                alert('공략이 삭제되었습니다.');
-                await loadData();
-            } catch (error) {
-                console.error('삭제 오류:', error);
-                alert('삭제에 실패했습니다.');
-            }
-        };
-
-        // 전략 수정
-        window.editStrategy = function(guideId, strategyIdx) {
-            const guide = guides.find(g => g.id === guideId);
-            if (!guide || !guide.strategies || !guide.strategies[strategyIdx]) return;
-
-            const strategy = guide.strategies[strategyIdx];
-            
-            // 모달 열기
-            currentGuideId = guideId;
-            document.getElementById('strategyModal').classList.add('active');
-            
-            // 폼 초기화
-            document.getElementById('strategyForm').reset();
-            
-            // 전략 이름
-            document.getElementById('strategyName').value = strategy.name;
-            
-            // 영웅 선택
-            strategy.heroes.forEach((hero, idx) => {
-                const gradeSelect = document.querySelectorAll('#strategyModal .hero-select-group')[idx].querySelector('select');
-                const heroSelect = document.getElementById(`attack${idx + 1}`);
-                
-                let heroGrade = '';
-                Object.keys(heroData).forEach(grade => {
-                    if (heroData[grade].includes(hero.name)) {
-                        heroGrade = grade;
-                    }
-                });
-                
-                gradeSelect.value = heroGrade;
-                
-                if (idx === 0) updateAttack1Options(heroGrade);
-                else if (idx === 1) updateAttack2Options(heroGrade);
-                else if (idx === 2) updateAttack3Options(heroGrade);
-                
-                setTimeout(() => {
-                    heroSelect.value = hero.name;
-                    updateStrategyEquipment();
-                    
-                    // 장비 설정
-                    setTimeout(() => {
-                        if (document.getElementById(`strategyHero${idx + 1}Set`)) {
-                            document.getElementById(`strategyHero${idx + 1}Set`).value = hero.equipment.set;
-                            document.getElementById(`strategyHero${idx + 1}Weapon1`).value = hero.equipment.weapon1;
-                            document.getElementById(`strategyHero${idx + 1}Weapon2`).value = hero.equipment.weapon2;
-                            document.getElementById(`strategyHero${idx + 1}Armor1`).value = hero.equipment.armor1;
-                            document.getElementById(`strategyHero${idx + 1}Armor2`).value = hero.equipment.armor2;
-                        }
-                    }, 200);
-                }, 100);
-            });
-            
-            // 스킬 순서
-            setTimeout(() => {
-                if (strategy.skillOrder && strategy.skillOrder.length > 0) {
-                    document.getElementById('strategySkillOrder1').value = strategy.skillOrder[0] || '';
-                    document.getElementById('strategySkillOrder2').value = strategy.skillOrder[1] || '';
-                    document.getElementById('strategySkillOrder3').value = strategy.skillOrder[2] || '';
-                }
-            }, 300);
-            
-            // 운용 팁
-            document.getElementById('strategyTip').value = strategy.tip || '';
-            
-            // 수정 모드 표시
-            document.querySelector('#strategyModal h2').textContent = '✏️ 공격 전략 수정';
-            document.querySelector('#strategyForm button[type="submit"]').textContent = '수정 완료';
-            document.querySelector('#strategyForm button[type="submit"]').style.background = 'linear-gradient(135deg, #ffd93d, #ffb627)';
-            
-            // 수정 인덱스 저장
-            window.editingStrategyIndex = strategyIdx;
-        };
-
-        window.deleteStrategy = async function(guideId, strategyIdx) {
-            if (!confirm('이 전략을 삭제하시겠습니까?')) return;
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                const strategies = guide.strategies || [];
-                strategies.splice(strategyIdx, 1);
-
-                await updateDoc(doc(db, 'guides', guideId), { strategies: strategies });
-                alert('전략이 삭제되었습니다.');
-                await loadData();
-            } catch (error) {
-                console.error('삭제 오류:', error);
-                alert('삭제에 실패했습니다.');
-            }
-        };
-
-        // 공략 댓글 삭제
-        window.deleteGuideComment = async function(guideId, commentIdx) {
-            if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                const comments = guide.comments || [];
-                comments.splice(commentIdx, 1);
-
-                await updateDoc(doc(db, 'guides', guideId), { comments: comments });
-                await loadData();
-            } catch (error) {
-                console.error('댓글 삭제 오류:', error);
-                alert('댓글 삭제에 실패했습니다.');
-            }
-        };
-
-        // 전략 댓글 삭제
-        window.deleteStrategyComment = async function(guideId, strategyIdx, commentIdx) {
-            if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
-
-            try {
-                const guide = guides.find(g => g.id === guideId);
-                const strategies = guide.strategies || [];
-                const comments = strategies[strategyIdx].comments || [];
-                comments.splice(commentIdx, 1);
-                strategies[strategyIdx].comments = comments;
-
-                await updateDoc(doc(db, 'guides', guideId), { strategies: strategies });
-                await loadData();
-            } catch (error) {
-                console.error('댓글 삭제 오류:', error);
-                alert('댓글 삭제에 실패했습니다.');
-            }
-        };
-
-        // 검색
-        window.searchGuides = function() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            if (!searchTerm) {
-                renderGuides();
-                return;
-            }
-
-            const filtered = guides.filter(guide => {
-                const nameMatch = guide.name.toLowerCase().includes(searchTerm);
-                const enemyMatch = guide.defenseHeroes.some(h => h.toLowerCase().includes(searchTerm));
-                const strategyMatch = (guide.strategies || []).some(s => 
-                    s.heroes.some(h => h.name.toLowerCase().includes(searchTerm))
-                );
-                return nameMatch || enemyMatch || strategyMatch;
-            });
-
-            const container = document.getElementById('guideList');
-            if (filtered.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px; background: white; border-radius: 15px;">검색 결과가 없습니다.</p>';
-            } else {
-                // 원본 데이터는 유지하고, 필터링된 데이터만 임시로 렌더링
-                const originalGuides = guides;
-                guides = filtered;
-                renderGuides();
-                guides = originalGuides;
-            }
-        };
-
-        // 탭 전환
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(tab + '-tab').classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
             event.target.classList.add('active');
+        };
+
+        window.updateDefenseHero = function(num, grade) {
+            const select = document.getElementById(`defenseHero${num}`);
+            select.disabled = false;
+            select.innerHTML = '<option value="">영웅 선택</option>';
+            if (heroData[grade]) {
+                heroData[grade].forEach(hero => {
+                    const option = document.createElement('option');
+                    option.value = hero;
+                    option.textContent = hero;
+                    select.appendChild(option);
+                });
+            }
+        };
+
+        window.updateAttackHero = function(num, grade) {
+            const select = document.getElementById(`attackHero${num}`);
+            select.disabled = false;
+            select.innerHTML = '<option value="">영웅 선택</option>';
+            if (heroData[grade]) {
+                heroData[grade].forEach(hero => {
+                    const option = document.createElement('option');
+                    option.value = hero;
+                    option.textContent = hero;
+                    select.appendChild(option);
+                });
+            }
+        };
+
+        window.handleImageUpload = function(heroNum, files) {
+            const container = document.getElementById(`hero${heroNum}Images`);
+            const imageArray = heroNum === 1 ? hero1Images : heroNum === 2 ? hero2Images : hero3Images;
+            
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    imageArray.push(file);
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        renderImages(heroNum);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        };
+
+        function renderImages(heroNum) {
+            const container = document.getElementById(`hero${heroNum}Images`);
+            const imageArray = heroNum === 1 ? hero1Images : heroNum === 2 ? hero2Images : hero3Images;
+            
+            container.innerHTML = '';
+            
+            if (imageArray.length === 0) {
+                container.innerHTML = `
+                    <div class="image-preview-item">사진을 선택하세요</div>
+                    ${heroNum === 1 ? '<div class="image-preview-item">사진을 선택하세요</div>' : ''}
+                `;
+                return;
+            }
+            
+            imageArray.forEach((file, idx) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="미리보기">
+                        <button type="button" class="image-remove-btn" onclick="removeImage(${heroNum}, ${idx})">×</button>
+                    `;
+                    container.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.removeImage = function(heroNum, index) {
+            const imageArray = heroNum === 1 ? hero1Images : heroNum === 2 ? hero2Images : hero3Images;
+            imageArray.splice(index, 1);
+            renderImages(heroNum);
+        };
+
+        window.saveStrategy = async function(e) {
+            e.preventDefault();
+            
+            if (!document.getElementById('defenseHero1').value || 
+                !document.getElementById('defenseHero2').value || 
+                !document.getElementById('defenseHero3').value ||
+                !document.getElementById('attackHero1').value ||
+                !document.getElementById('attackHero2').value ||
+                !document.getElementById('attackHero3').value) {
+                alert('모든 영웅을 선택해주세요.');
+                return;
+            }
+            
+            try {
+                const uploadImages = async (images) => {
+                    const urls = [];
+                    for (const file of images) {
+                        const storageRef = ref(storage, `strategies/${Date.now()}_${Math.random()}.jpg`);
+                        await uploadBytes(storageRef, file);
+                        const url = await getDownloadURL(storageRef);
+                        urls.push(url);
+                    }
+                    return urls;
+                };
+
+                const hero1ImageUrls = await uploadImages(hero1Images);
+                const hero2ImageUrls = await uploadImages(hero2Images);
+                const hero3ImageUrls = await uploadImages(hero3Images);
+
+                const strategyData = {
+                    name: document.getElementById('strategyName').value,
+                    defenseTeam: {
+                        hero1: document.getElementById('defenseHero1').value,
+                        hero2: document.getElementById('defenseHero2').value,
+                        hero3: document.getElementById('defenseHero3').value
+                    },
+                    attackTeam: {
+                        hero1: {
+                            name: document.getElementById('attackHero1').value,
+                            set: document.getElementById('hero1Set').value,
+                            weapon1: document.getElementById('hero1Weapon1').value,
+                            weapon2: document.getElementById('hero1Weapon2').value,
+                            armor1: document.getElementById('hero1Armor1').value,
+                            armor2: document.getElementById('hero1Armor2').value,
+                            description: document.getElementById('hero1Desc').value,
+                            images: hero1ImageUrls
+                        },
+                        hero2: {
+                            name: document.getElementById('attackHero2').value,
+                            set: document.getElementById('hero2Set').value,
+                            weapon1: document.getElementById('hero2Weapon1').value,
+                            weapon2: document.getElementById('hero2Weapon2').value,
+                            armor1: document.getElementById('hero2Armor1').value,
+                            armor2: document.getElementById('hero2Armor2').value,
+                            description: document.getElementById('hero2Desc').value,
+                            images: hero2ImageUrls
+                        },
+                        hero3: {
+                            name: document.getElementById('attackHero3').value,
+                            set: document.getElementById('hero3Set').value,
+                            weapon1: document.getElementById('hero3Weapon1').value,
+                            weapon2: document.getElementById('hero3Weapon2').value,
+                            armor1: document.getElementById('hero3Armor1').value,
+                            armor2: document.getElementById('hero3Armor2').value,
+                            description: document.getElementById('hero3Desc').value,
+                            images: hero3ImageUrls
+                        }
+                    },
+                    skills: {
+                        skill1: document.getElementById('skill1').value,
+                        skill2: document.getElementById('skill2').value,
+                        skill3: document.getElementById('skill3').value
+                    },
+                    operationTip: document.getElementById('operationTip').value,
+                    author: currentUser.nickname,
+                    authorUid: currentUser.uid,
+                    createdAt: new Date().toISOString()
+                };
+
+                await addDoc(collection(db, 'attack_strategies'), strategyData);
+                
+                alert('공략이 등록되었습니다!');
+                document.getElementById('strategyForm').reset();
+                hero1Images.length = 0;
+                hero2Images.length = 0;
+                hero3Images.length = 0;
+                renderImages(1);
+                renderImages(2);
+                renderImages(3);
+                
+                loadStrategies();
+                switchTab('list');
+            } catch (error) {
+                console.error('공략 저장 오류:', error);
+                alert('공략 저장 중 오류가 발생했습니다: ' + error.message);
+            }
+        };
+
+        async function loadStrategies() {
+            try {
+                const snapshot = await getDocs(query(collection(db, 'attack_strategies'), orderBy('createdAt', 'desc')));
+                strategies = [];
+                snapshot.forEach(doc => {
+                    strategies.push({ id: doc.id, ...doc.data() });
+                });
+
+                document.getElementById('strategyCount').textContent = strategies.length;
+                renderStrategies();
+            } catch (error) {
+                console.error('공략 로드 오류:', error);
+            }
+        }
+
+        function renderStrategies() {
+            const container = document.getElementById('strategyList');
+            
+            if (strategies.length === 0) {
+                container.innerHTML = '<div class="strategy-card"><p style="text-align: center; color: #999;">등록된 공략이 없습니다.</p></div>';
+                return;
+            }
+
+            container.innerHTML = strategies.map(strategy => `
+                <div class="strategy-card">
+                    <div class="strategy-header">
+                        <div>
+                            <div class="strategy-title">${strategy.name}</div>
+                            <p style="color: #999; font-size: 0.9em; margin-top: 5px;">작성자: ${strategy.author} | ${new Date(strategy.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        ${currentUser.uid === strategy.authorUid || currentUser.role === 'admin' ? `
+                            <div class="strategy-actions">
+                                <button class="btn-delete" onclick="deleteStrategy('${strategy.id}')">삭제</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>🛡️ 방어팀:</strong>
+                        <div class="hero-info">
+                            <span class="hero-badge">${strategy.defenseTeam.hero1}</span>
+                            <span class="hero-badge">${strategy.defenseTeam.hero2}</span>
+                            <span class="hero-badge">${strategy.defenseTeam.hero3}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>⚔️ 공격팀:</strong>
+                        <div class="hero-info">
+                            <span class="hero-badge">${strategy.attackTeam.hero1.name}</span>
+                            <span class="hero-badge">${strategy.attackTeam.hero2.name}</span>
+                            <span class="hero-badge">${strategy.attackTeam.hero3.name}</span>
+                        </div>
+                    </div>
+                    
+                    ${strategy.attackTeam.hero1.images?.length ? `
+                        <div style="margin-bottom: 15px;">
+                            <strong>📸 영웅1 장비:</strong>
+                            <div class="hero-images">
+                                ${strategy.attackTeam.hero1.images.map(img => `<img src="${img}" alt="장비">`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${strategy.operationTip ? `<p style="color: #666; margin-top: 15px;">💡 ${strategy.operationTip}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        window.deleteStrategy = async function(id) {
+            if (!confirm('이 공략을 삭제하시겠습니까?')) return;
+            
+            try {
+                await deleteDoc(doc(db, 'attack_strategies', id));
+                alert('공략이 삭제되었습니다.');
+                loadStrategies();
+            } catch (error) {
+                console.error('삭제 오류:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        };
+
+        window.searchStrategies = function() {
+            loadStrategies();
         };
     </script>
 </body>
