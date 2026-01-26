@@ -1120,50 +1120,121 @@
                 return;
             }
 
-            container.innerHTML = strategies.map(strategy => `
+            container.innerHTML = strategies.map(strategy => {
+                let html = `
                 <div class="strategy-card">
                     <div class="strategy-header">
                         <div>
                             <div class="strategy-title">${strategy.name}</div>
                             <p style="color: #999; font-size: 0.9em; margin-top: 5px;">작성자: ${strategy.author} | ${new Date(strategy.createdAt).toLocaleDateString()}</p>
                         </div>
-                        ${currentUser.uid === strategy.authorUid || currentUser.role === 'admin' ? `
+                        ${currentUser && (currentUser.uid === strategy.authorUid || currentUser.role === 'admin') ? `
                             <div class="strategy-actions">
                                 <button class="btn-delete" onclick="deleteStrategy('${strategy.id}')">삭제</button>
                             </div>
                         ` : ''}
                     </div>
                     
-                    <div style="margin-bottom: 15px;">
-                        <strong>🛡️ 방어팀:</strong>
-                        <div class="hero-info">
+                    <div style="background: rgba(255,182,193,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <strong style="color: #6B4966;">🛡️ 상대 방어팀</strong>
+                        <div class="hero-info" style="margin-top: 10px;">
                             <span class="hero-badge">${strategy.defenseTeam.hero1}</span>
                             <span class="hero-badge">${strategy.defenseTeam.hero2}</span>
                             <span class="hero-badge">${strategy.defenseTeam.hero3}</span>
                         </div>
                     </div>
                     
-                    <div style="margin-bottom: 15px;">
-                        <strong>⚔️ 공격팀:</strong>
-                        <div class="hero-info">
+                    <div style="background: rgba(152,216,200,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <strong style="color: #6B4966;">⚔️ 공격팀</strong>
+                        <div class="hero-info" style="margin-top: 10px;">
                             <span class="hero-badge">${strategy.attackTeam.hero1.name}</span>
                             <span class="hero-badge">${strategy.attackTeam.hero2.name}</span>
                             <span class="hero-badge">${strategy.attackTeam.hero3.name}</span>
                         </div>
-                    </div>
-                    
-                    ${strategy.attackTeam.hero1.images?.length ? `
-                        <div style="margin-bottom: 15px;">
-                            <strong>📸 영웅1 장비:</strong>
-                            <div class="hero-images">
+                    </div>`;
+                
+                // 영웅1 정보
+                if (strategy.attackTeam.hero1) {
+                    html += `
+                    <div style="border-left: 4px solid #FFB6C1; padding-left: 15px; margin-bottom: 20px;">
+                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${strategy.attackTeam.hero1.name} 장비</h4>
+                        ${strategy.attackTeam.hero1.images && strategy.attackTeam.hero1.images.length > 0 ? `
+                            <div class="hero-images" style="margin-bottom: 10px;">
                                 ${strategy.attackTeam.hero1.images.map(img => `<img src="${img}" alt="장비">`).join('')}
                             </div>
+                        ` : ''}
+                        <p style="font-size: 0.9em; color: #666;">
+                            <strong>세트:</strong> ${strategy.attackTeam.hero1.set || '미설정'} | 
+                            <strong>무기:</strong> ${strategy.attackTeam.hero1.weapon1 || '미설정'}, ${strategy.attackTeam.hero1.weapon2 || '미설정'} | 
+                            <strong>방어구:</strong> ${strategy.attackTeam.hero1.armor1 || '미설정'}, ${strategy.attackTeam.hero1.armor2 || '미설정'}
+                        </p>
+                        ${strategy.attackTeam.hero1.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${strategy.attackTeam.hero1.description}</p>` : ''}
+                    </div>`;
+                }
+                
+                // 영웅2 정보
+                if (strategy.attackTeam.hero2) {
+                    html += `
+                    <div style="border-left: 4px solid #98D8C8; padding-left: 15px; margin-bottom: 20px;">
+                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${strategy.attackTeam.hero2.name} 장비</h4>
+                        ${strategy.attackTeam.hero2.images && strategy.attackTeam.hero2.images.length > 0 ? `
+                            <div class="hero-images" style="margin-bottom: 10px;">
+                                ${strategy.attackTeam.hero2.images.map(img => `<img src="${img}" alt="장비">`).join('')}
+                            </div>
+                        ` : ''}
+                        <p style="font-size: 0.9em; color: #666;">
+                            <strong>세트:</strong> ${strategy.attackTeam.hero2.set || '미설정'} | 
+                            <strong>무기:</strong> ${strategy.attackTeam.hero2.weapon1 || '미설정'}, ${strategy.attackTeam.hero2.weapon2 || '미설정'} | 
+                            <strong>방어구:</strong> ${strategy.attackTeam.hero2.armor1 || '미설정'}, ${strategy.attackTeam.hero2.armor2 || '미설정'}
+                        </p>
+                        ${strategy.attackTeam.hero2.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${strategy.attackTeam.hero2.description}</p>` : ''}
+                    </div>`;
+                }
+                
+                // 영웅3 정보
+                if (strategy.attackTeam.hero3) {
+                    html += `
+                    <div style="border-left: 4px solid #B08AB0; padding-left: 15px; margin-bottom: 20px;">
+                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${strategy.attackTeam.hero3.name} 장비</h4>
+                        ${strategy.attackTeam.hero3.images && strategy.attackTeam.hero3.images.length > 0 ? `
+                            <div class="hero-images" style="margin-bottom: 10px;">
+                                ${strategy.attackTeam.hero3.images.map(img => `<img src="${img}" alt="장비">`).join('')}
+                            </div>
+                        ` : ''}
+                        <p style="font-size: 0.9em; color: #666;">
+                            <strong>세트:</strong> ${strategy.attackTeam.hero3.set || '미설정'} | 
+                            <strong>무기:</strong> ${strategy.attackTeam.hero3.weapon1 || '미설정'}, ${strategy.attackTeam.hero3.weapon2 || '미설정'} | 
+                            <strong>방어구:</strong> ${strategy.attackTeam.hero3.armor1 || '미설정'}, ${strategy.attackTeam.hero3.armor2 || '미설정'}
+                        </p>
+                        ${strategy.attackTeam.hero3.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${strategy.attackTeam.hero3.description}</p>` : ''}
+                    </div>`;
+                }
+                
+                // 스킬 순서
+                if (strategy.skills && (strategy.skills.skill1 || strategy.skills.skill2 || strategy.skills.skill3)) {
+                    html += `
+                    <div style="background: rgba(255,253,208,0.5); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <strong style="color: #6B4966;">⭐ 스킬 사용 순서</strong>
+                        <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            ${strategy.skills.skill1 ? `<span class="hero-badge" style="background: #ffd93d;">1순위: ${strategy.skills.skill1}</span>` : ''}
+                            ${strategy.skills.skill2 ? `<span class="hero-badge" style="background: #ffd93d;">2순위: ${strategy.skills.skill2}</span>` : ''}
+                            ${strategy.skills.skill3 ? `<span class="hero-badge" style="background: #ffd93d;">3순위: ${strategy.skills.skill3}</span>` : ''}
                         </div>
-                    ` : ''}
-                    
-                    ${strategy.operationTip ? `<p style="color: #666; margin-top: 15px;">💡 ${strategy.operationTip}</p>` : ''}
-                </div>
-            `).join('');
+                    </div>`;
+                }
+                
+                // 운용 팁
+                if (strategy.operationTip) {
+                    html += `
+                    <div style="background: rgba(152,216,200,0.1); padding: 15px; border-radius: 10px;">
+                        <strong style="color: #6B4966;">💡 운용 팁</strong>
+                        <p style="color: #666; margin-top: 10px; white-space: pre-wrap;">${strategy.operationTip}</p>
+                    </div>`;
+                }
+                
+                html += `</div>`;
+                return html;
+            }).join('');
         }
 
         window.deleteStrategy = async function(id) {
