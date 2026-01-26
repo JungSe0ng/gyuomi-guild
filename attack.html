@@ -725,7 +725,7 @@
             apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
             authDomain: "gyuomi-guild.firebaseapp.com",
             projectId: "gyuomi-guild",
-            storageBucket: "gyuomi-guild.appspot.com",
+            storageBucket: "gyuomi-guild.firebasestorage.app",
             messagingSenderId: "43293575259",
             appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
         };
@@ -950,27 +950,47 @@
             try {
                 console.log('공략 저장 시작...');
                 
-                // 이미지 업로드
+                // 이미지 업로드 (실패해도 계속 진행)
                 const uploadImages = async (images) => {
                     const urls = [];
+                    if (!images || images.length === 0) {
+                        console.log('업로드할 이미지 없음');
+                        return urls;
+                    }
+                    
                     for (const file of images) {
                         try {
-                            const storageRef = ref(storage, `strategies/${Date.now()}_${Math.random()}.jpg`);
+                            const timestamp = Date.now();
+                            const randomStr = Math.random().toString(36).substring(7);
+                            const fileName = `${timestamp}_${randomStr}.jpg`;
+                            const storageRef = ref(storage, `strategies/${fileName}`);
+                            
+                            console.log('이미지 업로드 시도:', fileName);
                             await uploadBytes(storageRef, file);
                             const url = await getDownloadURL(storageRef);
                             urls.push(url);
+                            console.log('이미지 업로드 성공:', url);
                         } catch (error) {
-                            console.error('이미지 업로드 오류:', error);
+                            console.warn('이미지 업로드 실패 (무시하고 계속):', error.message);
+                            // 이미지 업로드 실패해도 계속 진행
                         }
                     }
                     return urls;
                 };
 
                 console.log('이미지 업로드 중...');
-                const hero1ImageUrls = await uploadImages(hero1Images);
-                const hero2ImageUrls = await uploadImages(hero2Images);
-                const hero3ImageUrls = await uploadImages(hero3Images);
-                console.log('이미지 업로드 완료');
+                let hero1ImageUrls = [];
+                let hero2ImageUrls = [];
+                let hero3ImageUrls = [];
+                
+                try {
+                    hero1ImageUrls = await uploadImages(hero1Images);
+                    hero2ImageUrls = await uploadImages(hero2Images);
+                    hero3ImageUrls = await uploadImages(hero3Images);
+                    console.log('이미지 업로드 완료 (일부 실패 가능)');
+                } catch (error) {
+                    console.warn('이미지 업로드 중 오류 (무시하고 계속):', error);
+                }
 
                 const strategyData = {
                     name: document.getElementById('strategyName').value.trim(),
