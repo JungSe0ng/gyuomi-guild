@@ -47,6 +47,20 @@
         .form-group input, .form-group select, .form-group textarea {
             width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px;
             font-size: 1em; transition: all 0.3s; font-family: inherit;
+            background: white;
+        }
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+        .form-group select:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            color: #999;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none; border-color: #98D8C8; box-shadow: 0 0 0 3px rgba(152,216,200,0.1);
@@ -63,6 +77,19 @@
         .equipment-item { background: #f8f8f8; padding: 15px; border-radius: 10px; border: 2px solid #e0e0e0; }
         .equipment-item-title { font-weight: 600; color: #666; margin-bottom: 12px; font-size: 0.95em; }
         .equipment-options { display: flex; flex-direction: column; gap: 10px; }
+        .equipment-options select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+        .equipment-options select:focus {
+            outline: none;
+            border-color: #98D8C8;
+        }
         .hero-equipment-layout { display: grid; grid-template-columns: 300px 1fr; gap: 25px; margin-bottom: 25px; }
         .image-preview-container { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .image-preview-item {
@@ -88,6 +115,19 @@
         .skill-order-section { background: rgba(255,253,208,0.7); padding: 20px; border-radius: 12px; margin-top: 25px; border: 2px solid #ffd93d; }
         .skill-order-section h4 { margin: 0 0 10px 0; color: #666; font-size: 1.1em; }
         .skill-order-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .skill-order-grid select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .skill-order-grid select:focus {
+            outline: none;
+            border-color: #ffd93d;
+        }
         .btn {
             width: 100%; padding: 18px; background: linear-gradient(135deg, #98D8C8, #6FC3A8);
             color: white; border: none; border-radius: 12px; font-size: 1.2em;
@@ -241,7 +281,7 @@
 
                         <!-- 영웅 1 장비 -->
                         <div class="equipment-title">
-                            <span>🎯 영웅1 장비 세팅</span>
+                            <span id="hero1Title">🎯 영웅1 장비 세팅</span>
                             <div class="upload-btn-inline">
                                 <div class="upload-btn"><span>📁</span><span>사진등록</span></div>
                                 <input type="file" accept="image/*" multiple onchange="handleImageUpload(1, this.files)">
@@ -277,7 +317,7 @@
                                         <div class="equipment-options">
                                             <div>
                                                 <label style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">무기1 옵션</label>
-                                                <select id="hero1Weapon1">
+                                                <select id="hero1Weapon1" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer;">
                                                     <option value="모두">모두</option>
                                                     <option value="약점 공격 확률">약점 공격 확률</option>
                                                     <option value="치명타 확률">치명타 확률</option>
@@ -354,7 +394,7 @@
 
                         <!-- 영웅 2 장비 (동일 구조) -->
                         <div class="equipment-title">
-                            <span>🎯 영웅2 장비 세팅</span>
+                            <span id="hero2Title">🎯 영웅2 장비 세팅</span>
                             <div class="upload-btn-inline">
                                 <div class="upload-btn"><span>📁</span><span>사진등록</span></div>
                                 <input type="file" accept="image/*" multiple onchange="handleImageUpload(2, this.files)">
@@ -466,7 +506,7 @@
 
                         <!-- 영웅 3 장비 (동일 구조) -->
                         <div class="equipment-title">
-                            <span>🎯 영웅3 장비 세팅</span>
+                            <span id="hero3Title">🎯 영웅3 장비 세팅</span>
                             <div class="upload-btn-inline">
                                 <div class="upload-btn"><span>📁</span><span>사진등록</span></div>
                                 <input type="file" accept="image/*" multiple onchange="handleImageUpload(3, this.files)">
@@ -577,12 +617,57 @@
                         </div>
 
                         <div class="skill-order-section">
-                            <h4>⭐ 스킬 사용 순서</h4>
-                            <p>각 영웅의 스킬을 사용할 순서를 입력하세요</p>
+                            <h4>😊 스킬 사용 순서</h4>
+                            <p>각 영웅의 스킬 사용 순서를 선택하세요</p>
+                            
+                            <!-- 스킬 표시 영역 -->
+                            <div id="skillDisplay" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                                <div style="text-align: center;">
+                                    <div style="padding: 10px; background: rgba(255,182,193,0.3); border-radius: 8px; margin-bottom: 5px; color: #666; font-size: 0.9em;">
+                                        <span id="hero1NameSkill">영웅1</span> 스킬2
+                                    </div>
+                                    <div style="padding: 10px; background: rgba(255,182,193,0.5); border-radius: 8px; color: #333; font-weight: 600; font-size: 0.9em;">
+                                        <span id="hero1NameSkill2">영웅1</span> 스킬1
+                                    </div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="padding: 10px; background: rgba(152,216,200,0.3); border-radius: 8px; margin-bottom: 5px; color: #666; font-size: 0.9em;">
+                                        <span id="hero2NameSkill">영웅2</span> 스킬2
+                                    </div>
+                                    <div style="padding: 10px; background: rgba(152,216,200,0.5); border-radius: 8px; color: #333; font-weight: 600; font-size: 0.9em;">
+                                        <span id="hero2NameSkill2">영웅2</span> 스킬1
+                                    </div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="padding: 10px; background: rgba(176,138,176,0.3); border-radius: 8px; margin-bottom: 5px; color: #666; font-size: 0.9em;">
+                                        <span id="hero3NameSkill">영웅3</span> 스킬2
+                                    </div>
+                                    <div style="padding: 10px; background: rgba(176,138,176,0.5); border-radius: 8px; color: #333; font-weight: 600; font-size: 0.9em;">
+                                        <span id="hero3NameSkill2">영웅3</span> 스킬1
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <p style="font-weight: 600; margin-bottom: 10px;">스킬 순서 (3개 선택)</p>
                             <div class="skill-order-grid">
-                                <input type="text" id="skill1" placeholder="1순위 스킬">
-                                <input type="text" id="skill2" placeholder="2순위 스킬">
-                                <input type="text" id="skill3" placeholder="3순위 스킬">
+                                <div>
+                                    <label style="font-size: 0.9em; color: #666; margin-bottom: 5px; display: block;">1순위</label>
+                                    <select id="skill1">
+                                        <option value="">선택</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.9em; color: #666; margin-bottom: 5px; display: block;">2순위</label>
+                                    <select id="skill2">
+                                        <option value="">선택</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.9em; color: #666; margin-bottom: 5px; display: block;">3순위</label>
+                                    <select id="skill3">
+                                        <option value="">선택</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -707,7 +792,62 @@
                     select.appendChild(option);
                 });
             }
+            
+            // 영웅 선택시 제목 업데이트
+            select.addEventListener('change', function() {
+                updateHeroTitle(num, this.value);
+                updateSkillOptions();
+            });
         };
+
+        function updateHeroTitle(heroNum, heroName) {
+            const titleElement = document.getElementById(`hero${heroNum}Title`);
+            if (titleElement && heroName) {
+                titleElement.textContent = `🎯 영웅${heroNum} - ${heroName} 장비 세팅`;
+            }
+            
+            // 스킬 표시 영역도 업데이트
+            const skillSpan1 = document.getElementById(`hero${heroNum}NameSkill`);
+            const skillSpan2 = document.getElementById(`hero${heroNum}NameSkill2`);
+            if (skillSpan1 && heroName) skillSpan1.textContent = heroName;
+            if (skillSpan2 && heroName) skillSpan2.textContent = heroName;
+        }
+
+        function updateSkillOptions() {
+            const hero1 = document.getElementById('attackHero1').value;
+            const hero2 = document.getElementById('attackHero2').value;
+            const hero3 = document.getElementById('attackHero3').value;
+            
+            const skillOptions = [];
+            if (hero1) {
+                skillOptions.push(`${hero1} 스킬1`);
+                skillOptions.push(`${hero1} 스킬2`);
+            }
+            if (hero2) {
+                skillOptions.push(`${hero2} 스킬1`);
+                skillOptions.push(`${hero2} 스킬2`);
+            }
+            if (hero3) {
+                skillOptions.push(`${hero3} 스킬1`);
+                skillOptions.push(`${hero3} 스킬2`);
+            }
+            
+            // 모든 스킬 드롭다운 업데이트
+            ['skill1', 'skill2', 'skill3'].forEach(id => {
+                const select = document.getElementById(id);
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">선택</option>';
+                skillOptions.forEach(skill => {
+                    const option = document.createElement('option');
+                    option.value = skill;
+                    option.textContent = skill;
+                    select.appendChild(option);
+                });
+                if (currentValue && skillOptions.includes(currentValue)) {
+                    select.value = currentValue;
+                }
+            });
+        }
 
         window.handleImageUpload = function(heroNum, files) {
             const container = document.getElementById(`hero${heroNum}Images`);
@@ -763,34 +903,53 @@
         window.saveStrategy = async function(e) {
             e.preventDefault();
             
+            // 필수 필드 검증
+            if (!document.getElementById('strategyName').value.trim()) {
+                alert('공략 이름을 입력해주세요.');
+                return;
+            }
+            
             if (!document.getElementById('defenseHero1').value || 
                 !document.getElementById('defenseHero2').value || 
-                !document.getElementById('defenseHero3').value ||
-                !document.getElementById('attackHero1').value ||
+                !document.getElementById('defenseHero3').value) {
+                alert('상대 방어팀 영웅 3명을 모두 선택해주세요.');
+                return;
+            }
+            
+            if (!document.getElementById('attackHero1').value ||
                 !document.getElementById('attackHero2').value ||
                 !document.getElementById('attackHero3').value) {
-                alert('모든 영웅을 선택해주세요.');
+                alert('공격팀 영웅 3명을 모두 선택해주세요.');
                 return;
             }
             
             try {
+                console.log('공략 저장 시작...');
+                
+                // 이미지 업로드
                 const uploadImages = async (images) => {
                     const urls = [];
                     for (const file of images) {
-                        const storageRef = ref(storage, `strategies/${Date.now()}_${Math.random()}.jpg`);
-                        await uploadBytes(storageRef, file);
-                        const url = await getDownloadURL(storageRef);
-                        urls.push(url);
+                        try {
+                            const storageRef = ref(storage, `strategies/${Date.now()}_${Math.random()}.jpg`);
+                            await uploadBytes(storageRef, file);
+                            const url = await getDownloadURL(storageRef);
+                            urls.push(url);
+                        } catch (error) {
+                            console.error('이미지 업로드 오류:', error);
+                        }
                     }
                     return urls;
                 };
 
+                console.log('이미지 업로드 중...');
                 const hero1ImageUrls = await uploadImages(hero1Images);
                 const hero2ImageUrls = await uploadImages(hero2Images);
                 const hero3ImageUrls = await uploadImages(hero3Images);
+                console.log('이미지 업로드 완료');
 
                 const strategyData = {
-                    name: document.getElementById('strategyName').value,
+                    name: document.getElementById('strategyName').value.trim(),
                     defenseTeam: {
                         hero1: document.getElementById('defenseHero1').value,
                         hero2: document.getElementById('defenseHero2').value,
@@ -829,9 +988,9 @@
                         }
                     },
                     skills: {
-                        skill1: document.getElementById('skill1').value,
-                        skill2: document.getElementById('skill2').value,
-                        skill3: document.getElementById('skill3').value
+                        skill1: document.getElementById('skill1').value || '',
+                        skill2: document.getElementById('skill2').value || '',
+                        skill3: document.getElementById('skill3').value || ''
                     },
                     operationTip: document.getElementById('operationTip').value,
                     author: currentUser.nickname,
@@ -839,9 +998,13 @@
                     createdAt: new Date().toISOString()
                 };
 
-                await addDoc(collection(db, 'attack_strategies'), strategyData);
+                console.log('Firestore 저장 시작:', strategyData);
+                const docRef = await addDoc(collection(db, 'attack_strategies'), strategyData);
+                console.log('Firestore 저장 완료:', docRef.id);
                 
                 alert('공략이 등록되었습니다!');
+                
+                // 폼 초기화
                 document.getElementById('strategyForm').reset();
                 hero1Images.length = 0;
                 hero2Images.length = 0;
@@ -850,26 +1013,58 @@
                 renderImages(2);
                 renderImages(3);
                 
+                // 스킬 표시 초기화
+                ['hero1NameSkill', 'hero1NameSkill2', 'hero2NameSkill', 'hero2NameSkill2', 'hero3NameSkill', 'hero3NameSkill2'].forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.textContent = id.includes('hero1') ? '영웅1' : id.includes('hero2') ? '영웅2' : '영웅3';
+                });
+                
                 loadStrategies();
                 switchTab('list');
             } catch (error) {
                 console.error('공략 저장 오류:', error);
+                console.error('오류 상세:', error.message);
+                console.error('오류 스택:', error.stack);
                 alert('공략 저장 중 오류가 발생했습니다: ' + error.message);
             }
         };
 
         async function loadStrategies() {
             try {
+                console.log('공략 목록 로드 시작...');
                 const snapshot = await getDocs(query(collection(db, 'attack_strategies'), orderBy('createdAt', 'desc')));
                 strategies = [];
                 snapshot.forEach(doc => {
                     strategies.push({ id: doc.id, ...doc.data() });
                 });
 
+                console.log('로드된 공략 수:', strategies.length);
                 document.getElementById('strategyCount').textContent = strategies.length;
                 renderStrategies();
             } catch (error) {
                 console.error('공략 로드 오류:', error);
+                console.error('오류 상세:', error.message);
+                // 인덱스 오류일 경우 orderBy 없이 재시도
+                if (error.code === 'failed-precondition' || error.message.includes('index')) {
+                    console.log('인덱스 없이 재시도...');
+                    try {
+                        const snapshot = await getDocs(collection(db, 'attack_strategies'));
+                        strategies = [];
+                        snapshot.forEach(doc => {
+                            strategies.push({ id: doc.id, ...doc.data() });
+                        });
+                        // 클라이언트에서 정렬
+                        strategies.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                        console.log('로드된 공략 수:', strategies.length);
+                        document.getElementById('strategyCount').textContent = strategies.length;
+                        renderStrategies();
+                    } catch (retryError) {
+                        console.error('재시도 실패:', retryError);
+                        alert('공략 목록을 불러오는데 실패했습니다.');
+                    }
+                } else {
+                    alert('공략 목록을 불러오는데 실패했습니다.');
+                }
             }
         }
 
