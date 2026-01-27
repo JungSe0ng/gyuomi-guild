@@ -249,10 +249,12 @@
         .comment-delete:hover { text-decoration: underline; }
         
         /* 2열 레이아웃 (사진 있을 때) */
-        .hero-detail-layout { 
-            display: grid; grid-template-columns: 200px 1fr; 
-            gap: 15px; align-items: start; 
-        }
+.hero-detail-layout { 
+    display: grid; 
+    grid-template-columns: 300px 1fr;  /* 200px → 300px */
+    gap: 20px;  /* 15px → 20px (간격도 증가) */
+    align-items: start; 
+}
         .hero-detail-images { 
             display: flex; flex-direction: column; gap: 10px; 
         }
@@ -1278,27 +1280,61 @@
                     </div>`;
                 
                 // 영웅 정보 렌더링 함수
-                const renderHero = (hero, colorCode) => {
+// 영웅 정보 렌더링 함수 (defense.html 스타일)
+                const renderHero = (hero, colorCode, heroName) => {
                     const hasImages = hero.images && hero.images.length > 0;
                     
-                    let heroHtml = `<div style="border-left: 4px solid ${colorCode}; padding-left: 15px; margin-bottom: 20px;">
-                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${hero.name} 장비</h4>`;
+                    let heroHtml = `
+                    <div style="background: rgba(152,216,200,0.05); padding: 25px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid ${colorCode};">
+                        <h3 style="margin: 0 0 20px 0; color: ${colorCode}; font-size: 1.3em;">🎯 ${hero.name}</h3>`;
                     
                     if (hasImages) {
-                        // 2열 레이아웃 (사진 있을 때)
-                        heroHtml += `<div class="hero-detail-layout">
-                            <div class="hero-detail-images">
-                                ${hero.images.map(img => `<img src="${img}" alt="장비" onclick="showImageModal('${img}')">`).join('')}
+                        // 2열 레이아웃 (사진 300px)
+                        heroHtml += `
+                        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start;">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                ${hero.images.map(img => `
+                                    <img src="${img}" 
+                                         alt="장비" 
+                                         onclick="showImageModal('${img}')"
+                                         style="width: 100%; height: auto; border-radius: 10px; border: 2px solid #e0e0e0; cursor: pointer; transition: transform 0.2s;"
+                                         onmouseover="this.style.transform='scale(1.02)'"
+                                         onmouseout="this.style.transform='scale(1)'">
+                                `).join('')}
                             </div>
-                            <div class="hero-detail-info">`;
+                            <div>`;
                     }
                     
-                    // 장비 정보
+                    // 장비 정보 (defense.html 스타일)
                     heroHtml += `
-                        <p style="font-size: 0.9em; color: #666;"><strong>세트:</strong> ${hero.set || '미설정'}</p>
-                        <p style="font-size: 0.9em; color: #666;"><strong>무기:</strong> ${hero.weapon1 || '미설정'}, ${hero.weapon2 || '미설정'}</p>
-                        <p style="font-size: 0.9em; color: #666;"><strong>방어구:</strong> ${hero.armor1 || '미설정'}, ${hero.armor2 || '미설정'}</p>
-                        ${hero.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${hero.description}</p>` : ''}`;
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">📦 세트:</span> 
+                            <span style="color: #333; font-size: 1.05em;">${hero.set || '미설정'}</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">⚔️ 무기1:</span> 
+                            <span style="color: #333; font-size: 1.05em;">${hero.weapon1 || '미설정'}</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">⚔️ 무기2:</span> 
+                            <span style="color: #333; font-size: 1.05em;">${hero.weapon2 || '미설정'}</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">🛡️ 방어구1:</span> 
+                            <span style="color: #333; font-size: 1.05em;">${hero.armor1 || '미설정'}</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-weight: 600; color: #666;">🛡️ 방어구2:</span> 
+                            <span style="color: #333; font-size: 1.05em;">${hero.armor2 || '미설정'}</span>
+                        </div>`;
+                    
+                    if (hero.description) {
+                        heroHtml += `
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(152,216,200,0.1); border-radius: 8px; border-left: 3px solid ${colorCode};">
+                            <span style="font-weight: 600; color: #666;">💬 장비 설명:</span><br>
+                            <span style="color: #555; line-height: 1.6;">${hero.description}</span>
+                        </div>`;
+                    }
                     
                     if (hasImages) {
                         heroHtml += `</div></div>`;
@@ -1307,7 +1343,6 @@
                     heroHtml += `</div>`;
                     return heroHtml;
                 };
-                
                 // 영웅1, 2, 3 정보
                 if (strategy.attackTeam.hero1) {
                     html += renderHero(strategy.attackTeam.hero1, '#FFB6C1');
@@ -1528,7 +1563,7 @@
                 document.getElementById('hero3Armor2').value = strategy.attackTeam.hero3.armor2 || '모두';
                 document.getElementById('hero3Desc').value = strategy.attackTeam.hero3.description || '';
             }, 100);
-            
+
             // 스킬 순서
             updateSkillOptions();
             if (strategy.skills) {
