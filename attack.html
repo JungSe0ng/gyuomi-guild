@@ -1001,6 +1001,11 @@
         window.saveStrategy = async function(e) {
             e.preventDefault();
             
+            const form = e.target;
+            const editId = form.getAttribute('data-edit-id');
+            const existingStrategyJson = form.getAttribute('data-existing-strategy');
+            const isEditMode = !!editId;
+            
             // 필수 필드 검증
             if (!document.getElementById('strategyName').value.trim()) {
                 alert('공략 이름을 입력해주세요.');
@@ -1022,9 +1027,9 @@
             }
             
             try {
-                console.log('공략 저장 시작...');
+                console.log(isEditMode ? '공략 수정 시작...' : '공략 저장 시작...');
                 
-                // 이미지 업로드 (실패해도 계속 진행)
+                // 이미지 업로드 함수
                 const uploadImages = async (images) => {
                     const urls = [];
                     if (!images || images.length === 0) {
@@ -1046,7 +1051,6 @@
                             console.log('이미지 업로드 성공:', url);
                         } catch (error) {
                             console.warn('이미지 업로드 실패 (무시하고 계속):', error.message);
-                            // 이미지 업로드 실패해도 계속 진행
                         }
                     }
                     return urls;
@@ -1057,11 +1061,20 @@
                 let hero2ImageUrls = [];
                 let hero3ImageUrls = [];
                 
+                // 수정 모드일 경우 기존 이미지 사용
+                if (isEditMode && existingStrategyJson) {
+                    const existingStrategy = JSON.parse(existingStrategyJson);
+                    hero1ImageUrls = existingStrategy.attackTeam.hero1.images || [];
+                    hero2ImageUrls = existingStrategy.attackTeam.hero2.images || [];
+                    hero3ImageUrls = existingStrategy.attackTeam.hero3.images || [];
+                }
+                
+                // 새 이미지가 있으면 업로드 (기존 이미지 대체)
                 try {
-                    hero1ImageUrls = await uploadImages(hero1Images);
-                    hero2ImageUrls = await uploadImages(hero2Images);
-                    hero3ImageUrls = await uploadImages(hero3Images);
-                    console.log('이미지 업로드 완료 (일부 실패 가능)');
+                    if (hero1Images.length > 0) hero1ImageUrls = await uploadImages(hero1Images);
+                    if (hero2Images.length > 0) hero2ImageUrls = await uploadImages(hero2Images);
+                    if (hero3Images.length > 0) hero3ImageUrls = await uploadImages(hero3Images);
+                    console.log('이미지 업로드 완료');
                 } catch (error) {
                     console.warn('이미지 업로드 중 오류 (무시하고 계속):', error);
                 }
@@ -1113,17 +1126,37 @@
                     operationTip: document.getElementById('operationTip').value,
                     author: currentUser.nickname,
                     authorUid: currentUser.uid,
-                    createdAt: new Date().toISOString()
+                    createdAt: isEditMode ? (JSON.parse(existingStrategyJson).createdAt || new Date().toISOString()) : new Date().toISOString()
                 };
 
                 console.log('Firestore 저장 시작:', strategyData);
-                const docRef = await addDoc(collection(db, 'attack_strategies'), strategyData);
-                console.log('Firestore 저장 완료:', docRef.id);
                 
-                alert('공략이 등록되었습니다!');
+                if (isEditMode) {
+                    await updateDoc(doc(db, 'attack_strategies', editId), {
+                        ...strategyData,
+                        updatedAt: new Date().toISOString()
+                    });
+                    console.log('Firestore 수정 완료:', editId);
+                    alert('공략이 수정되었습니다!');
+                } else {
+                    const docRef = await addDoc(collection(db, 'attack_strategies'), strategyData);
+                    console.log('Firestore 저장 완료:', docRef.id);
+                    alert('공략이 등록되었습니다!');
+                }
                 
                 // 폼 초기화
                 document.getElementById('strategyForm').reset();
+                form.removeAttribute('data-edit-id');
+                form.removeAttribute('data-existing-strategy');
+                
+                // 취소 버튼 제거
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                if (cancelBtn) cancelBtn.remove();
+                
+                // 버튼 텍스트 원복
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.textContent = '✅ 공략 등록하기';
+                
                 hero1Images.length = 0;
                 hero2Images.length = 0;
                 hero3Images.length = 0;
@@ -1140,7 +1173,7 @@
                 loadStrategies();
                 switchTab('list');
             } catch (error) {
-                console.error('공략 저장 오류:', error);
+                console.error('공략 저장/수정 오류:', error);
                 console.error('오류 상세:', error.message);
                 console.error('오류 스택:', error.stack);
                 alert('공략 저장 중 오류가 발생했습니다: ' + error.message);
@@ -1336,35 +1369,52 @@
             // 폼에 데이터 채우기
             document.getElementById('strategyName').value = strategy.name;
             
-            // 방어팀 설정
-            // (등급 선택은 생략하고 영웅만 설정)
-            document.getElementById('defenseHero1').innerHTML = `<option value="${strategy.defenseTeam.hero1}">${strategy.defenseTeam.hero1}</option>`;
-            document.getElementById('defenseHero1').value = strategy.defenseTeam.hero1;
-            document.getElementById('defenseHero1').disabled = false;
+            // 방어팀 설정 (등급은 유지하고 영웅만 표시)
+            const defenseHeroSelects = [
+                { num: 1, hero: strategy.defenseTeam.hero1 },
+                { num: 2, hero: strategy.defenseTeam.hero2 },
+                { num: 3, hero: strategy.defenseTeam.hero3 }
+            ];
             
-            document.getElementById('defenseHero2').innerHTML = `<option value="${strategy.defenseTeam.hero2}">${strategy.defenseTeam.hero2}</option>`;
-            document.getElementById('defenseHero2').value = strategy.defenseTeam.hero2;
-            document.getElementById('defenseHero2').disabled = false;
+            defenseHeroSelects.forEach(({ num, hero }) => {
+                const select = document.getElementById(`defenseHero${num}`);
+                select.disabled = false;
+                // 모든 등급의 영웅을 추가
+                select.innerHTML = '<option value="">영웅 선택</option>';
+                Object.keys(heroData).forEach(grade => {
+                    heroData[grade].forEach(h => {
+                        const option = document.createElement('option');
+                        option.value = h;
+                        option.textContent = h;
+                        select.appendChild(option);
+                    });
+                });
+                select.value = hero;
+            });
             
-            document.getElementById('defenseHero3').innerHTML = `<option value="${strategy.defenseTeam.hero3}">${strategy.defenseTeam.hero3}</option>`;
-            document.getElementById('defenseHero3').value = strategy.defenseTeam.hero3;
-            document.getElementById('defenseHero3').disabled = false;
+            // 공격팀 설정 (등급은 유지하고 영웅만 표시)
+            const attackHeroData = [
+                { num: 1, hero: strategy.attackTeam.hero1 },
+                { num: 2, hero: strategy.attackTeam.hero2 },
+                { num: 3, hero: strategy.attackTeam.hero3 }
+            ];
             
-            // 공격팀 설정
-            document.getElementById('attackHero1').innerHTML = `<option value="${strategy.attackTeam.hero1.name}">${strategy.attackTeam.hero1.name}</option>`;
-            document.getElementById('attackHero1').value = strategy.attackTeam.hero1.name;
-            document.getElementById('attackHero1').disabled = false;
-            updateHeroTitle(1, strategy.attackTeam.hero1.name);
-            
-            document.getElementById('attackHero2').innerHTML = `<option value="${strategy.attackTeam.hero2.name}">${strategy.attackTeam.hero2.name}</option>`;
-            document.getElementById('attackHero2').value = strategy.attackTeam.hero2.name;
-            document.getElementById('attackHero2').disabled = false;
-            updateHeroTitle(2, strategy.attackTeam.hero2.name);
-            
-            document.getElementById('attackHero3').innerHTML = `<option value="${strategy.attackTeam.hero3.name}">${strategy.attackTeam.hero3.name}</option>`;
-            document.getElementById('attackHero3').value = strategy.attackTeam.hero3.name;
-            document.getElementById('attackHero3').disabled = false;
-            updateHeroTitle(3, strategy.attackTeam.hero3.name);
+            attackHeroData.forEach(({ num, hero }) => {
+                const select = document.getElementById(`attackHero${num}`);
+                select.disabled = false;
+                // 모든 등급의 영웅을 추가
+                select.innerHTML = '<option value="">영웅 선택</option>';
+                Object.keys(heroData).forEach(grade => {
+                    heroData[grade].forEach(h => {
+                        const option = document.createElement('option');
+                        option.value = h;
+                        option.textContent = h;
+                        select.appendChild(option);
+                    });
+                });
+                select.value = hero.name;
+                updateHeroTitle(num, hero.name);
+            });
             
             // 영웅1 장비
             document.getElementById('hero1Set').value = strategy.attackTeam.hero1.set || '모두';
@@ -1390,6 +1440,56 @@
             document.getElementById('hero3Armor2').value = strategy.attackTeam.hero3.armor2 || '모두';
             document.getElementById('hero3Desc').value = strategy.attackTeam.hero3.description || '';
             
+            // 기존 이미지 표시
+            hero1Images.length = 0;
+            hero2Images.length = 0;
+            hero3Images.length = 0;
+            
+            // 영웅1 이미지
+            if (strategy.attackTeam.hero1.images && strategy.attackTeam.hero1.images.length > 0) {
+                const container = document.getElementById('hero1Images');
+                container.innerHTML = '';
+                strategy.attackTeam.hero1.images.forEach((imgUrl, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${imgUrl}" alt="기존 이미지">
+                        <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.8em;">기존</div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+            
+            // 영웅2 이미지
+            if (strategy.attackTeam.hero2.images && strategy.attackTeam.hero2.images.length > 0) {
+                const container = document.getElementById('hero2Images');
+                container.innerHTML = '';
+                strategy.attackTeam.hero2.images.forEach((imgUrl, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${imgUrl}" alt="기존 이미지">
+                        <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.8em;">기존</div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+            
+            // 영웅3 이미지
+            if (strategy.attackTeam.hero3.images && strategy.attackTeam.hero3.images.length > 0) {
+                const container = document.getElementById('hero3Images');
+                container.innerHTML = '';
+                strategy.attackTeam.hero3.images.forEach((imgUrl, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${imgUrl}" alt="기존 이미지">
+                        <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.8em;">기존</div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+            
             // 스킬 순서
             updateSkillOptions();
             if (strategy.skills) {
@@ -1404,6 +1504,7 @@
             // 수정 모드 표시
             const form = document.getElementById('strategyForm');
             form.setAttribute('data-edit-id', id);
+            form.setAttribute('data-existing-strategy', JSON.stringify(strategy));
             
             // 버튼 텍스트 변경
             const submitBtn = form.querySelector('button[type="submit"]');
@@ -1420,6 +1521,7 @@
                 cancelBtn.onclick = function() {
                     form.reset();
                     form.removeAttribute('data-edit-id');
+                    form.removeAttribute('data-existing-strategy');
                     submitBtn.textContent = '✅ 공략 등록하기';
                     cancelBtn.remove();
                     hero1Images.length = 0;
@@ -1432,7 +1534,7 @@
                 submitBtn.parentNode.insertBefore(cancelBtn, submitBtn);
             }
             
-            alert('수정 모드로 전환되었습니다. 변경 후 "공략 수정하기" 버튼을 눌러주세요.');
+            alert('수정 모드로 전환되었습니다.\n\n• 기존 이미지는 "기존" 태그로 표시됩니다.\n• 새 이미지를 추가하면 기존 이미지를 대체합니다.\n• 변경 후 "공략 수정하기" 버튼을 눌러주세요.');
         };
 
         window.deleteStrategy = async function(id) {
