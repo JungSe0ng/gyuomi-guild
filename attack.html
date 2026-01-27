@@ -161,19 +161,35 @@
         .search-box { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .search-box input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; }
         .strategy-list { display: grid; gap: 20px; }
-        .strategy-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                .strategy-card { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 30px;  /* 25px에서 30px로 변경 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
         .strategy-header {
             display: flex; justify-content: space-between; align-items: start;
             margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;
         }
-        .strategy-title { font-size: 1.3em; font-weight: bold; color: #6B4966; }
+        .strategy-title { 
+            font-size: 1.5em;  /* 1.3em에서 1.5em으로 변경 */
+            font-weight: bold; 
+            color: #6B4966; 
+        }
         .strategy-actions { display: flex; gap: 10px; }
         .btn-delete { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9em; background: #ff3b30; color: white; }
         .btn-edit { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9em; background: #98D8C8; color: white; margin-right: 5px; }
         .btn-edit:hover { background: #7bc4b4; }
         .btn-delete:hover { background: #e6342a; }
         .hero-info { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .hero-badge { padding: 8px 15px; background: #f0f0f0; border-radius: 8px; font-weight: 600; color: #555; }
+                .hero-badge { 
+            padding: 10px 18px;  /* 8px 15px에서 10px 18px로 변경 */
+            background: #f0f0f0; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            color: #555; 
+            font-size: 1em;  /* 추가 */
+        }
         .hero-images { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         .hero-images img { width: 150px; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid #e0e0e0; }
         @media (max-width: 768px) {
@@ -1489,6 +1505,29 @@
                     container.appendChild(div);
                 });
             }
+                        // 장비 정보 재설정 (스킬 옵션 업데이트 후 값이 초기화될 수 있으므로)
+            setTimeout(() => {
+                document.getElementById('hero1Set').value = strategy.attackTeam.hero1.set || '모두';
+                document.getElementById('hero1Weapon1').value = strategy.attackTeam.hero1.weapon1 || '모두';
+                document.getElementById('hero1Weapon2').value = strategy.attackTeam.hero1.weapon2 || '모두';
+                document.getElementById('hero1Armor1').value = strategy.attackTeam.hero1.armor1 || '모두';
+                document.getElementById('hero1Armor2').value = strategy.attackTeam.hero1.armor2 || '모두';
+                document.getElementById('hero1Desc').value = strategy.attackTeam.hero1.description || '';
+                
+                document.getElementById('hero2Set').value = strategy.attackTeam.hero2.set || '모두';
+                document.getElementById('hero2Weapon1').value = strategy.attackTeam.hero2.weapon1 || '모두';
+                document.getElementById('hero2Weapon2').value = strategy.attackTeam.hero2.weapon2 || '모두';
+                document.getElementById('hero2Armor1').value = strategy.attackTeam.hero2.armor1 || '모두';
+                document.getElementById('hero2Armor2').value = strategy.attackTeam.hero2.armor2 || '모두';
+                document.getElementById('hero2Desc').value = strategy.attackTeam.hero2.description || '';
+                
+                document.getElementById('hero3Set').value = strategy.attackTeam.hero3.set || '모두';
+                document.getElementById('hero3Weapon1').value = strategy.attackTeam.hero3.weapon1 || '모두';
+                document.getElementById('hero3Weapon2').value = strategy.attackTeam.hero3.weapon2 || '모두';
+                document.getElementById('hero3Armor1').value = strategy.attackTeam.hero3.armor1 || '모두';
+                document.getElementById('hero3Armor2').value = strategy.attackTeam.hero3.armor2 || '모두';
+                document.getElementById('hero3Desc').value = strategy.attackTeam.hero3.description || '';
+            }, 100);
             
             // 스킬 순서
             updateSkillOptions();
@@ -1550,8 +1589,57 @@
             }
         };
 
-        window.searchStrategies = function() {
-            loadStrategies();
+window.searchStrategies = function() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!searchText) {
+                // 검색어 없으면 전체 표시
+                renderStrategies();
+                return;
+            }
+            
+            // 검색 필터링
+            const filteredStrategies = strategies.filter(strategy => {
+                // 공략 이름
+                if (strategy.name.toLowerCase().includes(searchText)) return true;
+                
+                // 방어팀 영웅
+                if (strategy.defenseTeam.hero1.toLowerCase().includes(searchText)) return true;
+                if (strategy.defenseTeam.hero2.toLowerCase().includes(searchText)) return true;
+                if (strategy.defenseTeam.hero3.toLowerCase().includes(searchText)) return true;
+                
+                // 공격팀 영웅
+                if (strategy.attackTeam.hero1.name.toLowerCase().includes(searchText)) return true;
+                if (strategy.attackTeam.hero2.name.toLowerCase().includes(searchText)) return true;
+                if (strategy.attackTeam.hero3.name.toLowerCase().includes(searchText)) return true;
+                
+                // 장비 설명
+                if (strategy.attackTeam.hero1.description && strategy.attackTeam.hero1.description.toLowerCase().includes(searchText)) return true;
+                if (strategy.attackTeam.hero2.description && strategy.attackTeam.hero2.description.toLowerCase().includes(searchText)) return true;
+                if (strategy.attackTeam.hero3.description && strategy.attackTeam.hero3.description.toLowerCase().includes(searchText)) return true;
+                
+                // 운용 팁
+                if (strategy.operationTip && strategy.operationTip.toLowerCase().includes(searchText)) return true;
+                
+                return false;
+            });
+            
+            // 검색 결과로 렌더링
+            const originalStrategies = strategies;
+            strategies = filteredStrategies;
+            renderStrategies();
+            strategies = originalStrategies;
+            
+            // 검색 결과 안내
+            if (filteredStrategies.length === 0) {
+                document.getElementById('strategyList').innerHTML = `
+                    <div class="strategy-card">
+                        <p style="text-align: center; color: #999;">
+                            "${searchText}" 검색 결과가 없습니다.
+                        </p>
+                    </div>
+                `;
+            }
         };
         window.showImageModal = function(imageSrc) {
             document.getElementById('imageModal').classList.add('active');
