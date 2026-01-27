@@ -183,6 +183,77 @@
             .hero-equipment-layout { grid-template-columns: 1fr !important; }
             .form-container { padding: 25px; }
         }
+        /* 이미지 모달 - 여기부터 추가! */
+        .image-modal { 
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
+        }
+        .image-modal.active { display: flex; align-items: center; justify-content: center; }
+        .image-modal img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 10px; }
+        .image-modal-close { 
+            position: absolute; top: 20px; right: 40px; color: white; 
+            font-size: 40px; font-weight: bold; cursor: pointer; 
+        }
+        .image-modal-close:hover { color: #ccc; }
+        
+        /* 댓글 스타일 */
+        .comments-section { 
+            margin-top: 20px; padding-top: 20px; 
+            border-top: 2px solid #f0f0f0; 
+        }
+        .comment-form { 
+            display: flex; gap: 10px; margin-bottom: 20px; 
+        }
+        .comment-input { 
+            flex: 1; padding: 12px; border: 2px solid #e0e0e0; 
+            border-radius: 10px; font-size: 1em; 
+        }
+        .comment-btn { 
+            padding: 12px 20px; background: #98D8C8; color: white; 
+            border: none; border-radius: 10px; cursor: pointer; 
+            font-weight: bold; 
+        }
+        .comment-btn:hover { background: #7bc4b4; }
+        .comment-list { display: flex; flex-direction: column; gap: 10px; }
+        .comment-item { 
+            background: #f9f9f9; padding: 15px; border-radius: 10px; 
+            border-left: 4px solid #98D8C8; 
+        }
+        .comment-header { 
+            display: flex; justify-content: space-between; 
+            margin-bottom: 8px; font-size: 0.9em; 
+        }
+        .comment-author { font-weight: bold; color: #6B4966; }
+        .comment-date { color: #999; }
+        .comment-text { color: #666; line-height: 1.5; }
+        .comment-delete { 
+            color: #ff3b30; cursor: pointer; font-size: 0.85em; 
+            margin-left: 10px; 
+        }
+        .comment-delete:hover { text-decoration: underline; }
+        
+        /* 2열 레이아웃 (사진 있을 때) */
+        .hero-detail-layout { 
+            display: grid; grid-template-columns: 200px 1fr; 
+            gap: 15px; align-items: start; 
+        }
+        .hero-detail-images { 
+            display: flex; flex-direction: column; gap: 10px; 
+        }
+        .hero-detail-images img { 
+            width: 100%; height: auto; border-radius: 10px; 
+            border: 2px solid #e0e0e0; cursor: pointer; 
+        }
+        .hero-detail-images img:hover { 
+            transform: scale(1.02); 
+            transition: transform 0.2s; 
+        }
+        .hero-detail-info { display: flex; flex-direction: column; gap: 8px; }
+        
+        @media (max-width: 768px) {
+            .hero-detail-layout { grid-template-columns: 1fr; }
+        }
+
     </style>
 </head>
 <body>
@@ -1157,61 +1228,46 @@
                         </div>
                     </div>`;
                 
-                // 영웅1 정보
+                // 영웅 정보 렌더링 함수
+                const renderHero = (hero, colorCode) => {
+                    const hasImages = hero.images && hero.images.length > 0;
+                    
+                    let heroHtml = `<div style="border-left: 4px solid ${colorCode}; padding-left: 15px; margin-bottom: 20px;">
+                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${hero.name} 장비</h4>`;
+                    
+                    if (hasImages) {
+                        // 2열 레이아웃 (사진 있을 때)
+                        heroHtml += `<div class="hero-detail-layout">
+                            <div class="hero-detail-images">
+                                ${hero.images.map(img => `<img src="${img}" alt="장비" onclick="showImageModal('${img}')">`).join('')}
+                            </div>
+                            <div class="hero-detail-info">`;
+                    }
+                    
+                    // 장비 정보
+                    heroHtml += `
+                        <p style="font-size: 0.9em; color: #666;"><strong>세트:</strong> ${hero.set || '미설정'}</p>
+                        <p style="font-size: 0.9em; color: #666;"><strong>무기:</strong> ${hero.weapon1 || '미설정'}, ${hero.weapon2 || '미설정'}</p>
+                        <p style="font-size: 0.9em; color: #666;"><strong>방어구:</strong> ${hero.armor1 || '미설정'}, ${hero.armor2 || '미설정'}</p>
+                        ${hero.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${hero.description}</p>` : ''}`;
+                    
+                    if (hasImages) {
+                        heroHtml += `</div></div>`;
+                    }
+                    
+                    heroHtml += `</div>`;
+                    return heroHtml;
+                };
+                
+                // 영웅1, 2, 3 정보
                 if (strategy.attackTeam.hero1) {
-                    html += `
-                    <div style="border-left: 4px solid #FFB6C1; padding-left: 15px; margin-bottom: 20px;">
-                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${strategy.attackTeam.hero1.name} 장비</h4>
-                        ${strategy.attackTeam.hero1.images && strategy.attackTeam.hero1.images.length > 0 ? `
-                            <div class="hero-images" style="margin-bottom: 10px;">
-                                ${strategy.attackTeam.hero1.images.map(img => `<img src="${img}" alt="장비">`).join('')}
-                            </div>
-                        ` : ''}
-                        <p style="font-size: 0.9em; color: #666;">
-                            <strong>세트:</strong> ${strategy.attackTeam.hero1.set || '미설정'} | 
-                            <strong>무기:</strong> ${strategy.attackTeam.hero1.weapon1 || '미설정'}, ${strategy.attackTeam.hero1.weapon2 || '미설정'} | 
-                            <strong>방어구:</strong> ${strategy.attackTeam.hero1.armor1 || '미설정'}, ${strategy.attackTeam.hero1.armor2 || '미설정'}
-                        </p>
-                        ${strategy.attackTeam.hero1.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${strategy.attackTeam.hero1.description}</p>` : ''}
-                    </div>`;
+                    html += renderHero(strategy.attackTeam.hero1, '#FFB6C1');
                 }
-                
-                // 영웅2 정보
                 if (strategy.attackTeam.hero2) {
-                    html += `
-                    <div style="border-left: 4px solid #98D8C8; padding-left: 15px; margin-bottom: 20px;">
-                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${strategy.attackTeam.hero2.name} 장비</h4>
-                        ${strategy.attackTeam.hero2.images && strategy.attackTeam.hero2.images.length > 0 ? `
-                            <div class="hero-images" style="margin-bottom: 10px;">
-                                ${strategy.attackTeam.hero2.images.map(img => `<img src="${img}" alt="장비">`).join('')}
-                            </div>
-                        ` : ''}
-                        <p style="font-size: 0.9em; color: #666;">
-                            <strong>세트:</strong> ${strategy.attackTeam.hero2.set || '미설정'} | 
-                            <strong>무기:</strong> ${strategy.attackTeam.hero2.weapon1 || '미설정'}, ${strategy.attackTeam.hero2.weapon2 || '미설정'} | 
-                            <strong>방어구:</strong> ${strategy.attackTeam.hero2.armor1 || '미설정'}, ${strategy.attackTeam.hero2.armor2 || '미설정'}
-                        </p>
-                        ${strategy.attackTeam.hero2.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${strategy.attackTeam.hero2.description}</p>` : ''}
-                    </div>`;
+                    html += renderHero(strategy.attackTeam.hero2, '#98D8C8');
                 }
-                
-                // 영웅3 정보
                 if (strategy.attackTeam.hero3) {
-                    html += `
-                    <div style="border-left: 4px solid #B08AB0; padding-left: 15px; margin-bottom: 20px;">
-                        <h4 style="color: #6B4966; margin-bottom: 10px;">🎯 ${strategy.attackTeam.hero3.name} 장비</h4>
-                        ${strategy.attackTeam.hero3.images && strategy.attackTeam.hero3.images.length > 0 ? `
-                            <div class="hero-images" style="margin-bottom: 10px;">
-                                ${strategy.attackTeam.hero3.images.map(img => `<img src="${img}" alt="장비">`).join('')}
-                            </div>
-                        ` : ''}
-                        <p style="font-size: 0.9em; color: #666;">
-                            <strong>세트:</strong> ${strategy.attackTeam.hero3.set || '미설정'} | 
-                            <strong>무기:</strong> ${strategy.attackTeam.hero3.weapon1 || '미설정'}, ${strategy.attackTeam.hero3.weapon2 || '미설정'} | 
-                            <strong>방어구:</strong> ${strategy.attackTeam.hero3.armor1 || '미설정'}, ${strategy.attackTeam.hero3.armor2 || '미설정'}
-                        </p>
-                        ${strategy.attackTeam.hero3.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">💬 ${strategy.attackTeam.hero3.description}</p>` : ''}
-                    </div>`;
+                    html += renderHero(strategy.attackTeam.hero3, '#B08AB0');
                 }
                 
                 // 스킬 순서
@@ -1230,11 +1286,37 @@
                 // 운용 팁
                 if (strategy.operationTip) {
                     html += `
-                    <div style="background: rgba(152,216,200,0.1); padding: 15px; border-radius: 10px;">
+                    <div style="background: rgba(152,216,200,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                         <strong style="color: #6B4966;">💡 운용 팁</strong>
                         <p style="color: #666; margin-top: 10px; white-space: pre-wrap;">${strategy.operationTip}</p>
                     </div>`;
                 }
+                
+                // 댓글 섹션
+                html += `
+                <div class="comments-section">
+                    <strong style="color: #6B4966;">💬 댓글 (${strategy.comments ? strategy.comments.length : 0})</strong>
+                    <div class="comment-form" style="margin-top: 15px;">
+                        <input type="text" class="comment-input" id="commentInput_${strategy.id}" placeholder="댓글을 입력하세요...">
+                        <button class="comment-btn" onclick="addComment('${strategy.id}')">등록</button>
+                    </div>
+                    <div class="comment-list" id="comments_${strategy.id}">
+                        ${strategy.comments && strategy.comments.length > 0 ? strategy.comments.map(comment => `
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <span class="comment-author">${comment.author}</span>
+                                    <span>
+                                        <span class="comment-date">${new Date(comment.createdAt).toLocaleDateString()}</span>
+                                        ${currentUser && (currentUser.uid === comment.authorUid || currentUser.role === 'admin') ? `
+                                            <span class="comment-delete" onclick="deleteComment('${strategy.id}', '${comment.id}')">삭제</span>
+                                        ` : ''}
+                                    </span>
+                                </div>
+                                <div class="comment-text">${comment.text}</div>
+                            </div>
+                        `).join('') : '<p style="color: #999; font-size: 0.9em; text-align: center; padding: 20px;">댓글이 없습니다.</p>'}
+                    </div>
+                </div>`;
                 
                 html += `</div>`;
                 return html;
@@ -1369,6 +1451,75 @@
         window.searchStrategies = function() {
             loadStrategies();
         };
+        window.showImageModal = function(imageSrc) {
+            document.getElementById('imageModal').classList.add('active');
+            document.getElementById('modalImage').src = imageSrc;
+        };
+
+        window.closeImageModal = function() {
+            document.getElementById('imageModal').classList.remove('active');
+        };
+
+        // 댓글 추가 함수
+        window.addComment = async function(strategyId) {
+            const input = document.getElementById(`commentInput_${strategyId}`);
+            const text = input.value.trim();
+            
+            if (!text) {
+                alert('댓글을 입력해주세요.');
+                return;
+            }
+            
+            try {
+                const comment = {
+                    id: Date.now().toString(),
+                    text: text,
+                    author: currentUser.nickname,
+                    authorUid: currentUser.uid,
+                    createdAt: new Date().toISOString()
+                };
+                
+                const strategy = strategies.find(s => s.id === strategyId);
+                if (!strategy.comments) strategy.comments = [];
+                strategy.comments.push(comment);
+                
+                await updateDoc(doc(db, 'attack_strategies', strategyId), {
+                    comments: strategy.comments
+                });
+                
+                input.value = '';
+                loadStrategies();
+            } catch (error) {
+                console.error('댓글 추가 오류:', error);
+                alert('댓글 추가 중 오류가 발생했습니다.');
+            }
+        };
+
+        // 댓글 삭제 함수
+        window.deleteComment = async function(strategyId, commentId) {
+            if (!confirm('댓글을 삭제하시겠습니까?')) return;
+            
+            try {
+                const strategy = strategies.find(s => s.id === strategyId);
+                strategy.comments = strategy.comments.filter(c => c.id !== commentId);
+                
+                await updateDoc(doc(db, 'attack_strategies', strategyId), {
+                    comments: strategy.comments
+                });
+                
+                loadStrategies();
+            } catch (error) {
+                console.error('댓글 삭제 오류:', error);
+                alert('댓글 삭제 중 오류가 발생했습니다.');
+            }
+        };
+
     </script>
+
+<!-- 이미지 모달 -->
+        <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+            <span class="image-modal-close">&times;</span>
+            <img id="modalImage" src="" alt="확대 이미지">
+        </div>
 </body>
 </html>
