@@ -1328,11 +1328,12 @@
                             <span style="color: #333; font-size: 1.05em;">${hero.armor2 || '미설정'}</span>
                         </div>`;
                     
-                    if (hero.description) {
-                        heroHtml += `
-                        <div style="margin-top: 15px; padding: 12px; background: rgba(152,216,200,0.1); border-radius: 8px; border-left: 3px solid ${colorCode};">
-                            <span style="font-weight: 600; color: #666;">💬 장비 설명:</span><br>
-                            <span style="color: #555; line-height: 1.6;">${hero.description}</span>
+if (hero.description) {
+    heroHtml += `
+    <div style="margin-top: 15px; padding: 12px; background: rgba(152,216,200,0.1); border-radius: 8px; border-left: 3px solid ${colorCode};">
+        <span style="font-weight: 600; color: #666;">💬 장비 설명:</span><br>
+        <span style="color: #555; line-height: 1.6; white-space: pre-wrap;">${hero.description}</span>
+    </span>
                         </div>`;
                     }
                     
@@ -1396,7 +1397,7 @@
                                         ` : ''}
                                     </span>
                                 </div>
-                                <div class="comment-text">${comment.text}</div>
+                                <div class="comment-text" style="white-space: pre-wrap;">${comment.text}</div>
                             </div>
                         `).join('') : '<p style="color: #999; font-size: 0.9em; text-align: center; padding: 20px;">댓글이 없습니다.</p>'}
                     </div>
