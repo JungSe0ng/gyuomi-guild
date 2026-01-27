@@ -1421,29 +1421,38 @@
             document.getElementById('strategyName').value = strategy.name;
             
             // 방어팀 설정 (등급은 유지하고 영웅만 표시)
-            const defenseHeroSelects = [
+             const defenseHeroSelects = [
                 { num: 1, hero: strategy.defenseTeam.hero1 },
                 { num: 2, hero: strategy.defenseTeam.hero2 },
                 { num: 3, hero: strategy.defenseTeam.hero3 }
             ];
             
             defenseHeroSelects.forEach(({ num, hero }) => {
-                const select = document.getElementById(`defenseHero${num}`);
-                select.disabled = false;
-                // 모든 등급의 영웅을 추가
-                select.innerHTML = '<option value="">영웅 선택</option>';
+                // 등급 드롭다운 찾기 - 영웅 선택 직전 select
+                const heroSelect = document.getElementById(`defenseHero${num}`);
+                const gradeSelect = heroSelect.previousElementSibling;
+                
+                // 등급 자동 선택
+                let heroGrade = '';
                 Object.keys(heroData).forEach(grade => {
-                    heroData[grade].forEach(h => {
-                        const option = document.createElement('option');
-                        option.value = h;
-                        option.textContent = h;
-                        select.appendChild(option);
-                    });
+                    if (heroData[grade].includes(hero)) {
+                        heroGrade = grade;
+                    }
                 });
-                select.value = hero;
+                
+                if (heroGrade && gradeSelect) {
+                    gradeSelect.value = heroGrade;
+                    // 등급 선택 이벤트 트리거
+                    updateDefenseHero(num, heroGrade);
+                }
+                
+                // 영웅 선택
+                setTimeout(() => {
+                    heroSelect.value = hero;
+                }, 50);
             });
             
-            // 공격팀 설정 (등급은 유지하고 영웅만 표시)
+            // 공격팀 설정
             const attackHeroData = [
                 { num: 1, hero: strategy.attackTeam.hero1 },
                 { num: 2, hero: strategy.attackTeam.hero2 },
@@ -1451,20 +1460,29 @@
             ];
             
             attackHeroData.forEach(({ num, hero }) => {
-                const select = document.getElementById(`attackHero${num}`);
-                select.disabled = false;
-                // 모든 등급의 영웅을 추가
-                select.innerHTML = '<option value="">영웅 선택</option>';
+                // 등급 드롭다운 찾기
+                const heroSelect = document.getElementById(`attackHero${num}`);
+                const gradeSelect = heroSelect.previousElementSibling;
+                
+                // 등급 자동 선택
+                let heroGrade = '';
                 Object.keys(heroData).forEach(grade => {
-                    heroData[grade].forEach(h => {
-                        const option = document.createElement('option');
-                        option.value = h;
-                        option.textContent = h;
-                        select.appendChild(option);
-                    });
+                    if (heroData[grade].includes(hero.name)) {
+                        heroGrade = grade;
+                    }
                 });
-                select.value = hero.name;
-                updateHeroTitle(num, hero.name);
+                
+                if (heroGrade && gradeSelect) {
+                    gradeSelect.value = heroGrade;
+                    // 등급 선택 이벤트 트리거
+                    updateAttackHero(num, heroGrade);
+                }
+                
+                // 영웅 선택 및 제목 업데이트
+                setTimeout(() => {
+                    heroSelect.value = hero.name;
+                    updateHeroTitle(num, hero.name);
+                }, 50);
             });
             
             // 영웅1 장비
