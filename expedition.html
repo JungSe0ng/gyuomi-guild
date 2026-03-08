@@ -868,66 +868,76 @@
         };
 
         // ── 수정 ─────────────────────────────────────────────────
-        window.editStrategy = async function(id) {
+        window.editStrategy = function(id) {
             const s = strategies.find(x => x.id === id);
             if (!s) { alert('공략을 찾을 수 없습니다.'); return; }
 
-            switchTab('register', null);
-            document.querySelector('.tab-btn').classList.add('active');
-            document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+            // 1) 등록 탭으로 전환
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('register-tab').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
 
+            // 2) 공략 이름
             document.getElementById('strategyName').value = s.name;
 
-            // 보스
+            // 3) 보스
             document.querySelectorAll('.boss-btn').forEach(b => {
-                if (b.textContent === s.boss) { b.classList.add('selected'); }
-                else b.classList.remove('selected');
+                b.classList.toggle('selected', b.textContent.trim() === s.boss);
             });
             document.getElementById('selectedBoss').value = s.boss;
 
-            // 영웅 세팅 helper
-            const setRound = async (prefix, heroes) => {
+            // 4) 영웅 + 장비 채우기
+            const setRound = (prefix, heroes) => {
                 for (let i = 0; i < 5; i++) {
                     const hero = heroes[i];
                     if (!hero) continue;
-                    // 등급 찾기
                     let grade = '';
                     Object.keys(heroData).forEach(g => { if (heroData[g].includes(hero.name)) grade = g; });
-                    document.getElementById(`${prefix}Grade${i+1}`).value = grade;
+                    const gradeEl = document.getElementById(`${prefix}Grade${i+1}`);
+                    if (gradeEl) gradeEl.value = grade;
                     updateHeroSelect(prefix, i+1);
-                    await new Promise(r => setTimeout(r, 30));
-                    document.getElementById(`${prefix}Hero${i+1}`).value = hero.name;
+                    const heroEl = document.getElementById(`${prefix}Hero${i+1}`);
+                    if (heroEl) heroEl.value = hero.name;
                     const titleEl = document.getElementById(`${prefix}EquipTitle${i+1}`);
                     if (titleEl) titleEl.textContent = `🎯 ${hero.name} 장비 세팅`;
-                    document.getElementById(`${prefix}Set${i+1}`).value  = hero.set  || '모두';
-                    document.getElementById(`${prefix}W1_${i+1}`).value  = hero.weapon1 || '모두';
-                    document.getElementById(`${prefix}W2_${i+1}`).value  = hero.weapon2 || '모두';
-                    document.getElementById(`${prefix}A1_${i+1}`).value  = hero.armor1  || '모두';
-                    document.getElementById(`${prefix}A2_${i+1}`).value  = hero.armor2  || '모두';
-                    document.getElementById(`${prefix}Desc${i+1}`).value = hero.desc    || '';
+                    const setEl = document.getElementById(`${prefix}Set${i+1}`);
+                    if (setEl) setEl.value = hero.set || '모두';
+                    const w1 = document.getElementById(`${prefix}W1_${i+1}`);
+                    if (w1) w1.value = hero.weapon1 || '모두';
+                    const w2 = document.getElementById(`${prefix}W2_${i+1}`);
+                    if (w2) w2.value = hero.weapon2 || '모두';
+                    const a1 = document.getElementById(`${prefix}A1_${i+1}`);
+                    if (a1) a1.value = hero.armor1 || '모두';
+                    const a2 = document.getElementById(`${prefix}A2_${i+1}`);
+                    if (a2) a2.value = hero.armor2 || '모두';
+                    const desc = document.getElementById(`${prefix}Desc${i+1}`);
+                    if (desc) desc.value = hero.desc || '';
                 }
             };
+            setRound('r1', s.round1.heroes);
+            setRound('r2', s.round2.heroes);
 
-            await setRound('r1', s.round1.heroes);
-            await setRound('r2', s.round2.heroes);
-
+            // 5) 턴 선택 → 스킬 DOM 생성
             document.getElementById('turnOver').value = s.turnOver;
             updateSkillTurns();
 
-            await new Promise(r => setTimeout(r, 80));
+            // 6) 스킬 DOM 생성 직후 다음 프레임에서 값 복원
+            requestAnimationFrame(() => {
+                const restoreSkills = (prefix, skills) => {
+                    Object.entries(skills || {}).forEach(([t, v]) => {
+                        const el = document.getElementById(`${prefix}Skill_${t}`);
+                        if (el) el.value = v;
+                    });
+                };
+                restoreSkills('r1', s.round1.skills || {});
+                restoreSkills('r2', s.round2.skills || {});
+            });
 
-            // 스킬 값 복원
-            const restoreSkills = (prefix, skills) => {
-                Object.entries(skills).forEach(([t, v]) => {
-                    const el = document.getElementById(`${prefix}Skill_${t}`);
-                    if (el) el.value = v;
-                });
-            };
-            restoreSkills('r1', s.round1.skills || {});
-            restoreSkills('r2', s.round2.skills || {});
-
+            // 7) 운용 팁
             document.getElementById('operationTip').value = s.operationTip || '';
 
+            // 8) 수정 모드 표시
             const form = document.getElementById('expeditionForm');
             form.setAttribute('data-edit-id', id);
             const submitBtn = form.querySelector('button[type="submit"]');
@@ -936,18 +946,30 @@
             if (!document.getElementById('cancelEditBtn')) {
                 const cancelBtn = document.createElement('button');
                 cancelBtn.id = 'cancelEditBtn'; cancelBtn.type = 'button'; cancelBtn.className = 'btn';
-                cancelBtn.style.background = '#999'; cancelBtn.style.marginTop = '10px';
+                cancelBtn.style.cssText = 'background:#999;margin-top:10px;';
                 cancelBtn.textContent = '취소';
                 cancelBtn.onclick = () => {
-                    form.reset(); form.removeAttribute('data-edit-id');
+                    form.reset();
+                    form.removeAttribute('data-edit-id');
                     submitBtn.textContent = '✅ 공략 등록하기';
                     cancelBtn.remove();
                     document.querySelectorAll('.boss-btn').forEach(b => b.classList.remove('selected'));
                     document.getElementById('r1SkillSection').style.display = 'none';
                     document.getElementById('r2SkillSection').style.display = 'none';
+                    for (let i = 1; i <= 5; i++) {
+                        ['r1','r2'].forEach(p => {
+                            const heroEl = document.getElementById(`${p}Hero${i}`);
+                            if (heroEl) { heroEl.innerHTML = '<option value="">영웅 선택</option>'; heroEl.disabled = true; }
+                            const titleEl = document.getElementById(`${p}EquipTitle${i}`);
+                            if (titleEl) titleEl.textContent = `🎯 영웅${i} 장비 세팅`;
+                        });
+                    }
                 };
                 submitBtn.parentNode.insertBefore(cancelBtn, submitBtn);
             }
+
+            // 상단으로 스크롤
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         // ── 삭제 ─────────────────────────────────────────────────
