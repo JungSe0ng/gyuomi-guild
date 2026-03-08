@@ -578,20 +578,19 @@
                 return;
             }
 
-            // 1라운드 스킬 턴: 0,4,8... 중 < turnOver 인 것
+            // 1라운드 스킬 턴: 0,4,8... 중 turnOver 미만까지
             const r1Turns = [];
             for (let t = 0; t < turnOverVal; t += 4) r1Turns.push(t);
 
-            // 2라운드 첫 스킬 턴: turnOver 이상인 첫 4의 배수
-            const r2Start = (turnOverVal % 4 === 0) ? turnOverVal : Math.ceil(turnOverVal / 4) * 4;
+            // 2라운드 첫 스킬 턴: turnOver 자체부터 +4씩
             const r2Turns = [];
-            for (let t = r2Start; t < 80; t += 4) r2Turns.push(t);
+            for (let t = turnOverVal; t < 80; t += 4) r2Turns.push(t);
 
             renderSkillSection('r1', r1Turns, turnOverVal);
             renderSkillSection('r2', r2Turns, turnOverVal);
 
             document.getElementById('r1SkillDesc').textContent = `스킬 사용 턴: ${r1Turns.join(', ')}턴 (${turnOverVal}턴에 2라운드 전환)`;
-            document.getElementById('r2SkillDesc').textContent = `스킬 사용 턴: ${r2Start}~80턴 이전`;
+            document.getElementById('r2SkillDesc').textContent = `스킬 사용 턴: ${turnOverVal}, ${turnOverVal+4}, ${turnOverVal+8}... (80턴 이전까지)`;
         };
 
         function getSkillOptions(prefix) {
@@ -659,9 +658,8 @@
             // 스킬 턴 수집
             const r1Turns = [];
             for (let t = 0; t < turnOver; t += 4) r1Turns.push(t);
-            const r2Start = (turnOver % 4 === 0) ? turnOver : Math.ceil(turnOver / 4) * 4;
             const r2Turns = [];
-            for (let t = r2Start; t < 80; t += 4) r2Turns.push(t);
+            for (let t = turnOver; t < 80; t += 4) r2Turns.push(t);
 
             const collectSkills = (prefix, turns) => {
                 const skills = {};
