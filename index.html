@@ -3,386 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 - 귀요미 길드</title>
+    <title>귀요미 길드 공략집</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #f4f5f9;
+            --white: #ffffff;
+            --primary: #7c5cbf;
+            --primary-light: #9b7fd4;
+            --primary-soft: #ede8f8;
+            --secondary: #e8609a;
+            --secondary-soft: #fde8f2;
+            --grad: linear-gradient(135deg, #7c5cbf, #e8609a);
+            --grad-soft: linear-gradient(135deg, #ede8f8, #fde8f2);
+            --text: #1a1a2e;
+            --text-sub: #5a5a7a;
+            --text-muted: #9898b8;
+            --border: #e8e8f0;
+            --shadow-lg: 0 20px 60px rgba(124,92,191,0.15);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Noto Sans KR', -apple-system, sans-serif;
-            background: linear-gradient(135deg, rgba(107, 73, 102, 0.97), rgba(139, 90, 134, 0.97));
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .auth-container {
-            background: white;
-            border-radius: 25px;
+        /* 배경 장식 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -120px; right: -120px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(124,92,191,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -100px; left: -100px;
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, rgba(232,96,154,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── 카드 ── */
+        .auth-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             padding: 40px;
-            max-width: 450px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            animation: fadeInUp 0.5s ease;
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1;
+            animation: fadeUp 0.45s ease;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .logo-section {
+        /* 로고 */
+        .logo-area {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
-        .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 15px;
-            background: linear-gradient(135deg, #B08AB0, #8B5A86);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(176,138,176,0.4);
+        .logo-circle {
+            width: 68px; height: 68px;
+            background: var(--grad);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2em;
+            margin: 0 auto 14px;
+            box-shadow: 0 8px 24px rgba(124,92,191,0.25);
         }
 
-        .logo span {
-            font-size: 3em;
+        .logo-title {
+            font-size: 1.25em;
+            font-weight: 800;
+            color: var(--text);
         }
 
-        h2 {
-            color: #B08AB0;
-            margin: 0;
-            font-size: 1.8em;
+        .logo-sub {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
-        .subtitle {
-            color: #999;
-            margin-top: 8px;
-            font-size: 0.9em;
-        }
-
+        /* 탭 */
         .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            background: #f0f0f0;
-            padding: 5px;
+            background: var(--bg);
             border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 26px;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 12px;
-            background: transparent;
-            color: #666;
+            padding: 9px;
+            border-radius: 9px;
             border: none;
-            border-radius: 10px;
-            font-weight: bold;
+            background: transparent;
+            font-size: 0.87em;
+            font-weight: 700;
+            color: var(--text-muted);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            font-family: inherit;
         }
 
         .tab-btn.active {
-            background: linear-gradient(135deg, #B08AB0, #8B5A86);
-            color: white;
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(124,92,191,0.12);
         }
 
-        .form-container {
-            display: none;
-        }
-
-        .form-container.active {
-            display: block;
-        }
+        /* 폼 */
+        .form-wrap { display: none; }
+        .form-wrap.active { display: block; }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
-        label {
+        .form-label {
             display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: bold;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-bottom: 6px;
         }
 
-        input[type="email"],
-        input[type="text"],
-        input[type="password"] {
+        .form-input {
             width: 100%;
-            padding: 14px;
-            border: 2px solid #e0e0e0;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
             border-radius: 10px;
-            font-size: 1em;
-            transition: border 0.3s;
+            font-size: 0.9em;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--white);
+            transition: border-color 0.18s, box-shadow 0.18s;
         }
 
-        input:focus {
+        .form-input:focus {
             outline: none;
-            border-color: #B08AB0;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124,92,191,0.08);
         }
 
-        .checkbox-group {
+        .form-input::placeholder { color: var(--text-muted); }
+
+        /* 자동로그인 체크박스 */
+        .check-row {
             display: flex;
             align-items: center;
+            gap: 7px;
+            margin-bottom: 18px;
             cursor: pointer;
-            user-select: none;
         }
 
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 8px;
+        .check-row input[type=checkbox] {
+            width: 16px; height: 16px;
+            accent-color: var(--primary);
             cursor: pointer;
-            accent-color: #B08AB0;
         }
 
+        .check-label {
+            font-size: 0.82em;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* 제출 버튼 */
         .btn-submit {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #B08AB0, #8B5A86);
+            padding: 12px;
+            background: var(--grad);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: bold;
+            border-radius: 11px;
+            font-size: 0.92em;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(176,138,176,0.4);
-            transition: all 0.3s;
+            font-family: inherit;
+            transition: opacity 0.18s, transform 0.18s;
+            box-shadow: 0 4px 16px rgba(124,92,191,0.25);
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(176,138,176,0.5);
-        }
+        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(0); }
 
-        .btn-submit.signup {
-            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
-            box-shadow: 0 4px 15px rgba(152,216,200,0.4);
+        /* 미리보기 버튼 */
+        .btn-preview {
+            width: 100%; margin-top: 10px;
+            padding: 11px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px dashed var(--border);
+            border-radius: 11px;
+            font-size: 0.82em; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.18s;
         }
+        .btn-preview:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
 
-        .btn-submit.signup:hover {
-            box-shadow: 0 6px 20px rgba(152,216,200,0.5);
+        /* 에러 메시지 */
+        .error-msg {
+            display: none;
+            font-size: 0.78em;
+            color: #d94f4f;
+            background: #fdeaea;
+            border-radius: 8px;
+            padding: 8px 11px;
+            margin-bottom: 14px;
+            border: 1px solid #fbd5d5;
+        }
+        .error-msg.show { display: block; }
+
+        /* 안내 문구 */
+        .notice-box {
+            background: var(--primary-soft);
+            border-radius: 10px;
+            padding: 11px 14px;
+            margin-top: 16px;
+            font-size: 0.78em;
+            color: var(--primary);
+            line-height: 1.5;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="logo-section">
-            <div class="logo">
-                <span>⚔️</span>
-            </div>
-            <h2>귀요미 길드 공략집</h2>
-            <p class="subtitle">길드원 전용 공간입니다</p>
-        </div>
-        
-        <div class="tabs">
-            <button id="loginTabBtn" class="tab-btn active" onclick="switchTab('login')">로그인</button>
-            <button id="signupTabBtn" class="tab-btn" onclick="switchTab('signup')">회원가입</button>
-        </div>
-        
-        <!-- 로그인 폼 -->
-        <div id="loginForm" class="form-container active">
-            <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>이메일</label>
-                    <input type="email" id="loginEmail" placeholder="이메일을 입력하세요" required>
-                </div>
-                <div class="form-group">
-                    <label>비밀번호</label>
-                    <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" required>
-                </div>
-                <div class="form-group">
-                    <label class="checkbox-group">
-                        <input type="checkbox" id="rememberMe">
-                        <span style="color: #666; font-size: 0.95em;">자동 로그인</span>
-                    </label>
-                </div>
-                <button type="submit" class="btn-submit">로그인 하기</button>
-            </form>
-        </div>
-        
-        <!-- 회원가입 폼 -->
-        <div id="signupForm" class="form-container">
-            <form onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label>이메일</label>
-                    <input type="email" id="signupEmail" placeholder="이메일 주소" required>
-                </div>
-                <div class="form-group">
-                    <label>닉네임</label>
-                    <input type="text" id="signupNickname" placeholder="닉네임 (2-10자)" required minlength="2" maxlength="10">
-                </div>
-                <div class="form-group">
-                    <label>비밀번호</label>
-                    <input type="password" id="signupPassword" placeholder="비밀번호 (6자 이상)" required minlength="6">
-                </div>
-                <div class="form-group">
-                    <label>비밀번호 확인</label>
-                    <input type="password" id="signupPasswordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
-                </div>
-                <button type="submit" class="btn-submit signup">회원가입 하기</button>
-            </form>
-        </div>
+
+<div class="auth-card">
+    <!-- 로고 -->
+    <div class="logo-area">
+        <div class="logo-circle">🐰</div>
+        <div class="logo-title">귀요미 길드 공략집</div>
+        <div class="logo-sub">세븐나이츠 길드원 전용 공간</div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    <!-- 탭 -->
+    <div class="tabs">
+        <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">로그인</button>
+        <button class="tab-btn" id="tabSignup" onclick="switchTab('signup')">회원가입</button>
+    </div>
 
-        // Firebase 설정
-        const firebaseConfig = {
-            apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
-            authDomain: "gyuomi-guild.firebaseapp.com",
-            projectId: "gyuomi-guild",
-            storageBucket: "gyuomi-guild.firebasestorage.app",
-            messagingSenderId: "43293575259",
-            appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
-        };
+    <!-- 에러 메시지 -->
+    <div class="error-msg" id="errorMsg"></div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    <!-- 로그인 폼 -->
+    <div class="form-wrap active" id="formLogin">
+        <div class="form-group">
+            <label class="form-label">이메일</label>
+            <input class="form-input" id="loginEmail" type="email" placeholder="이메일을 입력하세요">
+        </div>
+        <div class="form-group">
+            <label class="form-label">비밀번호</label>
+            <input class="form-input" id="loginPw" type="password" placeholder="비밀번호를 입력하세요" onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <label class="check-row">
+            <input type="checkbox" id="rememberMe">
+            <span class="check-label">자동 로그인</span>
+        </label>
+        <button class="btn-submit" onclick="doLogin()">로그인 하기</button>
+        <button class="btn-preview" onclick="window.location.href='main.html'">🖥️ 로컬 미리보기로 바로 입장</button>
+    </div>
 
-        // 탭 전환
-        window.switchTab = function(tab) {
-            const loginTabBtn = document.getElementById('loginTabBtn');
-            const signupTabBtn = document.getElementById('signupTabBtn');
-            const loginForm = document.getElementById('loginForm');
-            const signupForm = document.getElementById('signupForm');
-            
-            if (tab === 'login') {
-                loginTabBtn.classList.add('active');
-                signupTabBtn.classList.remove('active');
-                loginForm.classList.add('active');
-                signupForm.classList.remove('active');
-            } else {
-                signupTabBtn.classList.add('active');
-                loginTabBtn.classList.remove('active');
-                loginForm.classList.remove('active');
-                signupForm.classList.add('active');
-            }
+    <!-- 회원가입 폼 -->
+    <div class="form-wrap" id="formSignup">
+        <div class="form-group">
+            <label class="form-label">이메일</label>
+            <input class="form-input" id="signupEmail" type="email" placeholder="이메일 주소">
+        </div>
+        <div class="form-group">
+            <label class="form-label">닉네임</label>
+            <input class="form-input" id="signupNick" type="text" placeholder="닉네임 (2~10자)" maxlength="10">
+        </div>
+        <div class="form-group">
+            <label class="form-label">비밀번호</label>
+            <input class="form-input" id="signupPw" type="password" placeholder="비밀번호 (6자 이상)">
+        </div>
+        <div class="form-group" style="margin-bottom:18px;">
+            <label class="form-label">비밀번호 확인</label>
+            <input class="form-input" id="signupPwC" type="password" placeholder="비밀번호를 다시 입력하세요" onkeydown="if(event.key==='Enter') doSignup()">
+        </div>
+        <button class="btn-submit" onclick="doSignup()">회원가입 하기</button>
+        <div class="notice-box">회원가입 후 관리자 승인이 완료되어야<br>로그인하실 수 있어요 😊</div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
+    authDomain: "gyuomi-guild.firebaseapp.com",
+    projectId: "gyuomi-guild",
+    storageBucket: "gyuomi-guild.firebasestorage.app",
+    messagingSenderId: "43293575259",
+    appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// 이미 로그인 상태면 메인으로
+onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists() && snap.data().role !== 'pending') {
+            window.location.href = 'main.html';
+        }
+    } catch(e) {}
+});
+
+// 자동로그인 이메일 복원
+const savedEmail = localStorage.getItem('savedEmail');
+if (savedEmail) {
+    document.getElementById('loginEmail').value = savedEmail;
+    document.getElementById('rememberMe').checked = true;
+}
+
+// ── 탭 전환 ──
+window.switchTab = function(tab) {
+    document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+    document.getElementById('tabSignup').classList.toggle('active', tab==='signup');
+    document.getElementById('formLogin').classList.toggle('active', tab==='login');
+    document.getElementById('formSignup').classList.toggle('active', tab==='signup');
+    showError('');
+};
+
+function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.classList.toggle('show', !!msg);
+}
+
+// ── 로그인 ──
+window.doLogin = async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw    = document.getElementById('loginPw').value;
+    const remember = document.getElementById('rememberMe').checked;
+    showError('');
+
+    if (!email || !pw) { showError('이메일과 비밀번호를 입력해주세요.'); return; }
+
+    try {
+        await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+        const cred = await signInWithEmailAndPassword(auth, email, pw);
+        const snap = await getDoc(doc(db, 'users', cred.user.uid));
+
+        if (!snap.exists()) { showError('사용자 정보를 찾을 수 없습니다.'); await auth.signOut(); return; }
+
+        const data = snap.data();
+        if (data.role === 'pending') {
+            showError('아직 관리자 승인이 완료되지 않았습니다. 승인 후 로그인 가능해요.');
+            await auth.signOut(); return;
         }
 
-        // 로그인 처리
-        window.handleLogin = async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
+        if (remember) localStorage.setItem('savedEmail', email);
+        else localStorage.removeItem('savedEmail');
 
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userDocRef);
-
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    
-                    if (userData.role === 'pending') {
-                        alert('아직 관리자 승인이 완료되지 않았습니다. 승인 후 로그인 가능합니다.');
-                        await auth.signOut();
-                        return;
-                    }
-                    
-                    if (rememberMe) {
-                        localStorage.setItem('autoLogin', 'true');
-                        localStorage.setItem('userEmail', email);
-                    }
-                    
-                    window.location.href = 'main.html';
-                } else {
-                    alert('사용자 정보를 찾을 수 없습니다.');
-                    await auth.signOut();
-                }
-            } catch (error) {
-                console.error('로그인 오류:', error);
-                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-                    alert('이메일 또는 비밀번호가 일치하지 않습니다.');
-                } else if (error.code === 'auth/user-not-found') {
-                    alert('존재하지 않는 계정입니다.');
-                } else {
-                    alert('로그인 중 오류가 발생했습니다: ' + error.message);
-                }
-            }
+        window.location.href = 'main.html';
+    } catch(e) {
+        if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+            showError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        } else {
+            showError('로그인 오류: ' + e.message);
         }
+    }
+};
 
-        // 회원가입 처리
-        window.handleRegister = async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('signupEmail').value.trim();
-            const nickname = document.getElementById('signupNickname').value.trim();
-            const password = document.getElementById('signupPassword').value;
-            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+// ── 회원가입 ──
+window.doSignup = async function() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const nick  = document.getElementById('signupNick').value.trim();
+    const pw    = document.getElementById('signupPw').value;
+    const pwc   = document.getElementById('signupPwC').value;
+    showError('');
 
-            if (password !== passwordConfirm) {
-                alert('비밀번호가 일치하지 않습니다.');
-                return;
-            }
+    if (!email || !nick || !pw || !pwc) { showError('모든 항목을 입력해주세요.'); return; }
+    if (nick.length < 2) { showError('닉네임은 2자 이상 입력해주세요.'); return; }
+    if (pw.length < 6)   { showError('비밀번호는 6자 이상 입력해주세요.'); return; }
+    if (pw !== pwc)      { showError('비밀번호가 일치하지 않습니다.'); return; }
 
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                await setDoc(doc(db, 'users', user.uid), {
-                    email: email,
-                    nickname: nickname,
-                    role: 'pending',
-                    createdAt: new Date().toISOString()
-                });
-
-                alert('회원가입이 완료되었습니다! 관리자 승인 후 로그인 가능합니다.');
-                switchTab('login');
-
-                document.getElementById('signupEmail').value = '';
-                document.getElementById('signupNickname').value = '';
-                document.getElementById('signupPassword').value = '';
-                document.getElementById('signupPasswordConfirm').value = '';
-
-            } catch (error) {
-                console.error('회원가입 오류:', error);
-                if (error.code === 'auth/email-already-in-use') {
-                    alert('이미 사용 중인 이메일입니다.');
-                } else if (error.code === 'auth/invalid-email') {
-                    alert('올바르지 않은 이메일 형식입니다.');
-                } else if (error.code === 'auth/weak-password') {
-                    alert('비밀번호가 너무 약합니다. 6자 이상 입력해주세요.');
-                } else {
-                    alert('회원가입 중 오류가 발생했습니다: ' + error.message);
-                }
-            }
-        }
-
-        // 자동 로그인 체크
-        window.addEventListener('DOMContentLoaded', () => {
-            const autoLogin = localStorage.getItem('autoLogin');
-            const savedEmail = localStorage.getItem('userEmail');
-            
-            if (autoLogin === 'true' && savedEmail) {
-                document.getElementById('loginEmail').value = savedEmail;
-                document.getElementById('rememberMe').checked = true;
-            }
+    try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pw);
+        await setDoc(doc(db, 'users', cred.user.uid), {
+            email, nickname: nick,
+            role: 'pending',
+            createdAt: new Date().toISOString()
         });
-    </script>
+        await auth.signOut();
+        alert('회원가입이 완료되었습니다!\n관리자 승인 후 로그인하실 수 있어요 😊');
+        switchTab('login');
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupNick').value = '';
+        document.getElementById('signupPw').value = '';
+        document.getElementById('signupPwC').value = '';
+    } catch(e) {
+        if (e.code === 'auth/email-already-in-use') showError('이미 사용 중인 이메일입니다.');
+        else if (e.code === 'auth/invalid-email')   showError('올바르지 않은 이메일 형식입니다.');
+        else showError('회원가입 오류: ' + e.message);
+    }
+};
+</script>
+
 </body>
 </html>

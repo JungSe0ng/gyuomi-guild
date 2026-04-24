@@ -4,480 +4,776 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>귀요미 길드 공략집</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #f4f5f9;
+            --white: #ffffff;
+            --primary: #7c5cbf;
+            --primary-light: #9b7fd4;
+            --primary-soft: #ede8f8;
+            --secondary: #e8609a;
+            --secondary-soft: #fde8f2;
+            --grad: linear-gradient(135deg, #7c5cbf, #e8609a);
+            --grad-soft: linear-gradient(135deg, #ede8f8, #fde8f2);
+            --text: #1a1a2e;
+            --text-sub: #5a5a7a;
+            --text-muted: #9898b8;
+            --border: #e8e8f0;
+            --shadow-md: 0 4px 20px rgba(124,92,191,0.10);
+            --sidebar-w: 240px;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Noto Sans KR', -apple-system, sans-serif;
-            background: linear-gradient(135deg, #6B4966 0%, #8B5A86 50%, #B08AB0 100%);
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ───── 사이드바 ───── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+        }
+
+        .sidebar-logo {
+            padding: 24px 20px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: var(--grad);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+
+        .logo-name {
+            font-size: 0.95em;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .logo-sub {
+            font-size: 0.68em;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* 유저 */
+        .sidebar-user {
+            margin: 14px 12px;
+            padding: 12px 14px;
+            background: var(--primary-soft);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 32px; height: 32px;
+            background: var(--grad);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+
+        .user-info { flex: 1; min-width: 0; }
+
+        .user-name {
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.68em;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8em;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: color 0.18s;
+            flex-shrink: 0;
+        }
+        .logout-btn:hover { color: var(--secondary); }
+
+        /* 네비 */
+        .sidebar-nav {
+            flex: 1;
+            padding: 8px 12px;
+            overflow-y: auto;
+        }
+
+        .nav-label {
+            font-size: 0.62em;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 14px 10px 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 0.875em;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.18s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        .nav-icon { font-size: 1em; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .nav-badge {
+            margin-left: auto;
+            font-size: 0.68em;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        .nav-badge.pink  { background: var(--secondary-soft); color: var(--secondary); }
+        .nav-badge.teal  { background: #e6f7f5; color: #2a9d8f; }
+
+        .sidebar-bottom {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .admin-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 0.875em;
+            font-weight: 600;
+            color: var(--secondary);
+            text-decoration: none;
+            transition: background 0.18s;
+            background: var(--secondary-soft);
+        }
+        .admin-link:hover { background: #fbd5e8; }
+
+        /* ───── 메인 ───── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        .header {
-            text-align: center;
-            padding: 40px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            margin: 20px;
-            border-radius: 20px;
-        }
-
-        .logo {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 20px;
-            background: white;
-            border-radius: 50%;
+        /* 상단 바 */
+        .topbar {
+            height: 56px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 4em;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
 
-        h1 {
-            color: white;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        .topbar-title {
+            font-size: 0.9em;
+            font-weight: 700;
+            color: var(--text);
         }
 
-        .subtitle {
-            color: #FFD1DC;
-            font-size: 1.2em;
+        .topbar-date {
+            font-size: 0.78em;
+            color: var(--text-muted);
         }
 
-        .nav-tabs {
+        .guild-chip {
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin: 20px;
-            flex-wrap: wrap;
-        }
-
-        .nav-tab {
-            padding: 15px 40px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 15px;
-            color: white;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .nav-tab:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        .nav-tab.active {
-            background: linear-gradient(135deg, #FFB6C1, #FFC0CB);
-            color: #6B4966;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            flex: 1;
-        }
-
-        .welcome-card {
-            background: white;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            background: var(--primary-soft);
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: var(--primary);
         }
 
-        .welcome-card h2 {
-            color: #B08AB0;
-            font-size: 2em;
-            text-align: center;
-            margin-bottom: 30px;
+        /* ───── 콘텐츠 ───── */
+        .content { padding: 28px 32px; flex: 1; }
+
+        /* 배너 */
+        .welcome-banner {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 26px 30px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
         }
 
-        .feature-grid {
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 260px; height: 100%;
+            background: var(--grad-soft);
+            clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .welcome-text { position: relative; z-index: 1; }
+
+        .welcome-text h1 {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .welcome-text h1 .hl {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-text p { font-size: 0.82em; color: var(--text-muted); }
+
+        .welcome-emoji {
+            font-size: 3.2em;
+            position: relative;
+            z-index: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+        /* 통계 */
+        .stats-row {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            margin-top: 30px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
         }
 
-        .feature-card {
-            background: linear-gradient(135deg, #FFE5EC 0%, #FFF0F5 100%);
-            border: 3px solid #FFB6C1;
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.15em;
+            flex-shrink: 0;
+        }
+        .si-purple { background: var(--primary-soft); }
+        .si-pink   { background: var(--secondary-soft); }
+        .si-teal   { background: #e6f7f5; }
+        .si-gold   { background: #fef7e6; }
+
+        .stat-val  { font-size: 1.55em; font-weight: 800; color: var(--text); line-height: 1; }
+        .stat-lbl  { font-size: 0.73em; color: var(--text-muted); margin-top: 3px; }
+
+        /* 섹션 헤더 */
+        .sec-head { display: flex; align-items: center; gap: 7px; margin-bottom: 13px; }
+        .sec-head h2 { font-size: 0.87em; font-weight: 700; color: var(--text); }
+        .sec-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--grad); flex-shrink: 0; }
+
+        /* 공략 카드 */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .menu-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
             text-decoration: none;
             color: inherit;
-            display: block;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            transition: all 0.22s;
+        }
+        .menu-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+        .mc-top { display: flex; align-items: center; justify-content: space-between; }
+
+        .mc-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.25em; }
+        .mc-purple .mc-icon { background: var(--primary-soft); }
+        .mc-pink   .mc-icon { background: var(--secondary-soft); }
+        .mc-teal   .mc-icon { background: #e6f7f5; }
+
+        .mc-arrow { color: var(--text-muted); font-size: 0.85em; transition: all 0.2s; }
+        .menu-card:hover .mc-arrow { transform: translateX(3px); color: var(--primary); }
+
+        .mc-title { font-size: 0.96em; font-weight: 700; color: var(--text); }
+        .mc-desc  { font-size: 0.78em; color: var(--text-muted); line-height: 1.5; }
+
+        .mc-count {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.73em; font-weight: 700;
+            padding: 3px 9px; border-radius: 20px; width: fit-content;
+        }
+        .mc-purple .mc-count { background: var(--primary-soft); color: var(--primary); }
+        .mc-pink   .mc-count { background: var(--secondary-soft); color: var(--secondary); }
+        .mc-teal   .mc-count { background: #e6f7f5; color: #2a9d8f; }
+
+        /* 하단 패널 */
+        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .panel { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+
+        .panel-hd {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--text);
         }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.4);
+        .panel-body { padding: 6px 20px 14px; }
+
+        /* 길드원 */
+        .member-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .member-row:last-child { border-bottom: none; }
+        .m-num  { width: 18px; font-size: 0.72em; color: var(--text-muted); text-align: center; flex-shrink: 0; }
+        .m-ava  { width: 28px; height: 28px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 0.78em; flex-shrink: 0; }
+        .m-name { flex: 1; font-size: 0.84em; font-weight: 600; color: var(--text); }
+        .m-badge { font-size: 0.68em; font-weight: 700; padding: 2px 7px; border-radius: 8px; }
+        .m-badge.admin  { background: var(--primary-soft); color: var(--primary); }
+        .m-badge.member { background: #f0f0f8; color: var(--text-muted); }
+
+        /* 공지 */
+        .notice-row { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+        .notice-row:last-child { border-bottom: none; }
+        .n-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+        .n-text { font-size: 0.81em; color: var(--text-sub); line-height: 1.5; }
+        .n-time { font-size: 0.7em; color: var(--text-muted); margin-top: 2px; }
+
+        /* 모바일 오버레이 */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.25);
+            z-index: 90;
+        }
+        .sidebar-overlay.open { display: block; }
+
+        /* 햄버거 */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 14px; left: 14px;
+            z-index: 200;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 9px;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .hamburger span { display: block; width: 17px; height: 2px; background: var(--text-sub); border-radius: 2px; }
+
+        /* 반응형 */
+        @media (max-width: 860px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+            .main { margin-left: 0; }
+            .hamburger { display: flex; }
+            .topbar { padding: 0 16px 0 52px; }
+            .content { padding: 20px 16px; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .menu-grid { grid-template-columns: 1fr; }
+            .bottom-grid { grid-template-columns: 1fr; }
+            .welcome-banner::before { display: none; }
+            .welcome-emoji { display: none; }
         }
 
-        .feature-card.attack {
-            background: linear-gradient(135deg, #FFE5E5 0%, #FFF5F5 100%);
-            border-color: #FF9AA2;
-        }
-
-        .feature-card.defense {
-            background: linear-gradient(135deg, #E5F5F0 0%, #F0FFF5 100%);
-            border-color: #98D8C8;
-        }
-
-        .feature-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-        }
-
-        .feature-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #B08AB0;
-            margin-bottom: 10px;
-        }
-
-        .feature-desc {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .feature-stats {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px dashed #FFB6C1;
-            font-weight: bold;
-            color: #B08AB0;
-        }
-
-        /* 길드원 목록 테이블 */
-        .member-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .member-table thead {
-            background: linear-gradient(135deg, #B08AB0, #8B5A86);
-            color: white;
-        }
-
-        .member-table th {
-            padding: 15px;
-            text-align: left;
-            font-weight: bold;
-        }
-
-        .member-table tbody tr {
-            border-bottom: 1px solid #e0e0e0;
-            transition: background 0.3s;
-        }
-
-        .member-table tbody tr:hover {
-            background: rgba(176,138,176,0.05);
-        }
-
-        .member-table td {
-            padding: 15px;
-        }
-
-        .role-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-
-        .role-badge.admin {
-            background: linear-gradient(135deg, #FFB6C1, #FFC0CB);
-            color: #6B4966;
-        }
-
-        .role-badge.member {
-            background: linear-gradient(135deg, #98D8C8, #6FC3A8);
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.8em;
-            }
-
-            .nav-tab {
-                padding: 12px 25px;
-                font-size: 1em;
-            }
-
-            .feature-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* 페이드인 */
+        .fade-up { opacity: 0; transform: translateY(14px); animation: fu 0.4s ease forwards; }
+        @keyframes fu { to { opacity:1; transform:none; } }
+        .d1 { animation-delay: 0.05s; }
+        .d2 { animation-delay: 0.1s; }
+        .d3 { animation-delay: 0.16s; }
+        .d4 { animation-delay: 0.22s; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">🐰</div>
-        <h1>⚔️ 귀요미 길드 공략집 ⚔️</h1>
-        <p class="subtitle">세븐나이츠 길드전 전략 모음집</p>
-        <div id="userInfo"></div>
-    </div>
 
-    <div class="nav-tabs">
-        <a href="main.html" class="nav-tab active">메인</a>
-        <a href="attack.html" class="nav-tab">공격 공략</a>
-        <a href="defense.html" class="nav-tab">방어 공략</a>
-        <a href="expedition.html" class="nav-tab">🌟 강림원정대</a>
-    </div>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<button class="hamburger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+</button>
 
-    <div class="container">
-        <div class="welcome-card">
-            <h2>⚔️ 세븐나이츠 길드전 ⚔️</h2>
-            <p style="text-align: center; color: #666; font-size: 1.1em; line-height: 1.8;">
-                공격과 방어 전략을 체계적으로 관리하세요
-            </p>
-
-            <div class="feature-grid">
-                <a href="attack.html" class="feature-card attack">
-                    <div class="feature-icon">⚔️</div>
-                    <div class="feature-title">공격 공략집</div>
-                    <div class="feature-desc">
-                        상대 방어팀을 공략하는<br>
-                        전략을 등록하고 관리
-                    </div>
-                    <div class="feature-stats" id="attackCount">로딩중...</div>
-                </a>
-
-                <a href="defense.html" class="feature-card defense">
-                    <div class="feature-icon">🛡️</div>
-                    <div class="feature-title">방어 공략집</div>
-                    <div class="feature-desc">
-                        나의 방어팀을<br>
-                        구성하고 관리
-                    </div>
-                    <div class="feature-stats" id="defenseCount">로딩중...</div>
-                </a>
-            </div>
-        </div>
-
-        <!-- 길드원 목록 -->
-        <div class="welcome-card">
-            <h2>👥 길드원 목록</h2>
-            <div id="guildMembersList" style="display: grid; gap: 10px;">
-                <p style="text-align: center; color: #999;">로딩중...</p>
+<!-- ───── 사이드바 ───── -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-wrap">
+            <div class="logo-icon">🐰</div>
+            <div>
+                <div class="logo-name">귀요미 길드</div>
+                <div class="logo-sub">세븐나이츠 공략집</div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    <div class="sidebar-user">
+        <div class="user-avatar">🌸</div>
+        <div class="user-info">
+            <div class="user-name" id="sidebarName">로딩중...</div>
+            <div class="user-role" id="sidebarRole">멤버</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="로그아웃">↩</button>
+    </div>
 
-        // Firebase 설정 (실제 프로젝트 설정으로 교체 필요)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
-            authDomain: "gyuomi-guild.firebaseapp.com",
-            projectId: "gyuomi-guild",
-            storageBucket: "gyuomi-guild.firebasestorage.app",
-            messagingSenderId: "43293575259",
-            appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
-        };
+    <nav class="sidebar-nav">
+        <div class="nav-label">메뉴</div>
+        <a href="main.html" class="nav-item active">
+            <span class="nav-icon">🏠</span> 홈
+        </a>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        <div class="nav-label">공략</div>
+        <a href="guildwar.html" class="nav-item">
+            <span class="nav-icon">⚔️</span> 길드전
+            <span class="nav-badge" id="badgeGW">0</span>
+        </a>
+        <a href="siege.html" class="nav-item">
+            <span class="nav-icon">🏰</span> 공성전
+            <span class="nav-badge pink" id="badgeSG">0</span>
+        </a>
+        <a href="expedition.html" class="nav-item">
+            <span class="nav-icon">🌟</span> 강림원정대
+            <span class="nav-badge teal" id="badgeEX">0</span>
+        </a>
 
-        // 전역 변수로 내보내기
-        window.auth = auth;
-        window.db = db;
-        window.firebaseAuth = { onAuthStateChanged, signOut };
-        window.firestore = { collection, getDocs, doc, getDoc };
-        window.currentUser = null;
+        <div class="nav-label">커뮤니티</div>
+        <a href="board.html" class="nav-item">
+            <span class="nav-icon">📋</span> 게시판
+        </a>
 
-        // 인증 상태 확인
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userDocRef);
+        <div class="nav-label">기타</div>
+        <a href="members.html" class="nav-item">
+            <span class="nav-icon">👥</span> 길드원
+        </a>
+    </nav>
 
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    
-                    if (userData.role === 'pending') {
-                        await signOut(auth);
-                        window.location.href = 'login.html';
-                        return;
-                    }
-                    
-                    window.currentUser = {
-                        uid: user.uid,
-                        email: user.email,
-                        ...userData
-                    };
-                    
-                    updateUIForUser();
-                    loadCounts();
-                    loadGuildMembers();
-                } else {
-                    await signOut(auth);
-                    window.location.href = 'login.html';
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
+    <div class="sidebar-bottom" id="adminSection" style="display:none;">
+        <a href="admin.html" class="admin-link">
+            <span>👑</span> 회원 관리
+        </a>
+    </div>
+</aside>
 
-        function updateUIForUser() {
-            const userInfo = document.getElementById('userInfo');
-            const roleText = window.currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
-            const roleColor = window.currentUser.role === 'admin' ? '#FFB6C1' : '#98D8C8';
+<!-- ───── 메인 ───── -->
+<div class="main">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">대시보드</div>
+            <div class="topbar-date" id="topDate"></div>
+        </div>
+        <div class="guild-chip">🐰 귀요미 길드</div>
+    </div>
 
-            let html = `
-                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 15px; flex-wrap: wrap;">
-                    <div style="text-align: left;">
-                        <div style="font-size: 1.1em; font-weight: bold; color: white;">${window.currentUser.nickname}</div>
-                        <div style="font-size: 0.85em; color: ${roleColor};">${roleText}</div>
-                    </div>
-            `;
+    <div class="content">
 
-            if (window.currentUser.role === 'admin') {
-                html += `
-                    <a href="admin.html" style="padding: 8px 16px; background: rgba(255,182,193,0.3); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; text-decoration: none; font-size: 0.9em; transition: all 0.3s;"
-                        onmouseover="this.style.background='rgba(255,182,193,0.5)'" onmouseout="this.style.background='rgba(255,182,193,0.3)'">
-                        👥 회원 관리
-                    </a>
-                `;
-            }
+        <!-- 배너 -->
+        <div class="welcome-banner fade-up d1">
+            <div class="welcome-text">
+                <h1><span class="hl" id="heroName">길드원</span>님, 환영해요! 👋</h1>
+                <p>오늘도 귀요미 길드와 함께 세븐나이츠를 정복해봐요.</p>
+            </div>
+            <div class="welcome-emoji">⚔️</div>
+        </div>
 
-            html += `
-                    <button onclick="handleLogout()" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: all 0.3s;"
-                        onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                        로그아웃
-                    </button>
+        <!-- 통계 -->
+        <div class="stats-row fade-up d2">
+            <div class="stat-card">
+                <div class="stat-icon si-purple">⚔️</div>
+                <div><div class="stat-val" id="stGW">-</div><div class="stat-lbl">길드전 공략</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-pink">🏰</div>
+                <div><div class="stat-val" id="stSG">-</div><div class="stat-lbl">공성전 공략</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-gold">🌟</div>
+                <div><div class="stat-val" id="stEX">-</div><div class="stat-lbl">원정대 공략</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon si-teal">👥</div>
+                <div><div class="stat-val" id="stMB">-</div><div class="stat-lbl">길드원 수</div></div>
+            </div>
+        </div>
+
+        <!-- 공략 바로가기 -->
+        <div class="sec-head">
+            <div class="sec-dot"></div>
+            <h2>공략 바로가기</h2>
+        </div>
+        <div class="menu-grid fade-up d3">
+            <a href="guildwar.html" class="menu-card mc-purple">
+                <div class="mc-top">
+                    <div class="mc-icon">⚔️</div>
+                    <span class="mc-arrow">→</span>
                 </div>
-            `;
+                <div class="mc-title">길드전</div>
+                <div class="mc-desc">상대 방어팀 공략법과 팀 구성을 관리해요</div>
+                <div class="mc-count">📋 공략 <span id="mcGW">0</span>개</div>
+            </a>
+            <a href="siege.html" class="menu-card mc-pink">
+                <div class="mc-top">
+                    <div class="mc-icon">🏰</div>
+                    <span class="mc-arrow">→</span>
+                </div>
+                <div class="mc-title">공성전</div>
+                <div class="mc-desc">공성전 배치 전략과 수비 공략을 확인해요</div>
+                <div class="mc-count">📋 공략 <span id="mcSG">0</span>개</div>
+            </a>
+            <a href="expedition.html" class="menu-card mc-teal">
+                <div class="mc-top">
+                    <div class="mc-icon">🌟</div>
+                    <span class="mc-arrow">→</span>
+                </div>
+                <div class="mc-title">강림원정대</div>
+                <div class="mc-desc">보스별 원정대 구성과 공략 패턴을 정리해요</div>
+                <div class="mc-count">📋 공략 <span id="mcEX">0</span>개</div>
+            </a>
+        </div>
 
-            userInfo.innerHTML = html;
+        <!-- 하단 패널 -->
+        <div class="bottom-grid fade-up d4">
+            <div class="panel">
+                <div class="panel-hd">👥 길드원 목록</div>
+                <div class="panel-body" id="membersList">
+                    <p style="text-align:center;color:var(--text-muted);font-size:0.82em;padding:18px 0">로딩중...</p>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-hd">📢 공지사항</div>
+                <div class="panel-body">
+                    <div class="notice-row">
+                        <div class="n-dot" style="background:var(--primary)"></div>
+                        <div><div class="n-text">귀요미 길드 공략집이 새롭게 오픈되었습니다!</div><div class="n-time">방금 전</div></div>
+                    </div>
+                    <div class="notice-row">
+                        <div class="n-dot" style="background:var(--secondary)"></div>
+                        <div><div class="n-text">공성전 공략 페이지가 추가되었어요.</div><div class="n-time">오늘</div></div>
+                    </div>
+                    <div class="notice-row">
+                        <div class="n-dot" style="background:#2a9d8f"></div>
+                        <div><div class="n-text">강림원정대 보스 공략을 등록해보세요!</div><div class="n-time">오늘</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
+        authDomain: "gyuomi-guild.firebaseapp.com",
+        projectId: "gyuomi-guild",
+        storageBucket: "gyuomi-guild.firebasestorage.app",
+        messagingSenderId: "43293575259",
+        appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ✅ 미리보기 모드 (로컬 테스트용 — 배포 시 false로 변경)
+    const PREVIEW = false;
+    const PREVIEW_USER = { uid: 'preview', nickname: '미리보기', role: 'admin' };
+
+    // 날짜
+    const days = ['일','월','화','수','목','금','토'];
+    const now = new Date();
+    document.getElementById('topDate').textContent =
+        `${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+    if (PREVIEW) {
+        const me = PREVIEW_USER;
+        document.getElementById('sidebarName').textContent = me.nickname;
+        document.getElementById('sidebarRole').textContent = '👑 관리자';
+        document.getElementById('heroName').textContent = me.nickname;
+        document.getElementById('adminSection').style.display = '';
+        // 통계/멤버는 Firebase 없이 0으로
+        ['stGW','stSG','stEX','stMB','mcGW','mcSG','mcEX','badgeGW','badgeSG','badgeEX'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.textContent = '0';
+        });
+        document.getElementById('membersList').innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.82em;padding:18px 0">미리보기 모드 — Firebase 미연결</p>';
+    } else {
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = 'index.html'; return; }
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (!snap.exists()) { await signOut(auth); window.location.href = 'index.html'; return; }
+        const data = snap.data();
+        if (data.role === 'pending') { await signOut(auth); window.location.href = 'index.html'; return; }
+        const me = { uid: user.uid, ...data };
+
+        document.getElementById('sidebarName').textContent = me.nickname;
+        document.getElementById('sidebarRole').textContent = me.role === 'admin' ? '👑 관리자' : '👤 멤버';
+        document.getElementById('heroName').textContent = me.nickname;
+
+        if (me.role === 'admin') document.getElementById('adminSection').style.display = '';
+
+        loadStats();
+        loadMembers(me);
+    });
+    }
+
+    async function loadStats() {
+        try {
+            const [gw, sg, ex, us] = await Promise.all([
+                getDocs(collection(db, 'guides')),
+                getDocs(collection(db, 'siegeGuides')),
+                getDocs(collection(db, 'expeditions')),
+                getDocs(collection(db, 'users')),
+            ]);
+            const mc = [...us.docs].filter(d => d.data().role !== 'pending').length;
+            document.getElementById('stGW').textContent = gw.size;
+            document.getElementById('stSG').textContent = sg.size;
+            document.getElementById('stEX').textContent = ex.size;
+            document.getElementById('stMB').textContent = mc;
+            document.getElementById('mcGW').textContent = gw.size;
+            document.getElementById('mcSG').textContent = sg.size;
+            document.getElementById('mcEX').textContent = ex.size;
+            document.getElementById('badgeGW').textContent = gw.size;
+            document.getElementById('badgeSG').textContent = sg.size;
+            document.getElementById('badgeEX').textContent = ex.size;
+        } catch(e) {
+            ['stGW','stSG','stEX','stMB'].forEach(id => document.getElementById(id).textContent = '0');
         }
+    }
 
-        async function loadCounts() {
-            try {
-                const guidesSnapshot = await getDocs(collection(db, 'guides'));
-                const defenseSnapshot = await getDocs(collection(db, 'defenseTeams'));
-                
-                document.getElementById('attackCount').textContent = `${guidesSnapshot.size}개 등록`;
-                document.getElementById('defenseCount').textContent = `${defenseSnapshot.size}개 등록`;
-            } catch (error) {
-                console.error('카운트 로드 오류:', error);
-                document.getElementById('attackCount').textContent = '0개 등록';
-                document.getElementById('defenseCount').textContent = '0개 등록';
+    async function loadMembers(me) {
+        const emojis = ['🌸','🌼','🌺','🍀','⭐','🌙','🎀','🦋','🌈','🎯','🌻','🍒'];
+        try {
+            const snap = await getDocs(collection(db, 'users'));
+            const list = [];
+            snap.forEach(d => { const r = d.data(); if (r.role !== 'pending') list.push({uid:d.id,...r}); });
+            list.sort((a,b) => {
+                if (a.role==='admin' && b.role!=='admin') return -1;
+                if (a.role!=='admin' && b.role==='admin') return 1;
+                return new Date(a.createdAt) - new Date(b.createdAt);
+            });
+            const el = document.getElementById('membersList');
+            if (!list.length) {
+                el.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.82em;padding:18px 0">등록된 길드원이 없습니다.</p>';
+                return;
             }
+            el.innerHTML = list.map((m,i) => `
+                <div class="member-row">
+                    <span class="m-num">${i+1}</span>
+                    <div class="m-ava">${emojis[i%emojis.length]}</div>
+                    <span class="m-name">${m.nickname}${m.uid===me.uid?' (나)':''}</span>
+                    <span class="m-badge ${m.role}">${m.role==='admin'?'관리자':'멤버'}</span>
+                </div>
+            `).join('');
+        } catch(e) {
+            document.getElementById('membersList').innerHTML =
+                '<p style="text-align:center;color:var(--text-muted);font-size:0.82em;padding:18px 0">불러오기 실패</p>';
         }
+    }
 
-        async function loadGuildMembers() {
-            try {
-                const usersSnapshot = await getDocs(collection(db, 'users'));
-                const users = [];
-                
-                usersSnapshot.forEach(doc => {
-                    const userData = doc.data();
-                    if (userData.role !== 'pending') {
-                        users.push({ uid: doc.id, ...userData });
-                    }
-                });
+    window.handleLogout = async () => {
+        if (PREVIEW) { window.location.href = 'index.html'; return; }
+        if (!confirm('로그아웃 하시겠습니까?')) return;
+        await signOut(auth);
+        window.location.href = 'index.html';
+    };
+</script>
 
-                // 관리자 먼저, 그 다음 가입일순 정렬
-                users.sort((a, b) => {
-                    if (a.role === 'admin' && b.role !== 'admin') return -1;
-                    if (a.role !== 'admin' && b.role === 'admin') return 1;
-                    return new Date(a.createdAt) - new Date(b.createdAt);
-                });
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('open');
+    }
+</script>
 
-                const container = document.getElementById('guildMembersList');
-                
-                if (users.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #999;">등록된 길드원이 없습니다.</p>';
-                    return;
-                }
-
-                let html = `
-                    <table class="member-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px; text-align: center;">순번</th>
-                                <th>닉네임</th>
-                                <th style="width: 120px; text-align: center;">권한</th>
-                                <th style="width: 150px;">가입일</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                users.forEach((user, index) => {
-                    const isCurrentUser = window.currentUser && user.uid === window.currentUser.uid;
-                    const roleClass = user.role === 'admin' ? 'admin' : 'member';
-                    const roleText = user.role === 'admin' ? '👑 관리자' : '👤 멤버';
-                    
-                    html += `
-                        <tr style="${isCurrentUser ? 'background: rgba(176,138,176,0.1); font-weight: bold;' : ''}">
-                            <td style="text-align: center; color: #999;">${index + 1}</td>
-                            <td style="color: #333;">
-                                ${user.nickname}${isCurrentUser ? ' (나)' : ''}
-                            </td>
-                            <td style="text-align: center;">
-                                <span class="role-badge ${roleClass}">${roleText}</span>
-                            </td>
-                            <td style="color: #666; font-size: 0.9em;">
-                                ${new Date(user.createdAt).toLocaleDateString('ko-KR')}
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                html += `
-                        </tbody>
-                    </table>
-                `;
-
-                container.innerHTML = html;
-
-            } catch (error) {
-                console.error('길드원 목록 로드 오류:', error);
-                document.getElementById('guildMembersList').innerHTML = '<p style="text-align: center; color: #ff6b6b;">길드원 목록을 불러오는데 실패했습니다.</p>';
-            }
-        }
-
-        window.handleLogout = async function() {
-            if (!confirm('로그아웃 하시겠습니까?')) return;
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('로그아웃 오류:', error);
-                alert('로그아웃 중 오류가 발생했습니다.');
-            }
-        }
-    </script>
 </body>
 </html>
