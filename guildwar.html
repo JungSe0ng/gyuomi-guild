@@ -82,7 +82,7 @@
         /* ── 등록 폼 메인 레이아웃 ── */
         .form-layout {
             display: grid;
-            grid-template-columns: 220px 1fr;
+            grid-template-columns: 300px 1fr;
             gap: 16px;
             align-items: start;
         }
@@ -496,7 +496,7 @@
         .hamburger { display: none; position: fixed; top: 14px; left: 14px; z-index: 200; background: var(--white); border: 1px solid var(--border); border-radius: 9px; padding: 9px; cursor: pointer; flex-direction: column; gap: 4px; }
         .hamburger span { display: block; width: 17px; height: 2px; background: var(--text-sub); border-radius: 2px; }
 
-        @media (max-width: 1100px) { .form-layout { grid-template-columns: 200px 1fr; } }
+        @media (max-width: 1100px) { .form-layout { grid-template-columns: 260px 1fr; } }
         @media (max-width: 860px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
@@ -566,7 +566,7 @@
         <!-- 메인 탭 -->
         <div class="main-tabs">
             <button class="main-tab active-atk" id="mainTabAtk" onclick="switchMainTab('atk')">⚔️ 공격 공략</button>
-            <button class="main-tab" id="mainTabDef" onclick="switchMainTab('def')">🛡️ 방어 공략</button>
+            <button class="main-tab" id="mainTabDef" onclick="window.location.href='defense.html'">🛡️ 방어 공략</button>
         </div>
 
         <!-- 공격 공략 섹션 -->
@@ -864,7 +864,7 @@ function initSlots() {
 // 영웅 이미지 헬퍼
 // ──────────────────────────────────────────
 function heroImgEl(name, cls='') {
-    return `<img src="${HERO_IMG_PATH}${name}.png" alt="${name}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.7em;color:var(--text-muted);text-align:center;\\'>${name}</span>'" ${cls ? `class="${cls}"` : ''}>`;
+    return `<img src="${HERO_IMG_PATH}${name}.webp" alt="${name}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.7em;color:var(--text-muted);text-align:center;\\'>${name}</span>'" ${cls ? `class="${cls}"` : ''}>`;
 }
 
 // ──────────────────────────────────────────
@@ -955,7 +955,7 @@ function renderEquipTabs() {
         if (!name) return '';
         return `
         <div class="equip-hero-tab ${i === activeAtkIdx ? 'active' : ''}" id="equipTab${i}" onclick="setActiveAtk(${i})">
-            <img src="${HERO_IMG_PATH}${name}.png" alt="${name}" onerror="this.style.display='none'">
+            <img src="${HERO_IMG_PATH}${name}.webp" alt="${name}" onerror="this.style.display='none'">
             ${name}
         </div>`;
     }).join('');
@@ -1049,8 +1049,8 @@ function getAvailableSkills() {
     const skills = [];
     atkHeroes.forEach(name => {
         if (!name) return;
-        skills.push({ hero: name, num: 1, key: `${name}_1`, img: `${HERO_IMG_PATH}${name}1.png` });
-        skills.push({ hero: name, num: 2, key: `${name}_2`, img: `${HERO_IMG_PATH}${name}2.png` });
+        skills.push({ hero: name, num: 1, key: `${name}_1`, img: `${HERO_IMG_PATH}${name}1.webp` });
+        skills.push({ hero: name, num: 2, key: `${name}_2`, img: `${HERO_IMG_PATH}${name}2.webp` });
     });
     return skills;
 }
@@ -1123,7 +1123,7 @@ function renderPetGrid() {
     grid.innerHTML = PET_LIST.map(name => `
         <div class="pet-item" onclick="addPet('${name}')">
             <div class="pet-item-img ${selectedPets.includes(name) ? 'selected' : ''}">
-                <img src="${PET_IMG_PATH}${name}.png" alt="${name}"
+                <img src="${PET_IMG_PATH}${name}.webp" alt="${name}"
                      onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.6em;text-align:center;padding:4px;\\'>${name}</span>'">
             </div>
             <div class="pet-item-name">${name}</div>
@@ -1155,7 +1155,7 @@ function renderPetSlots() {
         const name = selectedPets[i];
         if (name) {
             slot.className = 'pet-slot filled';
-            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.png" alt="${name}"
+            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.webp" alt="${name}"
                 onerror="this.style.background='var(--teal-soft)'">
                 <button class="del-pet" onclick="event.stopPropagation();clearPet(${i})">×</button>`;
         } else {
