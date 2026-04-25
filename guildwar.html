@@ -790,60 +790,6 @@ const app = initializeApp(FB);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 let currentUser = null;
-
-onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = 'index.html'; return; }
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (!snap.exists()) { await signOut(auth); window.location.href = 'index.html'; return; }
-    const data = snap.data();
-    if (data.role === 'pending') { await signOut(auth); window.location.href = 'index.html'; return; }
-    currentUser = { uid: user.uid, ...data };
-    document.getElementById('sidebarName').textContent = currentUser.nickname;
-    document.getElementById('sidebarRole').textContent = currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
-    if (currentUser.role === 'admin') {
-        const adminEl = document.getElementById('adminSection');
-        if (adminEl) adminEl.style.display = '';
-    }
-    // module 스크립트 로드 완료 후 일반 스크립트 함수 호출
-    if (typeof window.loadGuides === 'function') {
-        window.loadGuides();
-    } else {
-        window.addEventListener('guidesReady', () => window.loadGuides());
-    }
-});
-
-window.fbSaveGuide = async function(data) {
-    await addDoc(collection(db, 'attack_strategies'), {
-        ...data,
-        author: currentUser.nickname,
-        authorUid: currentUser.uid,
-        createdAt: serverTimestamp(),
-        comments: []
-    });
-};
-
-window.fbLoadGuides = async function() {
-    try {
-        const q = query(collection(db, 'attack_strategies'), orderBy('createdAt','desc'));
-        const snap = await getDocs(q);
-        const guides = [];
-        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
-        return guides;
-    } catch(e) {
-        const snap = await getDocs(collection(db, 'attack_strategies'));
-        const guides = [];
-        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
-        return guides;
-    }
-};
-
-window.handleLogout = async () => {
-    if (!confirm('로그아웃 하시겠습니까?')) return;
-    await signOut(auth); window.location.href = 'index.html';
-};
-</script>
-
-<script>
 // ──────────────────────────────────────────
 // 날짜
 // ──────────────────────────────────────────
@@ -1305,9 +1251,6 @@ async function loadGuides() {
         </div>`;
     }).join('');
 }
-window.loadGuides = loadGuides;
-window.dispatchEvent(new Event('guidesReady'));
-
 // ──────────────────────────────────────────
 // 모달 외부 클릭
 // ──────────────────────────────────────────
@@ -1318,6 +1261,88 @@ document.getElementById('heroModal').addEventListener('click', function(e) {
 // 사이드바
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
 function closeSidebar()  { document.getElementById('sidebar').classList.remove('open');  document.getElementById('overlay').classList.remove('open'); }
+
+// ── Firebase 저장/로드 ──
+async function fbSaveGuide(data) {
+    await addDoc(collection(db, 'attack_strategies'), {
+        ...data,
+        author: currentUser.nickname,
+        authorUid: currentUser.uid,
+        createdAt: serverTimestamp(),
+        comments: []
+    });
+}
+
+async function fbLoadGuides() {
+    try {
+        const q = query(collection(db, 'attack_strategies'), orderBy('createdAt','desc'));
+        const snap = await getDocs(q);
+        const guides = [];
+        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
+        return guides;
+    } catch(e) {
+        const snap = await getDocs(collection(db, 'attack_strategies'));
+        const guides = [];
+        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
+        return guides;
+    }
+}
+
+// ── 인증 ──
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'index.html'; return; }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) { await signOut(auth); window.location.href = 'index.html'; return; }
+    const data = snap.data();
+    if (data.role === 'pending') { await signOut(auth); window.location.href = 'index.html'; return; }
+    currentUser = { uid: user.uid, ...data };
+    document.getElementById('sidebarName').textContent = currentUser.nickname;
+    document.getElementById('sidebarRole').textContent = currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
+    if (currentUser.role === 'admin') {
+        const adminEl = document.getElementById('adminSection');
+        if (adminEl) adminEl.style.display = '';
+    }
+    await loadGuides();
+});
+
+window.handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) return;
+    await signOut(auth); window.location.href = 'index.html';
+};
+
+// saveGuide에서 fbSaveGuide 직접 호출하도록
+const _origSaveGuide = saveGuide;
+window.saveGuide = async function() {
+    const name = document.getElementById('fName').value.trim();
+    if (!name) { alert('공략 이름을 입력해주세요.'); return; }
+    if (defHeroes.some(h => !h)) { alert('상대 방어팀 영웅 3명을 모두 선택해주세요.'); return; }
+    if (atkHeroes.some(h => !h)) { alert('내 공격팀 영웅 3명을 모두 선택해주세요.'); return; }
+
+    const btn = document.querySelector('.btn-submit');
+    btn.textContent = '저장중...'; btn.disabled = true;
+    try {
+        const data = {
+            name,
+            speedCondition: document.querySelector('input[name="speedAtk"]:checked')?.value,
+            memo: document.getElementById('fMemo').value,
+            detail: document.getElementById('fDetail').value,
+            defenseTeam: [...defHeroes],
+            attackTeam: [...atkHeroes],
+            equipData: JSON.parse(JSON.stringify(equipData)),
+            skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
+            pets: selectedPets.filter(Boolean),
+        };
+        await fbSaveGuide(data);
+        alert('공략이 등록되었습니다! ✅');
+        switchSub('list');
+        await loadGuides();
+    } catch(e) {
+        console.error(e);
+        alert('저장 오류: ' + e.message);
+    } finally {
+        btn.textContent = '✅ 공략 등록하기'; btn.disabled = false;
+    }
+};
 
 // ── 초기화 ──
 initSlots();
