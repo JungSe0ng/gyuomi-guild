@@ -804,7 +804,12 @@ onAuthStateChanged(auth, async (user) => {
         const adminEl = document.getElementById('adminSection');
         if (adminEl) adminEl.style.display = '';
     }
-    loadGuides();
+    // module 스크립트 로드 완료 후 일반 스크립트 함수 호출
+    if (typeof window.loadGuides === 'function') {
+        window.loadGuides();
+    } else {
+        window.addEventListener('guidesReady', () => window.loadGuides());
+    }
 });
 
 window.fbSaveGuide = async function(data) {
@@ -1279,7 +1284,7 @@ async function loadGuides() {
     if (countEl) countEl.textContent = guides.length;
 
     const el = document.getElementById('atkList');
-    if (!el) return; // 요소 없으면 그냥 종료
+    if (!el) return;
 
     if (!guides.length) {
         el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-text">등록된 공략이 없습니다.</div></div>';
@@ -1300,6 +1305,8 @@ async function loadGuides() {
         </div>`;
     }).join('');
 }
+window.loadGuides = loadGuides;
+window.dispatchEvent(new Event('guidesReady'));
 
 // ──────────────────────────────────────────
 // 모달 외부 클릭

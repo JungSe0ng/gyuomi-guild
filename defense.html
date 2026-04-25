@@ -495,7 +495,11 @@ onAuthStateChanged(auth, async (user) => {
         const adminEl = document.getElementById('adminSection');
         if (adminEl) adminEl.style.display = '';
     }
-    loadGuides();
+    if (typeof window.loadGuides === 'function') {
+        window.loadGuides();
+    } else {
+        window.addEventListener('defGuidesReady', () => window.loadGuides());
+    }
 });
 
 window.handleLogout = async () => {
@@ -952,6 +956,8 @@ async function loadGuides() {
 
     el.innerHTML = cardsHtml;
 }
+window.loadGuides = loadGuides;
+window.dispatchEvent(new Event('defGuidesReady'));
 
 // ──────────────────────────────────
 // 모달 외부 클릭
