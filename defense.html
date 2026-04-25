@@ -791,15 +791,17 @@ function renderSkillSlots() {
 // 펫
 // ──────────────────────────────────
 function renderPetGrid() {
-    document.getElementById('petGrid').innerHTML = PET_LIST.map(name => `
-        <div class="pet-item" onclick="addPet('${name}')">
-            <div class="pet-item-img ${selectedPets.includes(name) ? 'selected' : ''}">
+    const grid = document.getElementById('petGrid');
+    grid.innerHTML = PET_LIST.map(name => {
+        const sel = selectedPets.includes(name);
+        return `<div class="pet-item" onclick="addPet('${name}')">
+            <div class="pet-item-img ${sel ? 'selected' : ''}">
                 <img src="${PET_IMG_PATH}${name}.webp" alt="${name}"
-                    onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.6em;text-align:center;padding:4px;\\'>${name}</span>'">
+                     onerror="this.closest('.pet-item').style.display='none'">
             </div>
             <div class="pet-item-name">${name}</div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function addPet(name) {
@@ -913,6 +915,23 @@ document.getElementById('heroModal').addEventListener('click', function(e) {
 // 사이드바
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
 function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+
+// ── window에 함수 등록 (onclick에서 사용) ──
+window.switchSub = switchSub;
+window.openHeroModal = openHeroModal;
+window.closeHeroModal = closeHeroModal;
+window.renderHeroModal = renderHeroModal;
+window.selectHero = selectHero;
+window.setActiveHero = setActiveHero;
+window.saveEquip = saveEquip;
+window.renderSkillGrid = renderSkillGrid;
+window.addSkill = addSkill;
+window.clearSkillSlot = clearSkillSlot;
+window.addPet = addPet;
+window.clearPet = clearPet;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
 
 // ── 초기화 ──
 initSlots();

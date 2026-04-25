@@ -1138,15 +1138,16 @@ function renderSkillSlots() {
 // ──────────────────────────────────────────
 function renderPetGrid() {
     const grid = document.getElementById('petGrid');
-    grid.innerHTML = PET_LIST.map(name => `
-        <div class="pet-item" onclick="addPet('${name}')">
-            <div class="pet-item-img ${selectedPets.includes(name) ? 'selected' : ''}">
+    grid.innerHTML = PET_LIST.map(name => {
+        const sel = selectedPets.includes(name);
+        return `<div class="pet-item" id="pi-${name.replace(/[^a-zA-Z0-9]/g,'')}" onclick="addPet('${name}')">
+            <div class="pet-item-img ${sel ? 'selected' : ''}">
                 <img src="${PET_IMG_PATH}${name}.webp" alt="${name}"
-                     onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.6em;text-align:center;padding:4px;\\'>${name}</span>'">
+                     onerror="this.closest('.pet-item').style.display='none'">
             </div>
             <div class="pet-item-name">${name}</div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function addPet(name) {
@@ -1343,6 +1344,24 @@ window.saveGuide = async function() {
         btn.textContent = '✅ 공략 등록하기'; btn.disabled = false;
     }
 };
+
+
+// ── window에 함수 등록 (onclick에서 사용) ──
+window.switchMainTab = switchMainTab;
+window.switchSub = switchSub;
+window.openHeroModal = openHeroModal;
+window.closeHeroModal = closeHeroModal;
+window.renderHeroModal = renderHeroModal;
+window.selectHero = selectHero;
+window.setActiveAtk = setActiveAtk;
+window.saveEquip = saveEquip;
+window.renderSkillGrid = renderSkillGrid;
+window.addSkill = addSkill;
+window.clearSkillSlot = clearSkillSlot;
+window.addPet = addPet;
+window.clearPet = clearPet;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
 
 // ── 초기화 ──
 initSlots();
