@@ -771,6 +771,71 @@
     </div>
 </div>
 
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const FB = {
+    apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
+    authDomain: "gyuomi-guild.firebaseapp.com",
+    projectId: "gyuomi-guild",
+    storageBucket: "gyuomi-guild.firebasestorage.app",
+    messagingSenderId: "43293575259",
+    appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
+};
+const app = initializeApp(FB);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'index.html'; return; }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) { await signOut(auth); window.location.href = 'index.html'; return; }
+    const data = snap.data();
+    if (data.role === 'pending') { await signOut(auth); window.location.href = 'index.html'; return; }
+    currentUser = { uid: user.uid, ...data };
+    document.getElementById('sidebarName').textContent = currentUser.nickname;
+    document.getElementById('sidebarRole').textContent = currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
+    if (currentUser.role === 'admin') {
+        const adminEl = document.getElementById('adminSection');
+        if (adminEl) adminEl.style.display = '';
+    }
+    loadGuides();
+});
+
+window.fbSaveGuide = async function(data) {
+    await addDoc(collection(db, 'attack_strategies'), {
+        ...data,
+        author: currentUser.nickname,
+        authorUid: currentUser.uid,
+        createdAt: serverTimestamp(),
+        comments: []
+    });
+};
+
+window.fbLoadGuides = async function() {
+    try {
+        const q = query(collection(db, 'attack_strategies'), orderBy('createdAt','desc'));
+        const snap = await getDocs(q);
+        const guides = [];
+        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
+        return guides;
+    } catch(e) {
+        const snap = await getDocs(collection(db, 'attack_strategies'));
+        const guides = [];
+        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
+        return guides;
+    }
+};
+
+window.handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) return;
+    await signOut(auth); window.location.href = 'index.html';
+};
+</script>
+
 <script>
 // ──────────────────────────────────────────
 // 날짜
@@ -1170,26 +1235,65 @@ function renderPetSlots() {
 // ──────────────────────────────────────────
 // 저장
 // ──────────────────────────────────────────
-function saveGuide() {
+async function saveGuide() {
     const name = document.getElementById('fName').value.trim();
     if (!name) { alert('공략 이름을 입력해주세요.'); return; }
     if (defHeroes.some(h => !h)) { alert('상대 방어팀 영웅 3명을 모두 선택해주세요.'); return; }
     if (atkHeroes.some(h => !h)) { alert('내 공격팀 영웅 3명을 모두 선택해주세요.'); return; }
 
-    const data = {
-        name,
-        speedCondition: document.querySelector('input[name="speedAtk"]:checked')?.value,
-        memo: document.getElementById('fMemo').value,
-        detail: document.getElementById('fDetail').value,
-        defenseTeam: defHeroes,
-        attackTeam: atkHeroes,
-        equipData,
-        skillOrder: skillOrder.filter(Boolean),
-        pets: selectedPets.filter(Boolean),
-    };
+    const btn = document.querySelector('.btn-submit');
+    btn.textContent = '저장중...'; btn.disabled = true;
 
-    console.log('저장 데이터:', data);
-    alert('공략 데이터가 준비되었습니다!\n(Firebase 연결 후 실제 저장됩니다)\n\n' + JSON.stringify(data, null, 2));
+    try {
+        const data = {
+            name,
+            speedCondition: document.querySelector('input[name="speedAtk"]:checked')?.value,
+            memo: document.getElementById('fMemo').value,
+            detail: document.getElementById('fDetail').value,
+            defenseTeam: defHeroes,
+            attackTeam: atkHeroes,
+            equipData,
+            skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
+            pets: selectedPets.filter(Boolean),
+        };
+
+        await window.fbSaveGuide(data);
+        alert('공략이 등록되었습니다! ✅');
+        switchSub('list');
+        await loadGuides();
+    } catch(e) {
+        console.error(e);
+        alert('저장 오류: ' + e.message);
+    } finally {
+        btn.textContent = '✅ 공략 등록하기'; btn.disabled = false;
+    }
+}
+
+async function loadGuides() {
+    if (!window.fbLoadGuides) return;
+    const guides = await window.fbLoadGuides();
+    document.getElementById('atkCount').textContent = guides.length;
+    const el = document.getElementById('atkList');
+    if (!guides.length) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-text">등록된 공략이 없습니다.</div></div>';
+        return;
+    }
+    el.innerHTML = guides.map(g => {
+        const dt = g.defenseTeam || [];
+        const at = g.attackTeam || [];
+        const date = g.createdAt?.toDate ? `${g.createdAt.toDate().getMonth()+1}.${g.createdAt.toDate().getDate()}` : '';
+        return `
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:6px;">${g.name}</div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                    ${dt.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--secondary-soft);color:var(--secondary);">🛡 ${h}</span>`).join('')}
+                    ${at.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--primary-soft);color:var(--primary);">⚔ ${h}</span>`).join('')}
+                </div>
+                <div style="font-size:0.73em;color:var(--text-muted);margin-top:5px;">${g.author||''} · ${date}</div>
+            </div>
+        </div>`;
+    }).join('');
 }
 
 // ──────────────────────────────────────────
