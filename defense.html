@@ -505,7 +505,7 @@ const HERO_DATA = {
 };
 Object.keys(HERO_DATA).forEach(g => HERO_DATA[g].sort((a,b) => a.localeCompare(b,'ko')));
 
-const PET_LIST = ['바람의요정','불꽃늑대','얼음토끼','번개매','대지곰','어둠고양이','빛나비','독거미','물고기','황금용'];
+const PET_LIST = []; // pets/ 폴더에 이미지 추가 후 직접 입력하세요
 
 const SETS = ['선봉장','성기사','암살자','복수자','조율자','수문장','수호자','추적자','주술사'];
 const WPN_OPTS = ['약점 공격 확률','치명타 확률','치명타 피해','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 적중'];
@@ -918,6 +918,7 @@ function closeSidebar()  { document.getElementById('sidebar').classList.remove('
 
 
 // ── window에 함수 등록 (onclick에서 사용) ──
+window.saveGuide = saveGuide;
 window.switchSub = switchSub;
 window.openHeroModal = openHeroModal;
 window.closeHeroModal = closeHeroModal;
@@ -963,38 +964,7 @@ async function fbLoad() {
     }
 }
 
-// saveGuide Firebase 연동
-const _baseSaveGuide = saveGuide;
-window.saveGuide = async function() {
-    const name = document.getElementById('fName').value.trim();
-    if (!name) { alert('방어팀 이름을 입력해주세요.'); return; }
-    if (defHeroes.some(h => !h)) { alert('방어팀 영웅 3명을 모두 선택해주세요.'); return; }
-    if (!selectedPets.filter(Boolean).length) { alert('펫을 최소 1개 이상 선택해주세요.'); return; }
 
-    const btn = document.querySelector('.btn-submit');
-    btn.textContent = '저장중...'; btn.disabled = true;
-    try {
-        const data = {
-            name,
-            speedCondition: document.querySelector('input[name="speedDef"]:checked')?.value,
-            memo: document.getElementById('fMemo').value,
-            detail: document.getElementById('fDetail').value,
-            defenseTeam: [...defHeroes],
-            equipData: JSON.parse(JSON.stringify(equipData)),
-            skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
-            pets: selectedPets.filter(Boolean),
-        };
-        await fbSave(data);
-        alert('방어팀이 등록되었습니다! ✅');
-        switchSub('list');
-        await loadGuides();
-    } catch(e) {
-        console.error(e);
-        alert('저장 오류: ' + e.message);
-    } finally {
-        btn.textContent = '✅ 방어팀 등록하기'; btn.disabled = false;
-    }
-};
 
 // ── 인증 ──
 onAuthStateChanged(auth, async (user) => {
