@@ -582,9 +582,11 @@
                     <input class="search-input" type="text" placeholder="🔍 공략 이름, 영웅 이름 검색...">
                     <button class="btn-add" onclick="switchSub('form')">✏️ 공략 등록</button>
                 </div>
-                <div class="empty-state">
-                    <div class="empty-icon">⚔️</div>
-                    <div class="empty-text">등록된 공략이 없습니다.</div>
+                <div id="atkList">
+                    <div class="empty-state">
+                        <div class="empty-icon">⚔️</div>
+                        <div class="empty-text">로딩중...</div>
+                    </div>
                 </div>
             </div>
 
@@ -1272,8 +1274,13 @@ async function saveGuide() {
 async function loadGuides() {
     if (!window.fbLoadGuides) return;
     const guides = await window.fbLoadGuides();
-    document.getElementById('atkCount').textContent = guides.length;
+
+    const countEl = document.getElementById('atkCount');
+    if (countEl) countEl.textContent = guides.length;
+
     const el = document.getElementById('atkList');
+    if (!el) return; // 요소 없으면 그냥 종료
+
     if (!guides.length) {
         el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-text">등록된 공략이 없습니다.</div></div>';
         return;
@@ -1283,15 +1290,13 @@ async function loadGuides() {
         const at = g.attackTeam || [];
         const date = g.createdAt?.toDate ? `${g.createdAt.toDate().getMonth()+1}.${g.createdAt.toDate().getDate()}` : '';
         return `
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;">
-            <div>
-                <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:6px;">${g.name}</div>
-                <div style="display:flex;gap:5px;flex-wrap:wrap;">
-                    ${dt.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--secondary-soft);color:var(--secondary);">🛡 ${h}</span>`).join('')}
-                    ${at.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--primary-soft);color:var(--primary);">⚔ ${h}</span>`).join('')}
-                </div>
-                <div style="font-size:0.73em;color:var(--text-muted);margin-top:5px;">${g.author||''} · ${date}</div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:12px;">
+            <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:6px;">${g.name}</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
+                ${dt.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--secondary-soft);color:var(--secondary);">🛡 ${h}</span>`).join('')}
+                ${at.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--primary-soft);color:var(--primary);">⚔ ${h}</span>`).join('')}
             </div>
+            <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
         </div>`;
     }).join('');
 }

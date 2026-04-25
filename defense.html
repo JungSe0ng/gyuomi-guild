@@ -305,9 +305,11 @@
                 <input class="search-input" type="text" placeholder="🔍 팀 이름, 영웅 이름 검색...">
                 <button class="btn-add" onclick="switchSub('form')">✏️ 방어팀 등록</button>
             </div>
-            <div class="empty-state">
-                <div class="empty-icon">🛡️</div>
-                <div class="empty-text">등록된 방어팀이 없습니다.</div>
+            <div id="defList">
+                <div class="empty-state">
+                    <div class="empty-icon">🛡️</div>
+                    <div class="empty-text">로딩중...</div>
+                </div>
             </div>
         </div>
 
@@ -925,12 +927,13 @@ async function saveGuide() {
 async function loadGuides() {
     if (!window.fbLoad) return;
     const guides = await window.fbLoad();
-    document.getElementById('defCount').textContent = guides.length;
-    const el = document.getElementById('viewList');
-    const listEl = el.querySelector('.empty-state') || el;
+    const countEl = document.getElementById('defCount');
+    if (countEl) countEl.textContent = guides.length;
+    const el = document.getElementById('defList');
+    if (!el) return;
 
     if (!guides.length) {
-        el.innerHTML = '<div class="action-bar"><input class="search-input" type="text" placeholder="🔍 팀 이름, 영웅 이름 검색..."><button class="btn-add" onclick="switchSub('form')">✏️ 방어팀 등록</button></div><div class="empty-state"><div class="empty-icon">🛡️</div><div class="empty-text">등록된 방어팀이 없습니다.</div></div>';
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🛡️</div><div class="empty-text">등록된 방어팀이 없습니다.</div></div>';
         return;
     }
 
@@ -947,7 +950,7 @@ async function loadGuides() {
         </div>`;
     }).join('');
 
-    el.innerHTML = '<div class="action-bar"><input class="search-input" type="text" placeholder="🔍 팀 이름, 영웅 이름 검색..."><button class="btn-add" onclick="switchSub('form')">✏️ 방어팀 등록</button></div>' + cardsHtml;
+    el.innerHTML = cardsHtml;
 }
 
 // ──────────────────────────────────
