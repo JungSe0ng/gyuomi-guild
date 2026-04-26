@@ -776,7 +776,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const FB = {
     apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -1236,21 +1236,131 @@ async function loadGuides() {
         el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-text">등록된 공략이 없습니다.</div></div>';
         return;
     }
-    el.innerHTML = guides.map(g => {
+
+    const SETS_LABEL = { '모두': '전체' };
+    const heroColors = ['var(--secondary)', 'var(--primary)', '#2a9d8f'];
+
+    el.innerHTML = guides.map((g, gi) => {
         const dt = g.defenseTeam || [];
         const at = g.attackTeam || [];
+        const eq = g.equipData || [{},{},{}];
+        const sk = g.skillOrder || [];
+        const pets = g.pets || [];
         const date = g.createdAt?.toDate ? `${g.createdAt.toDate().getMonth()+1}.${g.createdAt.toDate().getDate()}` : '';
+        const canManage = currentUser && (currentUser.uid === g.authorUid || currentUser.role === 'admin');
+
+        // 장비 카드
+        const equipCards = at.map((name, i) => {
+            const e = eq[i] || {};
+            return `
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;flex:1;min-width:140px;">
+                <div style="font-size:0.8em;font-weight:800;color:${heroColors[i]};margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">${name}</div>
+                ${e.set ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">세트</span><span style="font-weight:700;">${e.set}</span></div>` : ''}
+                ${e.speed ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">속공</span><span style="font-weight:700;">${e.speed}</span></div>` : ''}
+                ${e.wpn1 && e.wpn1 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">무기1</span><span style="font-weight:700;">${e.wpn1}</span></div>` : ''}
+                ${e.wpn2 && e.wpn2 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">무기2</span><span style="font-weight:700;">${e.wpn2}</span></div>` : ''}
+                ${e.arm1 && e.arm1 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">방어구1</span><span style="font-weight:700;">${e.arm1}</span></div>` : ''}
+                ${e.arm2 && e.arm2 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">방어구2</span><span style="font-weight:700;">${e.arm2}</span></div>` : ''}
+                ${e.sub ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">부옵</span><span style="font-weight:700;">${e.sub}</span></div>` : ''}
+                ${e.memo ? `<div style="margin-top:6px;padding:6px 8px;background:var(--white);border-radius:6px;font-size:0.72em;color:var(--text-sub);">${e.memo}</div>` : ''}
+            </div>`;
+        }).join('');
+
+        // 스킬 순서
+        const skillBadges = sk.map((s, i) => `
+            <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:#fffbe6;border:1px solid #ffe58f;font-size:0.76em;font-weight:700;color:#b8860b;">
+                <span style="font-weight:800;">${i+1}</span>
+                <img src="${HERO_IMG_PATH}${s.hero}${s.num}.webp" style="width:20px;height:20px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'">
+                ${s.hero} S${s.num}
+            </div>`).join('');
+
+        // 펫
+        const petChips = pets.map(name => `
+            <div style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:var(--teal-soft);font-size:0.72em;font-weight:700;color:var(--teal);">
+                <img src="${PET_IMG_PATH}${name}.webp" style="width:16px;height:16px;border-radius:3px;object-fit:cover;" onerror="this.style.display='none'">
+                ${name}
+            </div>`).join('');
+
         return `
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:12px;">
-            <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:6px;">${g.name}</div>
-            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
-                ${dt.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--secondary-soft);color:var(--secondary);">🛡 ${h}</span>`).join('')}
-                ${at.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--primary-soft);color:var(--primary);">⚔ ${h}</span>`).join('')}
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;">
+
+            <!-- 헤더 (클릭으로 펼치기) -->
+            <div onclick="toggleDetail('guide-${gi}')" style="padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:7px;">${g.name}</div>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
+                        ${dt.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--secondary-soft);color:var(--secondary);">🛡 ${h}</span>`).join('')}
+                        ${at.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--primary-soft);color:var(--primary);">⚔ ${h}</span>`).join('')}
+                    </div>
+                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                    ${canManage ? `<button onclick="event.stopPropagation();deleteGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:#fdeaea;color:#d94f4f;font-size:0.74em;font-weight:700;cursor:pointer;">삭제</button>` : ''}
+                    <span id="toggle-${gi}" style="color:var(--text-muted);font-size:0.8em;transition:transform 0.2s;">▼</span>
+                </div>
             </div>
-            <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
+
+            <!-- 상세 내용 (접힘) -->
+            <div id="guide-${gi}" style="display:none;border-top:1px solid var(--border);padding:18px 20px;">
+
+                <!-- 공격팀 장비 -->
+                ${at.length ? `
+                <div style="margin-bottom:14px;">
+                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--primary);margin-bottom:10px;">⚔️ 공격팀 장비</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">${equipCards}</div>
+                </div>` : ''}
+
+                <!-- 스킬 순서 -->
+                ${sk.length ? `
+                <div style="margin-bottom:14px;">
+                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:8px;">⭐ 스킬 순서</div>
+                    <div style="display:flex;gap:7px;flex-wrap:wrap;">${skillBadges}</div>
+                </div>` : ''}
+
+                <!-- 펫 -->
+                ${pets.length ? `
+                <div style="margin-bottom:14px;">
+                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">🐾 펫</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">${petChips}</div>
+                </div>` : ''}
+
+                <!-- 메모 -->
+                ${g.memo ? `
+                <div style="margin-bottom:10px;">
+                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">📌 메모</div>
+                    <div style="font-size:0.83em;color:var(--text-sub);line-height:1.6;">${g.memo}</div>
+                </div>` : ''}
+
+                <!-- 공격 디테일 -->
+                ${g.detail ? `
+                <div>
+                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">💡 공격 디테일</div>
+                    <div style="font-size:0.83em;color:var(--text-sub);line-height:1.7;white-space:pre-wrap;">${g.detail}</div>
+                </div>` : ''}
+
+            </div>
         </div>`;
     }).join('');
 }
+
+window.toggleDetail = function(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const idx = id.split('-')[1];
+    const arrow = document.getElementById(`toggle-${idx}`);
+    const isOpen = el.style.display !== 'none';
+    el.style.display = isOpen ? 'none' : 'block';
+    if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
+
+window.deleteGuide = async function(id) {
+    if (!confirm('이 공략을 삭제하시겠습니까?')) return;
+    try {
+        await deleteDoc(doc(db, 'attack_strategies', id));
+        alert('삭제되었습니다.');
+        await loadGuides();
+    } catch(e) { alert('삭제 오류: ' + e.message); }
+};
 // ──────────────────────────────────────────
 // 모달 외부 클릭
 // ──────────────────────────────────────────
