@@ -901,25 +901,41 @@ async function loadGuides() {
         const equipCards = heroes.map((name, i) => {
             const e = eq[i] || {};
             return `
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;flex:1;min-width:140px;">
-                <div style="font-size:0.8em;font-weight:800;color:${heroColors[i]};margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">${name}</div>
-                ${e.set ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">세트</span><span style="font-weight:700;">${e.set}</span></div>` : ''}
-                ${e.speed ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">속공</span><span style="font-weight:700;">${e.speed}</span></div>` : ''}
-                ${e.wpn1 && e.wpn1 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">무기1</span><span style="font-weight:700;">${e.wpn1}</span></div>` : ''}
-                ${e.wpn2 && e.wpn2 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">무기2</span><span style="font-weight:700;">${e.wpn2}</span></div>` : ''}
-                ${e.arm1 && e.arm1 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">방어구1</span><span style="font-weight:700;">${e.arm1}</span></div>` : ''}
-                ${e.arm2 && e.arm2 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">방어구2</span><span style="font-weight:700;">${e.arm2}</span></div>` : ''}
-                ${e.sub ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:2px 0;"><span style="color:var(--text-muted);">부옵</span><span style="font-weight:700;">${e.sub}</span></div>` : ''}
-                ${e.memo ? `<div style="margin-top:6px;padding:6px 8px;background:var(--white);border-radius:6px;font-size:0.72em;color:var(--text-sub);">${e.memo}</div>` : ''}
+            <div style="position:relative;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;flex:1;min-width:150px;overflow:hidden;">
+                <img src="${HERO_IMG_PATH}${name}.webp" alt=""
+                     style="position:absolute;right:-10px;bottom:-10px;width:100px;height:100px;object-fit:cover;opacity:0.08;border-radius:8px;pointer-events:none;"
+                     onerror="this.style.display='none'">
+                <div style="position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
+                    <img src="${HERO_IMG_PATH}${name}.webp"
+                         style="width:28px;height:28px;border-radius:6px;object-fit:cover;border:1px solid var(--border);"
+                         onerror="this.style.display='none'">
+                    <span style="font-size:0.84em;font-weight:800;color:${heroColors[i]};">${name}</span>
+                </div>
+                <div style="position:relative;">
+                    ${e.set ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">📦 세트</span><span style="font-weight:700;">${e.set}</span></div>` : ''}
+                    ${e.speed ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">⚡ 속공</span><span style="font-weight:700;">${e.speed}</span></div>` : ''}
+                    ${e.wpn1 && e.wpn1 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">⚔️ 무기1</span><span style="font-weight:700;">${e.wpn1}</span></div>` : ''}
+                    ${e.wpn2 && e.wpn2 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">⚔️ 무기2</span><span style="font-weight:700;">${e.wpn2}</span></div>` : ''}
+                    ${e.arm1 && e.arm1 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">🛡️ 방어구1</span><span style="font-weight:700;">${e.arm1}</span></div>` : ''}
+                    ${e.arm2 && e.arm2 !== '모두' ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">🛡️ 방어구2</span><span style="font-weight:700;">${e.arm2}</span></div>` : ''}
+                    ${e.sub ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">✨ 부옵</span><span style="font-weight:700;">${e.sub}</span></div>` : ''}
+                    ${e.memo ? `<div style="margin-top:6px;padding:6px 8px;background:var(--white);border-radius:6px;font-size:0.72em;color:var(--text-sub);">${e.memo}</div>` : ''}
+                </div>
             </div>`;
         }).join('');
 
         // 스킬 순서
         const skillBadges = sk.map((s, i) => `
-            <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:#fffbe6;border:1px solid #ffe58f;font-size:0.76em;font-weight:700;color:#b8860b;">
-                <span style="font-weight:800;">${i+1}</span>
-                <img src="${HERO_IMG_PATH}${s.hero}${s.num}.webp" style="width:20px;height:20px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'">
-                ${s.hero} S${s.num}
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div style="position:relative;">
+                    <div style="width:52px;height:52px;border-radius:10px;overflow:hidden;border:2px solid #ffe58f;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;">
+                        <img src="${HERO_IMG_PATH}${s.hero}${s.num}.webp"
+                             style="width:100%;height:100%;object-fit:cover;"
+                             onerror="this.parentElement.innerHTML='<span style=\'font-size:1.4em;\'>⭐</span>'">
+                    </div>
+                    <div style="position:absolute;top:-5px;left:-5px;width:18px;height:18px;background:#b8860b;color:white;border-radius:50%;font-size:0.65em;font-weight:800;display:flex;align-items:center;justify-content:center;">${i+1}</div>
+                </div>
+                <div style="font-size:0.68em;font-weight:700;color:#b8860b;text-align:center;">${s.hero}<br>S${s.num}</div>
             </div>`).join('');
 
         // 펫
