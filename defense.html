@@ -505,7 +505,7 @@ const HERO_DATA = {
 };
 Object.keys(HERO_DATA).forEach(g => HERO_DATA[g].sort((a,b) => a.localeCompare(b,'ko')));
 
-const PET_LIST = []; // pets/ 폴더에 이미지 추가 후 직접 입력하세요
+const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
 
 const SETS = ['선봉장','성기사','암살자','복수자','조율자','수문장','수호자','추적자','주술사'];
 const WPN_OPTS = ['약점 공격 확률','치명타 확률','치명타 피해','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 적중'];
@@ -796,7 +796,7 @@ function renderPetGrid() {
         const sel = selectedPets.includes(name);
         return `<div class="pet-item" onclick="addPet('${name}')">
             <div class="pet-item-img ${sel ? 'selected' : ''}">
-                <img src="${PET_IMG_PATH}${name}.webp" alt="${name}"
+                <img src="${PET_IMG_PATH}${name}.png" alt="${name}"
                      onerror="this.closest('.pet-item').style.display='none'">
             </div>
             <div class="pet-item-name">${name}</div>
@@ -828,7 +828,7 @@ function renderPetSlots() {
         const name = selectedPets[i];
         if (name) {
             slot.className = 'pet-slot filled';
-            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.webp" alt="${name}"
+            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.png" alt="${name}"
                 onerror="this.style.background='var(--teal-soft)'">
                 <button class="del-pet" onclick="event.stopPropagation();clearPet(${i})">×</button>`;
         } else {
@@ -941,7 +941,7 @@ async function loadGuides() {
         // 펫
         const petChips = pets.map(name => `
             <div style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:var(--teal-soft);font-size:0.72em;font-weight:700;color:var(--teal);">
-                <img src="${PET_IMG_PATH}${name}.webp" style="width:16px;height:16px;border-radius:3px;object-fit:cover;" onerror="this.style.display='none'">
+                <img src="${PET_IMG_PATH}${name}.png" style="width:16px;height:16px;border-radius:3px;object-fit:cover;" onerror="this.style.display='none'">
                 ${name}
             </div>`).join('');
 
