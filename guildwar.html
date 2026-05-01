@@ -305,10 +305,10 @@
         .skill-search input:focus { outline: none; border-color: var(--primary); }
 
         .skill-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-            gap: 6px;
-            max-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 260px;
             overflow-y: auto;
             padding: 2px;
         }
@@ -806,7 +806,7 @@ const PET_IMG_PATH  = './pets/';     // 펫: 펫이름.png
 const HERO_DATA = {
     '구세나': ['밀리아','갤리두스','파이','쥬리','로지'],
     '찐스': ['나타', '델론즈', '라드그리드', '라이언', '란드그리드', '레긴레이프', '레이첼', '루디', '린', '멜키르', '미스트', '바네사', '브란즈&브란셀', '비스킷', '손오공', '스파이크', '실베스타', '아일린', '아킬라', '에이스', '엘리시아', '여포', '연희', '오를리', '오목', '제이브', '카구라', '카르마', '카일', '콜트', '크리스', '클라한', '키리엘', '태오', '트루드', '프레이야', '플라튼'],
-    '짭스': ['백각','아멜리아','미호','데이지','타카','파스칼','아라곤','엘리스','발리스타','첸슬러','룩','지크','세인','에스파다','니아','루리','벨리카','리나','비담','유신','녹스','초선','백룡','소교','관우'],
+    '짭스': ['백각','아멜리아','미호','데이지','타카','파스칼','아라곤','엘리스','발리스타','챈슬러','룩','지크','세인','에스파다','니아','루리','벨리카','리나','비담','유신','녹스','초선','백룡','소교','관우'],
     '희귀': ['레이','진','캐티','블랙로즈','아수라','노호','클로에','메이','세라','제인','유이','실비아','루시','빅토리아','카론','조커','카린','에반','쥬피','스니퍼','소이','풍연','헤브니아','헬레니아','아리엘','리','사라','라니아','클레오','베인','레오','유리','라쿤','호킨','샤오','링링','조운']
 };
 Object.keys(HERO_DATA).forEach(g => HERO_DATA[g].sort((a,b) => a.localeCompare(b,'ko')));
@@ -993,11 +993,13 @@ function renderEquipBody() {
     const setOpts = SETS.map(s => `<option value="${s}" ${d.set===s?'selected':''}>${s}</option>`).join('');
 
     document.getElementById('equipBody').innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-            <div style="width:44px;height:44px;border-radius:10px;overflow:hidden;border:2px solid var(--primary-soft);flex-shrink:0;">
-                ${heroImgEl(name)}
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+            <div style="width:52px;height:52px;border-radius:12px;overflow:hidden;border:2px solid var(--primary-soft);flex-shrink:0;background:var(--bg);">
+                <img src="${HERO_IMG_PATH}${name}.webp" alt="${name}"
+                     style="width:100%;height:100%;object-fit:cover;"
+                     onerror="this.parentElement.innerHTML='<span style=\\'font-size:1.4em;display:flex;align-items:center;justify-content:center;height:100%;\\'></span>'">
             </div>
-            <div style="font-size:0.92em;font-weight:800;color:var(--primary);">${name} 장비</div>
+            <div style="font-size:0.95em;font-weight:800;color:var(--primary);">${name} 장비</div>
         </div>
 
         <div class="equip-grid-2" style="margin-bottom:10px;">
@@ -1086,25 +1088,63 @@ function renderSkillGrid(q) {
     const lq = q.toLowerCase();
     const filtered = q ? skills.filter(s => s.hero.toLowerCase().includes(lq)) : skills;
 
-    grid.innerHTML = filtered.map(s => {
-        const used = usedKeys.includes(s.key);
+    // 영웅별로 그룹핑
+    const grouped = {};
+    filtered.forEach(s => {
+        if (!grouped[s.hero]) grouped[s.hero] = [];
+        grouped[s.hero].push(s);
+    });
+
+    grid.innerHTML = Object.entries(grouped).map(([hero, heroSkills]) => {
+        const skillsHtml = heroSkills.map(s => {
+            const used = usedKeys.includes(s.key);
+            const orderIdx = skillOrder.findIndex(o => o && o.key === s.key);
+            return `
+            <div onclick="toggleSkill('${s.key}','${s.hero}',${s.num},'${s.img}')"
+                 style="position:relative;width:56px;height:56px;border-radius:10px;overflow:hidden;border:2px solid ${used ? 'var(--gold)' : 'var(--border)'};cursor:pointer;background:var(--bg);transition:all 0.18s;">
+                <img src="${s.img}" style="width:100%;height:100%;object-fit:cover;"
+                     onerror="this.parentElement.style.background='var(--primary-soft)'">
+                ${used ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.3);display:flex;align-items:center;justify-content:center;">
+                    <span style="background:#b8860b;color:white;font-size:0.75em;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${orderIdx+1}</span>
+                </div>` : ''}
+            </div>`;
+        }).join('');
+
         return `
-        <div class="skill-item" onclick="${used ? '' : `addSkill('${s.key}','${s.hero}',${s.num},'${s.img}')`}">
-            <div class="skill-item-img ${used ? 'used' : ''}">
-                <img src="${s.img}" alt="${s.hero} 스킬${s.num}"
-                     onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.62em;color:var(--text-muted);text-align:center;padding:2px;\\'>${s.hero}<br>스킬${s.num}</span>'">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
+            <!-- 영웅 초상화 크게 -->
+            <div style="width:72px;height:72px;border-radius:12px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:var(--white);">
+                <img src="${HERO_IMG_PATH}${hero}.webp" style="width:100%;height:100%;object-fit:cover;"
+                     onerror="this.parentElement.innerHTML='<div style=\\'font-size:0.7em;text-align:center;padding:4px;color:var(--text-muted);\\'>'+\`${hero}\`+'</div>'">
             </div>
-            <div class="skill-item-name">${s.hero} S${s.num}</div>
+            <!-- 스킬 2개 세로 배치 -->
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                ${skillsHtml}
+            </div>
+            <div style="font-size:0.78em;font-weight:700;color:var(--text-sub);">${hero}</div>
         </div>`;
     }).join('');
 }
 
-function addSkill(key, hero, num, img) {
-    const idx = skillOrder.findIndex(s => s === null);
-    if (idx === -1) return; // 이미 3개 선택됨
-    skillOrder[idx] = { key, hero, num, img };
+function toggleSkill(key, hero, num, img) {
+    const existIdx = skillOrder.findIndex(s => s && s.key === key);
+    if (existIdx !== -1) {
+        // 이미 선택된 경우 → 제거 후 재정렬
+        skillOrder[existIdx] = null;
+        skillOrder = skillOrder.filter(Boolean);
+        while (skillOrder.length < 3) skillOrder.push(null);
+    } else {
+        // 미선택 → 빈 슬롯에 추가
+        const emptyIdx = skillOrder.findIndex(s => s === null);
+        if (emptyIdx === -1) return;
+        skillOrder[emptyIdx] = { key, hero, num, img };
+    }
     renderSkillSlots();
     renderSkillGrid('');
+}
+
+function addSkill(key, hero, num, img) {
+    toggleSkill(key, hero, num, img);
 }
 
 function clearSkillSlot(idx) {
@@ -1450,6 +1490,7 @@ window.handleLogout = async () => {
 
 // ── window에 함수 등록 (onclick에서 사용) ──
 window.saveGuide = saveGuide;
+window.toggleSkill = toggleSkill;
 window.switchMainTab = switchMainTab;
 window.switchSub = switchSub;
 window.openHeroModal = openHeroModal;
