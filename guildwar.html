@@ -1109,16 +1109,31 @@ function renderSkillGrid(q) {
             </div>`;
         }).join('');
 
+        // S2 위, S1 아래 순서로 정렬
+        const sortedSkills = [...heroSkills].sort((a, b) => b.num - a.num);
+        const skillsVertical = sortedSkills.map(s => {
+            const used = usedKeys.includes(s.key);
+            const orderIdx = skillOrder.findIndex(o => o && o.key === s.key);
+            return `<div onclick="toggleSkill('${s.key}','${s.hero}',${s.num},'${s.img}')"
+                 style="position:relative;width:52px;height:52px;border-radius:10px;overflow:hidden;border:2px solid ${used ? '#b8860b' : 'var(--border)'};cursor:pointer;background:var(--bg);transition:all 0.18s;">
+                <img src="${s.img}" style="width:100%;height:100%;object-fit:cover;"
+                     onerror="this.parentElement.style.background='var(--primary-soft)'">
+                ${used ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.25);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.75em;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${orderIdx+1}</span></div>` : ''}
+            </div>`;
+        }).join('');
+
         return `
-        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;background:var(--bg);border-radius:12px;border:1px solid var(--border);min-width:80px;">
-            <!-- 영웅 초상화 크게 -->
-            <div style="width:72px;height:72px;border-radius:12px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:var(--white);">
-                <img src="${HERO_IMG_PATH}${hero}.webp" style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.65em;text-align:center;color:var(--text-muted);padding:2px;\\'>${hero}</div>'">
-            </div>
-            <!-- 스킬 2개 가로 배치 -->
-            <div style="display:flex;flex-direction:row;gap:4px;">
-                ${skillsHtml}
+        <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:10px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
+            <div style="display:flex;align-items:center;gap:6px;">
+                <!-- 초상화 왼쪽 크게 -->
+                <div style="width:72px;height:72px;border-radius:12px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:var(--white);">
+                    <img src="${HERO_IMG_PATH}${hero}.webp" style="width:100%;height:100%;object-fit:cover;"
+                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.65em;text-align:center;color:var(--text-muted);padding:2px;\\'>${hero}</div>'">
+                </div>
+                <!-- 스킬: S2 위, S1 아래 -->
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    ${skillsVertical}
+                </div>
             </div>
             <div style="font-size:0.72em;font-weight:700;color:var(--text-sub);text-align:center;">${hero}</div>
         </div>`;
