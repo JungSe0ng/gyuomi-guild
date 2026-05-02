@@ -1347,11 +1347,37 @@ async function loadGuides() {
                 <div style="font-size:0.68em;font-weight:700;color:#b8860b;text-align:center;">${s.hero}<br>S${s.num}</div>
             </div>`).join('');
 
-        // 펫
+        // 스킬 순서 (등록 UI와 동일: 초상화+S2위+S1아래)
+        const skillCards = sk.map((s, i) => `
+            <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:5px;">
+                    <div style="position:relative;width:56px;height:56px;border-radius:10px;overflow:hidden;border:2px solid var(--border);background:var(--white);flex-shrink:0;">
+                        <img src="${HERO_IMG_PATH}${s.hero}.webp" style="width:100%;height:100%;object-fit:cover;"
+                             onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6em;text-align:center;color:var(--text-muted);padding:2px;\'>${s.hero}</div>'">
+                        <div style="position:absolute;top:-4px;left:-4px;width:18px;height:18px;background:var(--primary);color:white;border-radius:50%;font-size:0.65em;font-weight:800;display:flex;align-items:center;justify-content:center;">${i+1}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===2?'#b8860b':'var(--border)'};background:var(--bg);">
+                            <img src="${HERO_IMG_PATH}${s.hero}2.webp" style="width:100%;height:100%;object-fit:cover;"
+                                 onerror="this.parentElement.style.background='var(--primary-soft)'">
+                        </div>
+                        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===1?'#b8860b':'var(--border)'};background:var(--bg);">
+                            <img src="${HERO_IMG_PATH}${s.hero}1.webp" style="width:100%;height:100%;object-fit:cover;"
+                                 onerror="this.parentElement.style.background='var(--primary-soft)'">
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size:0.7em;font-weight:700;color:var(--text-sub);text-align:center;">${s.hero} S${s.num}</div>
+            </div>`).join('<div style="display:flex;align-items:center;color:var(--text-muted);font-size:1em;padding:0 2px;padding-bottom:20px;">→</div>');
+
+        // 펫 (크게)
         const petChips = pets.map(name => `
-            <div style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:var(--teal-soft);font-size:0.72em;font-weight:700;color:var(--teal);">
-                <img src="${PET_IMG_PATH}${name}.png" style="width:16px;height:16px;border-radius:3px;object-fit:cover;" onerror="this.style.display='none'">
-                ${name}
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
+                    <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;"
+                         onerror="this.closest('.pet-wrap').style.display='none'">
+                </div>
+                <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
             </div>`).join('');
 
         return `
@@ -1360,16 +1386,25 @@ async function loadGuides() {
             <!-- 헤더 -->
             <div onclick="toggleDetail('guide-${gi}')" style="padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:8px;">${g.name}</div>
-                    <!-- 방어팀 -->
-                    <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
+                    <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:10px;">${g.name}</div>
+                    <!-- 방어팀 칩 -->
+                    <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
                         <span style="font-size:0.68em;font-weight:800;color:var(--secondary);min-width:70px;">상대 방어팀</span>
                         ${dt.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--secondary-soft);color:var(--secondary);">${h}</span>`).join('')}
                     </div>
-                    <!-- 공격팀 -->
-                    <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px;">
-                        <span style="font-size:0.68em;font-weight:800;color:var(--primary);min-width:70px;">아군 공격팀</span>
-                        ${at.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--primary-soft);color:var(--primary);">${h}</span>`).join('')}
+                    <!-- 공격팀 초상화 -->
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <span style="font-size:0.68em;font-weight:800;color:var(--primary);min-width:70px;flex-shrink:0;">아군 공격팀</span>
+                        <div style="display:flex;gap:6px;">
+                            ${at.map(h=>`
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                                <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--primary-soft);background:var(--bg);">
+                                    <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
+                                         onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\'>${h}</div>'">
+                                </div>
+                                <span style="font-size:0.62em;font-weight:600;color:var(--text-sub);">${h}</span>
+                            </div>`).join('')}
+                        </div>
                     </div>
                     <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
                 </div>
@@ -1393,14 +1428,14 @@ async function loadGuides() {
                 ${sk.length ? `
                 <div style="margin-bottom:18px;">
                     <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:10px;">⭐ 스킬 순서</div>
-                    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;">${skillBadges}</div>
+                    <div style="display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;">${skillCards}</div>
                 </div>` : ''}
 
                 <!-- 펫 -->
                 ${pets.length ? `
                 <div style="margin-bottom:14px;">
                     <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">🐾 펫</div>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap;">${petChips}</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">${petChips}</div>
                 </div>` : ''}
 
                 <!-- 메모 -->
