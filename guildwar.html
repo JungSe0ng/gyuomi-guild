@@ -775,7 +775,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const FB = {
     apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -1354,32 +1354,51 @@ async function loadGuides() {
                     <div style="position:relative;">
                         <div style="width:56px;height:56px;border-radius:10px;overflow:hidden;border:2px solid var(--border);background:var(--white);">
                             <img src="${HERO_IMG_PATH}${s.hero}.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6em;text-align:center;color:var(--text-muted);padding:2px;\'>${s.hero}</div>'">
+                                 onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6em;text-align:center;color:var(--text-muted);padding:2px;\\'>${s.hero}</div>'">
                         </div>
-                        <div style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:var(--primary);color:white;border-radius:50%;font-size:0.72em;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid white;z-index:1;">${i+1}</div>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:3px;">
-                        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===2?'#b8860b':'var(--border)'};background:var(--bg);">
+                        <!-- S2 위 -->
+                        <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===2?'#b8860b':'var(--border)'};background:var(--bg);">
                             <img src="${HERO_IMG_PATH}${s.hero}2.webp" style="width:100%;height:100%;object-fit:cover;"
                                  onerror="this.parentElement.style.background='var(--primary-soft)'">
+                            ${s.num===2 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
                         </div>
-                        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===1?'#b8860b':'var(--border)'};background:var(--bg);">
+                        <!-- S1 아래 -->
+                        <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===1?'#b8860b':'var(--border)'};background:var(--bg);">
                             <img src="${HERO_IMG_PATH}${s.hero}1.webp" style="width:100%;height:100%;object-fit:cover;"
                                  onerror="this.parentElement.style.background='var(--primary-soft)'">
+                            ${s.num===1 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
                         </div>
                     </div>
                 </div>
                 <div style="font-size:0.7em;font-weight:700;color:var(--text-sub);text-align:center;">${s.hero} S${s.num}</div>
             </div>`).join('<div style="display:flex;align-items:center;color:var(--text-muted);font-size:1em;padding:0 2px;padding-bottom:20px;">→</div>');
 
-        // 펫 (크게)
-        const petChips = pets.map(name => `
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
-                    <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;"
-                         onerror="this.closest('.pet-wrap').style.display='none'">
+        // 펫 > 구분자
+        const petChips = pets.map((name, pi) => `
+            <div style="display:flex;align-items:center;gap:6px;">
+                ${pi > 0 ? '<span style="color:var(--text-muted);font-weight:700;font-size:0.9em;">></span>' : ''}
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                    <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
+                        <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;"
+                             onerror="this.parentElement.parentElement.parentElement.style.display='none'">
+                    </div>
+                    <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
                 </div>
-                <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
+            </div>`).join('');
+
+        // 댓글
+        const comments = g.comments || [];
+        const commentsHtml = comments.map(cm => `
+            <div style="background:var(--bg);border-radius:10px;padding:10px 12px;border-left:3px solid var(--primary-soft);">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <span style="font-size:0.78em;font-weight:700;color:var(--primary);">${cm.author}</span>
+                    <span style="font-size:0.7em;color:var(--text-muted);margin-left:auto;">${cm.date||''}</span>
+                    ${currentUser && (currentUser.uid === cm.uid || currentUser.role === 'admin') ?
+                        `<button onclick="deleteComment('${g.id}','${cm.id}')" style="font-size:0.7em;color:#d94f4f;background:none;border:none;cursor:pointer;padding:0 2px;">삭제</button>` : ''}
+                </div>
+                <div style="font-size:0.83em;color:var(--text-sub);line-height:1.5;white-space:pre-wrap;">${cm.text}</div>
             </div>`).join('');
 
         return `
@@ -1397,7 +1416,7 @@ async function loadGuides() {
                             <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
                                 <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--secondary-soft);background:var(--bg);">
                                     <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
-                                         onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\'>${h}</div>'">
+                                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\\'>${h}</div>'">
                                 </div>
                                 <span style="font-size:0.62em;font-weight:600;color:var(--text-sub);">${h}</span>
                             </div>`).join('')}
@@ -1411,7 +1430,7 @@ async function loadGuides() {
                             <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
                                 <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--primary-soft);background:var(--bg);">
                                     <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
-                                         onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\'>${h}</div>'">
+                                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\\'>${h}</div>'">
                                 </div>
                                 <span style="font-size:0.62em;font-weight:600;color:var(--text-sub);">${h}</span>
                             </div>`).join('')}
@@ -1444,24 +1463,39 @@ async function loadGuides() {
 
                 <!-- 펫 -->
                 ${pets.length ? `
-                <div style="margin-bottom:14px;">
+                <div style="margin-bottom:18px;">
                     <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">🐾 펫</div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">${petChips}</div>
+                    <div style="display:flex;align-items:flex-start;gap:0;flex-wrap:wrap;">${petChips}</div>
                 </div>` : ''}
 
                 <!-- 메모 -->
                 ${g.memo ? `
-                <div style="margin-bottom:10px;">
+                <div style="margin-bottom:14px;">
                     <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">📌 메모</div>
                     <div style="font-size:0.83em;color:var(--text-sub);line-height:1.6;">${g.memo}</div>
                 </div>` : ''}
 
                 <!-- 공격 디테일 -->
                 ${g.detail ? `
-                <div>
+                <div style="margin-bottom:18px;">
                     <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">💡 공격 디테일</div>
                     <div style="font-size:0.83em;color:var(--text-sub);line-height:1.7;white-space:pre-wrap;">${g.detail}</div>
                 </div>` : ''}
+
+                <!-- 댓글 -->
+                <div style="border-top:1px solid var(--border);padding-top:14px;">
+                    <div style="font-size:0.78em;font-weight:700;color:var(--text);margin-bottom:10px;">💬 댓글 (${comments.length})</div>
+                    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;" id="clist-${g.id}">
+                        ${commentsHtml || '<p style="font-size:0.78em;color:var(--text-muted);padding:4px 0;">첫 댓글을 남겨보세요!</p>'}
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <input id="cinput-${g.id}" type="text" placeholder="댓글을 입력하세요..."
+                               style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.84em;font-family:inherit;"
+                               onkeydown="if(event.key==='Enter') addComment('${g.id}')">
+                        <button onclick="addComment('${g.id}')"
+                                style="padding:8px 16px;background:var(--primary-soft);color:var(--primary);border:none;border-radius:9px;font-size:0.82em;font-weight:700;cursor:pointer;white-space:nowrap;">등록</button>
+                    </div>
+                </div>
 
             </div>
         </div>`;
@@ -1476,6 +1510,43 @@ window.toggleDetail = function(id) {
     const isOpen = el.style.display !== 'none';
     el.style.display = isOpen ? 'none' : 'block';
     if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
+
+window.addComment = async function(guideId) {
+    const input = document.getElementById(`cinput-${guideId}`);
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+        const gRef = doc(db, 'attack_strategies', guideId);
+        const gSnap = await getDoc(gRef);
+        const comments = gSnap.data().comments || [];
+        comments.push({
+            id: Date.now().toString(),
+            text,
+            author: currentUser.nickname,
+            uid: currentUser.uid,
+            date: `${new Date().getMonth()+1}.${new Date().getDate()}`
+        });
+        await updateDoc(gRef, { comments });
+        input.value = '';
+        await loadGuides();
+        // 펼쳐진 상태 유지
+        const detail = document.getElementById(`guide-${guides.findIndex ? '' : ''}`);
+        document.querySelectorAll('[id^="guide-"]').forEach(el => {
+            if (el.style.display === 'block') el.style.display = 'block';
+        });
+    } catch(e) { alert('댓글 등록 오류: ' + e.message); }
+};
+
+window.deleteComment = async function(guideId, commentId) {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+    try {
+        const gRef = doc(db, 'attack_strategies', guideId);
+        const gSnap = await getDoc(gRef);
+        const comments = (gSnap.data().comments || []).filter(c => c.id !== commentId);
+        await updateDoc(gRef, { comments });
+        await loadGuides();
+    } catch(e) { alert('댓글 삭제 오류: ' + e.message); }
 };
 
 window.deleteGuide = async function(id) {
@@ -1551,6 +1622,8 @@ window.handleLogout = async () => {
 // ── window에 함수 등록 (onclick에서 사용) ──
 window.saveGuide = saveGuide;
 window.toggleSkill = toggleSkill;
+window.addComment = addComment;
+window.deleteComment = deleteComment;
 window.switchMainTab = switchMainTab;
 window.switchSub = switchSub;
 window.openHeroModal = openHeroModal;
