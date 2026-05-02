@@ -828,6 +828,9 @@ let activeAtkIdx = 0; // 현재 활성 공격 영웅 탭
 let equipData = [{}, {}, {}]; // 각 공격영웅 장비
 let skillOrder = [null, null, null]; // 스킬 순서
 let selectedPets = [null, null, null]; // 펫
+let editingId = null; // 수정 중인 공략 ID
+let allGuides = []; // 공략 목록
+let aImgs = {1:[],2:[],3:[]}; // 업로드 이미지
 
 let modalTarget = null; // { type: 'def'|'atk', idx: 0|1|2 }
 
@@ -1249,7 +1252,7 @@ async function saveGuide() {
     if (defHeroes.some(h => !h)) { alert('상대 방어팀 영웅 3명을 모두 선택해주세요.'); return; }
     if (atkHeroes.some(h => !h)) { alert('내 공격팀 영웅 3명을 모두 선택해주세요.'); return; }
 
-    const btn = document.querySelector('.btn-submit');
+    const btn = document.getElementById('aBtnSubmit');
     btn.textContent = '저장중...'; btn.disabled = true;
 
     try {
@@ -1258,27 +1261,39 @@ async function saveGuide() {
             speedCondition: document.querySelector('input[name="speedAtk"]:checked')?.value,
             memo: document.getElementById('fMemo').value,
             detail: document.getElementById('fDetail').value,
-            defenseTeam: defHeroes,
-            attackTeam: atkHeroes,
-            equipData,
+            defenseTeam: [...defHeroes],
+            attackTeam: [...atkHeroes],
+            equipData: JSON.parse(JSON.stringify(equipData)),
             skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
             pets: selectedPets.filter(Boolean),
         };
 
-        await fbSaveGuide(data);
-        alert('공략이 등록되었습니다! ✅');
+        if (editingId) {
+            // 수정
+            await updateDoc(doc(db, 'attack_strategies', editingId), {
+                ...data, updatedAt: serverTimestamp()
+            });
+            alert('공략이 수정되었습니다! ✅');
+            editingId = null;
+        } else {
+            // 신규 등록
+            await fbSaveGuide(data);
+            alert('공략이 등록되었습니다! ✅');
+        }
         switchSub('list');
         await loadGuides();
     } catch(e) {
         console.error(e);
         alert('저장 오류: ' + e.message);
     } finally {
-        btn.textContent = '✅ 공략 등록하기'; btn.disabled = false;
+        btn.textContent = editingId ? '✅ 공략 수정하기' : '✅ 공략 등록하기';
+        btn.disabled = false;
     }
 }
 
 async function loadGuides() {
     const guides = await fbLoadGuides();
+    allGuides = guides; // 전역 업데이트
 
     const countEl = document.getElementById('atkCount');
     if (countEl) countEl.textContent = guides.length;
@@ -1390,16 +1405,31 @@ async function loadGuides() {
 
         // 댓글
         const comments = g.comments || [];
-        const commentsHtml = comments.map(cm => `
-            <div style="background:var(--bg);border-radius:10px;padding:10px 12px;border-left:3px solid var(--primary-soft);">
+        const commentsHtml = comments.map(cm => {
+            const canEditCm = currentUser && (currentUser.uid === cm.uid || currentUser.role === 'admin');
+            return `
+            <div id="cm-${cm.id}" style="background:var(--bg);border-radius:10px;padding:10px 12px;border-left:3px solid var(--primary-soft);">
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
                     <span style="font-size:0.78em;font-weight:700;color:var(--primary);">${cm.author}</span>
                     <span style="font-size:0.7em;color:var(--text-muted);margin-left:auto;">${cm.date||''}</span>
-                    ${currentUser && (currentUser.uid === cm.uid || currentUser.role === 'admin') ?
-                        `<button onclick="deleteComment('${g.id}','${cm.id}')" style="font-size:0.7em;color:#d94f4f;background:none;border:none;cursor:pointer;padding:0 2px;">삭제</button>` : ''}
+                    ${canEditCm ? `
+                    <button onclick="startEditComment('${g.id}','${cm.id}')"
+                            style="font-size:0.7em;color:var(--primary);background:none;border:none;cursor:pointer;padding:0 2px;">수정</button>
+                    <button onclick="deleteComment('${g.id}','${cm.id}')"
+                            style="font-size:0.7em;color:#d94f4f;background:none;border:none;cursor:pointer;padding:0 2px;">삭제</button>` : ''}
                 </div>
-                <div style="font-size:0.83em;color:var(--text-sub);line-height:1.5;white-space:pre-wrap;">${cm.text}</div>
-            </div>`).join('');
+                <div id="cmtext-${cm.id}" style="font-size:0.83em;color:var(--text-sub);line-height:1.5;white-space:pre-wrap;">${cm.text}</div>
+                <div id="cmedit-${cm.id}" style="display:none;margin-top:6px;">
+                    <textarea id="cminput-${cm.id}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82em;font-family:inherit;resize:vertical;min-height:56px;"></textarea>
+                    <div style="display:flex;gap:6px;margin-top:5px;justify-content:flex-end;">
+                        <button onclick="cancelEditComment('${cm.id}')"
+                                style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text-muted);font-size:0.78em;cursor:pointer;">취소</button>
+                        <button onclick="saveEditComment('${g.id}','${cm.id}')"
+                                style="padding:5px 12px;border-radius:7px;border:none;background:var(--primary-soft);color:var(--primary);font-size:0.78em;font-weight:700;cursor:pointer;">저장</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
 
         return `
         <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;">
@@ -1439,7 +1469,10 @@ async function loadGuides() {
                     <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                    ${canManage ? `<button onclick="event.stopPropagation();deleteGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:#fdeaea;color:#d94f4f;font-size:0.74em;font-weight:700;cursor:pointer;">삭제</button>` : ''}
+                    ${canManage ? `
+                    <button onclick="event.stopPropagation();editGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:var(--primary-soft);color:var(--primary);font-size:0.74em;font-weight:700;cursor:pointer;">수정</button>
+                    <button onclick="event.stopPropagation();deleteGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:#fdeaea;color:#d94f4f;font-size:0.74em;font-weight:700;cursor:pointer;">삭제</button>
+                    ` : ''}
                     <span id="toggle-${gi}" style="color:var(--text-muted);font-size:0.8em;transition:transform 0.2s;">▼</span>
                 </div>
             </div>
@@ -1530,12 +1563,41 @@ window.addComment = async function(guideId) {
         await updateDoc(gRef, { comments });
         input.value = '';
         await loadGuides();
-        // 펼쳐진 상태 유지
-        const detail = document.getElementById(`guide-${guides.findIndex ? '' : ''}`);
-        document.querySelectorAll('[id^="guide-"]').forEach(el => {
-            if (el.style.display === 'block') el.style.display = 'block';
-        });
     } catch(e) { alert('댓글 등록 오류: ' + e.message); }
+};
+
+window.startEditComment = function(guideId, commentId) {
+    const textEl = document.getElementById(`cmtext-${commentId}`);
+    const editEl = document.getElementById(`cmedit-${commentId}`);
+    const inputEl = document.getElementById(`cminput-${commentId}`);
+    if (!textEl || !editEl || !inputEl) return;
+    inputEl.value = textEl.innerText;
+    textEl.style.display = 'none';
+    editEl.style.display = 'block';
+    inputEl.focus();
+};
+
+window.cancelEditComment = function(commentId) {
+    const textEl = document.getElementById(`cmtext-${commentId}`);
+    const editEl = document.getElementById(`cmedit-${commentId}`);
+    if (!textEl || !editEl) return;
+    textEl.style.display = 'block';
+    editEl.style.display = 'none';
+};
+
+window.saveEditComment = async function(guideId, commentId) {
+    const inputEl = document.getElementById(`cminput-${commentId}`);
+    const newText = inputEl.value.trim();
+    if (!newText) { alert('내용을 입력해주세요.'); return; }
+    try {
+        const gRef = doc(db, 'attack_strategies', guideId);
+        const gSnap = await getDoc(gRef);
+        const comments = (gSnap.data().comments || []).map(c =>
+            c.id === commentId ? { ...c, text: newText } : c
+        );
+        await updateDoc(gRef, { comments });
+        await loadGuides();
+    } catch(e) { alert('수정 오류: ' + e.message); }
 };
 
 window.deleteComment = async function(guideId, commentId) {
@@ -1547,6 +1609,89 @@ window.deleteComment = async function(guideId, commentId) {
         await updateDoc(gRef, { comments });
         await loadGuides();
     } catch(e) { alert('댓글 삭제 오류: ' + e.message); }
+};
+
+// 공략 수정 - 등록 폼으로 이동하며 기존 데이터 채우기
+window.editGuide = async function(id) {
+    const g = allGuides.find(x => x.id === id);
+    if (!g) return;
+    editingId = id;
+    aImgs = {1:[],2:[],3:[]};
+
+    // 폼으로 전환
+    switchSub('form');
+
+    // 이름/메모/디테일
+    document.getElementById('fName').value = g.name || '';
+    document.getElementById('fMemo').value = g.memo || '';
+    document.getElementById('fDetail').value = g.detail || '';
+
+    // 속공 조건
+    const radio = document.querySelector(`input[name="speedAtk"][value="${g.speedCondition||'무관'}"]`);
+    if (radio) radio.checked = true;
+
+    // 방어팀
+    const dt = g.defenseTeam || [];
+    dt.forEach((h, i) => {
+        const gradeKey = Object.keys(HERO_DATA).find(gr => HERO_DATA[gr].includes(h));
+        const gs = document.getElementById(`adGrade${i+1}`);
+        const hs = document.getElementById(`adHero${i+1}`);
+        if (gs && hs && gradeKey) {
+            gs.value = gradeKey;
+            onGradeChange('ad', i+1, gradeKey);
+            setTimeout(() => { hs.value = h; }, 80);
+        }
+    });
+
+    // 공격팀
+    const at = g.attackTeam || [];
+    const eq = g.equipData || [{},{},{}];
+    at.forEach((h, i) => {
+        const gradeKey = Object.keys(HERO_DATA).find(gr => HERO_DATA[gr].includes(h));
+        const gs = document.getElementById(`aaGrade${i+1}`);
+        const hs = document.getElementById(`aaHero${i+1}`);
+        if (gs && hs && gradeKey) {
+            gs.value = gradeKey;
+            onGradeChange('aa', i+1, gradeKey);
+            setTimeout(() => {
+                hs.value = h;
+                onAtkHeroChange(i+1, h);
+                const e = eq[i] || {};
+                const n = i+1;
+                if (document.getElementById(`aSet${n}`)) document.getElementById(`aSet${n}`).value = e.set || '모두';
+                if (document.getElementById(`aW${n}1`)) document.getElementById(`aW${n}1`).value = e.wpn1 || '모두';
+                if (document.getElementById(`aW${n}2`)) document.getElementById(`aW${n}2`).value = e.wpn2 || '모두';
+                if (document.getElementById(`aA${n}1`)) document.getElementById(`aA${n}1`).value = e.arm1 || '모두';
+                if (document.getElementById(`aA${n}2`)) document.getElementById(`aA${n}2`).value = e.arm2 || '모두';
+                if (document.getElementById(`aDesc${n}`)) document.getElementById(`aDesc${n}`).value = e.description || '';
+            }, 100);
+        }
+    });
+
+    // 스킬 순서 복원
+    setTimeout(() => {
+        updateAtkSkills();
+        skillOrder = [null, null, null];
+        (g.skillOrder || []).forEach((s, i) => {
+            skillOrder[i] = {
+                key: s.key || `${s.hero}_${s.num}`,
+                hero: s.hero, num: s.num,
+                img: `${HERO_IMG_PATH}${s.hero}${s.num}.webp`
+            };
+        });
+        renderSkillSlots();
+        renderSkillGrid('');
+    }, 200);
+
+    // 펫 복원
+    selectedPets = [null, null, null];
+    (g.pets || []).forEach((name, i) => { selectedPets[i] = name; });
+    renderPetSlots();
+    renderPetGrid();
+
+    // 버튼 텍스트 변경
+    const btn = document.getElementById('aBtnSubmit');
+    if (btn) btn.textContent = '✅ 공략 수정하기';
 };
 
 window.deleteGuide = async function(id) {
@@ -1624,6 +1769,10 @@ window.saveGuide = saveGuide;
 window.toggleSkill = toggleSkill;
 window.addComment = addComment;
 window.deleteComment = deleteComment;
+window.startEditComment = startEditComment;
+window.cancelEditComment = cancelEditComment;
+window.saveEditComment = saveEditComment;
+window.editGuide = editGuide;
 window.switchMainTab = switchMainTab;
 window.switchSub = switchSub;
 window.openHeroModal = openHeroModal;
