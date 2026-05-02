@@ -441,7 +441,7 @@
                     <!-- 저장 -->
                     <div class="form-actions">
                         <button class="btn-cancel" onclick="switchSub('list')">취소</button>
-                        <button class="btn-submit" onclick="saveGuide()">✅ 방어팀 등록하기</button>
+                        <button class="btn-submit" id="dBtnSubmit" onclick="saveGuide()">✅ 방어팀 등록하기</button>
                     </div>
 
                 </div>
@@ -467,7 +467,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const FB = {
     apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -520,6 +520,8 @@ let equipData   = [{}, {}, {}];
 let skillOrder  = [null, null, null];
 let selectedPets = [null, null, null];
 let modalTargetIdx = 0;
+let editingDefId = null;
+let allDefGuides = [];
 
 // ──────────────────────────────────
 // 서브탭 전환
@@ -904,7 +906,9 @@ async function saveGuide() {
     if (defHeroes.some(h => !h)) { alert('방어팀 영웅 3명을 모두 선택해주세요.'); return; }
     if (!selectedPets.filter(Boolean).length) { alert('펫을 최소 1개 이상 선택해주세요.'); return; }
 
-    const btn = document.querySelector('.btn-submit');
+    const btn = document.getElementById('dBtnSubmit');
+    if (!btn) return;
+    const isEditing = !!editingDefId;
     btn.textContent = '저장중...'; btn.disabled = true;
 
     try {
@@ -913,26 +917,33 @@ async function saveGuide() {
             speedCondition: document.querySelector('input[name="speedDef"]:checked')?.value,
             memo: document.getElementById('fMemo').value,
             detail: document.getElementById('fDetail').value,
-            defenseTeam: defHeroes,
-            equipData,
+            defenseTeam: [...defHeroes],
+            equipData: JSON.parse(JSON.stringify(equipData)),
             skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
             pets: selectedPets.filter(Boolean),
         };
 
-        await fbSave(data);
-        alert('방어팀이 등록되었습니다! ✅');
+        if (isEditing) {
+            await updateDoc(doc(db, 'defense_strategies', editingDefId), { ...data, updatedAt: serverTimestamp() });
+            alert('방어팀이 수정되었습니다! ✅');
+            editingDefId = null;
+        } else {
+            await fbSave(data);
+            alert('방어팀이 등록되었습니다! ✅');
+        }
         switchSub('list');
         await loadGuides();
     } catch(e) {
         console.error(e);
         alert('저장 오류: ' + e.message);
     } finally {
-        btn.textContent = '✅ 방어팀 등록하기'; btn.disabled = false;
+        if (btn) { btn.textContent = isEditing ? '✅ 방어팀 수정하기' : '✅ 방어팀 등록하기'; btn.disabled = false; }
     }
 }
 
 async function loadGuides() {
     const guides = await fbLoad();
+    allDefGuides = guides;
     const countEl = document.getElementById('defCount');
     if (countEl) countEl.textContent = guides.length;
     const el = document.getElementById('defList');
@@ -962,9 +973,7 @@ async function loadGuides() {
                      style="position:absolute;right:-10px;bottom:-10px;width:100px;height:100px;object-fit:cover;opacity:0.08;border-radius:8px;pointer-events:none;"
                      onerror="this.style.display='none'">
                 <div style="position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
-                    <img src="${HERO_IMG_PATH}${name}.webp"
-                         style="width:28px;height:28px;border-radius:6px;object-fit:cover;border:1px solid var(--border);"
-                         onerror="this.style.display='none'">
+                    <img src="${HERO_IMG_PATH}${name}.webp" style="width:28px;height:28px;border-radius:6px;object-fit:cover;border:1px solid var(--border);" onerror="this.style.display='none'">
                     <span style="font-size:0.84em;font-weight:800;color:${heroColors[i]};">${name}</span>
                 </div>
                 <div style="position:relative;">
@@ -980,7 +989,7 @@ async function loadGuides() {
             </div>`;
         }).join('');
 
-        // 스킬 순서
+        // 스킬 순서 (선택된 스킬에 번호)
         const skillCards = sk.map((s, i) => `
             <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
                 <div style="display:flex;align-items:center;gap:5px;">
@@ -989,73 +998,104 @@ async function loadGuides() {
                             <img src="${HERO_IMG_PATH}${s.hero}.webp" style="width:100%;height:100%;object-fit:cover;"
                                  onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6em;text-align:center;color:var(--text-muted);padding:2px;\\'>${s.hero}</div>'">
                         </div>
-                        <div style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:var(--teal);color:white;border-radius:50%;font-size:0.72em;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid white;z-index:1;">${i+1}</div>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:3px;">
-                        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===2?'#b8860b':'var(--border)'};background:var(--bg);">
-                            <img src="${HERO_IMG_PATH}${s.hero}2.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.style.background='var(--teal-soft)'">
+                        <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===2?'#b8860b':'var(--border)'};background:var(--bg);">
+                            <img src="${HERO_IMG_PATH}${s.hero}2.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='var(--teal-soft)'">
+                            ${s.num===2 ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
                         </div>
-                        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===1?'#b8860b':'var(--border)'};background:var(--bg);">
-                            <img src="${HERO_IMG_PATH}${s.hero}1.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.style.background='var(--teal-soft)'">
+                        <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===1?'#b8860b':'var(--border)'};background:var(--bg);">
+                            <img src="${HERO_IMG_PATH}${s.hero}1.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='var(--teal-soft)'">
+                            ${s.num===1 ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
                         </div>
                     </div>
                 </div>
                 <div style="font-size:0.7em;font-weight:700;color:var(--text-sub);text-align:center;">${s.hero} S${s.num}</div>
             </div>`).join('<div style="display:flex;align-items:center;color:var(--text-muted);font-size:1em;padding:0 2px;padding-bottom:20px;">→</div>');
 
-        // 펫
-        const petChips = pets.map(name => `
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
-                    <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;"
-                         onerror="this.parentElement.parentElement.style.display='none'">
+        // 펫 > 구분자
+        const petChips = pets.map((name, pi) => `
+            <div style="display:flex;align-items:center;gap:8px;">
+                ${pi > 0 ? '<div style="font-size:1.1em;font-weight:700;color:var(--text-muted);line-height:1;padding-bottom:18px;">></div>' : ''}
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                    <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
+                        <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.parentElement.parentElement.style.display='none'">
+                    </div>
+                    <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
                 </div>
-                <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
             </div>`).join('');
+
+        // 댓글
+        const comments = g.comments || [];
+        const commentsHtml = comments.map(cm => {
+            const canEditCm = currentUser && (currentUser.uid === cm.uid || currentUser.role === 'admin');
+            return `
+            <div id="dcm-${cm.id}" style="background:var(--bg);border-radius:10px;padding:10px 12px;border-left:3px solid var(--teal-soft);">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <span style="font-size:0.78em;font-weight:700;color:var(--teal);">${cm.author}</span>
+                    <span style="font-size:0.7em;color:var(--text-muted);margin-left:auto;">${cm.date||''}</span>
+                    ${canEditCm ? `
+                    <button onclick="startEditDefComment('${g.id}','${cm.id}')" style="font-size:0.7em;color:var(--teal);background:none;border:none;cursor:pointer;padding:0 2px;">수정</button>
+                    <button onclick="deleteDefComment('${g.id}','${cm.id}')" style="font-size:0.7em;color:#d94f4f;background:none;border:none;cursor:pointer;padding:0 2px;">삭제</button>` : ''}
+                </div>
+                <div id="dcmtext-${cm.id}" style="font-size:0.83em;color:var(--text-sub);line-height:1.5;white-space:pre-wrap;">${cm.text}</div>
+                <div id="dcmedit-${cm.id}" style="display:none;margin-top:6px;">
+                    <textarea id="dcminput-${cm.id}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82em;font-family:inherit;resize:vertical;min-height:56px;"></textarea>
+                    <div style="display:flex;gap:6px;margin-top:5px;justify-content:flex-end;">
+                        <button onclick="cancelEditDefComment('${cm.id}')" style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text-muted);font-size:0.78em;cursor:pointer;">취소</button>
+                        <button onclick="saveEditDefComment('${g.id}','${cm.id}')" style="padding:5px 12px;border-radius:7px;border:none;background:var(--teal-soft);color:var(--teal);font-size:0.78em;font-weight:700;cursor:pointer;">저장</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
 
         return `
         <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;">
+            <!-- 헤더 -->
             <div onclick="toggleDetail('def-${gi}')" style="padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:7px;">${g.name}</div>
-                    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
-                        ${heroes.map(h=>`<span style="padding:2px 9px;border-radius:20px;font-size:0.72em;font-weight:700;background:var(--teal-soft);color:var(--teal);">🛡 ${h}</span>`).join('')}
+                    <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:10px;">${g.name}</div>
+                    <!-- 방어팀 초상화 -->
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <span style="font-size:0.68em;font-weight:800;color:var(--teal);min-width:70px;flex-shrink:0;">내 방어팀</span>
+                        <div style="display:flex;gap:6px;">
+                            ${heroes.map(h=>`
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                                <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
+                                    <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
+                                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\\'>${h}</div>'">
+                                </div>
+                                <span style="font-size:0.62em;font-weight:600;color:var(--text-sub);">${h}</span>
+                            </div>`).join('')}
+                        </div>
                     </div>
                     <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                    ${canManage ? `<button onclick="event.stopPropagation();deleteDefGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:#fdeaea;color:#d94f4f;font-size:0.74em;font-weight:700;cursor:pointer;">삭제</button>` : ''}
+                    ${canManage ? `
+                    <button onclick="event.stopPropagation();editDefGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:var(--teal-soft);color:var(--teal);font-size:0.74em;font-weight:700;cursor:pointer;">수정</button>
+                    <button onclick="event.stopPropagation();deleteDefGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:#fdeaea;color:#d94f4f;font-size:0.74em;font-weight:700;cursor:pointer;">삭제</button>` : ''}
                     <span id="dtoggle-${gi}" style="color:var(--text-muted);font-size:0.8em;transition:transform 0.2s;">▼</span>
                 </div>
             </div>
+            <!-- 상세 -->
             <div id="def-${gi}" style="display:none;border-top:1px solid var(--border);padding:18px 20px;">
-                ${heroes.length ? `
-                <div style="margin-bottom:14px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:10px;">🛡️ 방어팀 장비</div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">${equipCards}</div>
-                </div>` : ''}
-                ${sk.length ? `
-                <div style="margin-bottom:14px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:8px;">⭐ 스킬 순서</div>
-                    <div style="display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;">${skillCards}</div>
-                </div>` : ''}
-                ${pets.length ? `
-                <div style="margin-bottom:14px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">🐾 펫</div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">${petChips}</div>
-                </div>` : ''}
-                ${g.memo ? `
-                <div style="margin-bottom:10px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">📌 메모</div>
-                    <div style="font-size:0.83em;color:var(--text-sub);line-height:1.6;">${g.memo}</div>
-                </div>` : ''}
-                ${g.detail ? `
-                <div>
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">💡 방어 디테일</div>
-                    <div style="font-size:0.83em;color:var(--text-sub);line-height:1.7;white-space:pre-wrap;">${g.detail}</div>
-                </div>` : ''}
+                ${heroes.length ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:10px;">🛡️ 방어팀 장비</div><div style="display:flex;gap:10px;flex-wrap:wrap;">${equipCards}</div></div>` : ''}
+                ${sk.length ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:10px;">⭐ 스킬 순서</div><div style="display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;">${skillCards}</div></div>` : ''}
+                ${pets.length ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">🐾 펫</div><div style="display:flex;align-items:flex-start;gap:0;flex-wrap:wrap;">${petChips}</div></div>` : ''}
+                ${g.memo ? `<div style="margin-bottom:14px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">📌 메모</div><div style="font-size:0.83em;color:var(--text-sub);line-height:1.6;">${g.memo}</div></div>` : ''}
+                ${g.detail ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">💡 방어 디테일</div><div style="font-size:0.83em;color:var(--text-sub);line-height:1.7;white-space:pre-wrap;">${g.detail}</div></div>` : ''}
+                <!-- 댓글 -->
+                <div style="border-top:1px solid var(--border);padding-top:14px;">
+                    <div style="font-size:0.78em;font-weight:700;color:var(--text);margin-bottom:10px;">💬 댓글 (${comments.length})</div>
+                    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;">${commentsHtml || '<p style="font-size:0.78em;color:var(--text-muted);padding:4px 0;">첫 댓글을 남겨보세요!</p>'}</div>
+                    <div style="display:flex;gap:8px;">
+                        <input id="dcinput-${g.id}" type="text" placeholder="댓글을 입력하세요..."
+                               style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.84em;font-family:inherit;"
+                               onkeydown="if(event.key==='Enter') addDefComment('${g.id}')">
+                        <button onclick="addDefComment('${g.id}')" style="padding:8px 16px;background:var(--teal-soft);color:var(--teal);border:none;border-radius:9px;font-size:0.82em;font-weight:700;cursor:pointer;white-space:nowrap;">등록</button>
+                    </div>
+                </div>
             </div>
         </div>`;
     }).join('');
@@ -1073,9 +1113,96 @@ window.toggleDetail = function(id) {
 
 window.deleteDefGuide = async function(id) {
     if (!confirm('이 방어팀을 삭제하시겠습니까?')) return;
+    try { await deleteDoc(doc(db, 'defense_strategies', id)); alert('삭제되었습니다.'); await loadGuides(); }
+    catch(e) { alert('삭제 오류: ' + e.message); }
+};
+
+window.editDefGuide = async function(id) {
+    const g = allDefGuides.find(x => x.id === id);
+    if (!g) return;
+    editingDefId = id;
+    switchSub('form');
+    await new Promise(r => setTimeout(r, 50));
+    document.getElementById('fName').value = g.name || '';
+    if (document.getElementById('fMemo')) document.getElementById('fMemo').value = g.memo || '';
+    if (document.getElementById('fDetail')) document.getElementById('fDetail').value = g.detail || '';
+    const radio = document.querySelector(`input[name="speedDef"][value="${g.speedCondition||'무관'}"]`);
+    if (radio) radio.checked = true;
+    const heroes = g.defenseTeam || [];
+    const eq = g.equipData || [{},{},{}];
+    heroes.forEach((h, i) => {
+        if (!h) return;
+        defHeroes[i] = h;
+        const slot = document.getElementById(`defSlot${i}`);
+        const nameEl = document.getElementById(`defSlotName${i}`);
+        if (slot) { slot.innerHTML = heroImg(h); slot.className = 'hero-slot-img selected'; }
+        if (nameEl) nameEl.textContent = h;
+        equipData[i] = { set:eq[i]?.set||'', speed:eq[i]?.speed||'', wpn1:eq[i]?.wpn1||'', wpn2:eq[i]?.wpn2||'', arm1:eq[i]?.arm1||'', arm2:eq[i]?.arm2||'', sub:eq[i]?.sub||'', memo:eq[i]?.memo||'' };
+    });
+    renderEquipTabs();
+    if (defHeroes[0]) { activeDefIdx = 0; setActiveHero(0); }
+    renderSkillGrid('');
+    skillOrder = [null, null, null];
+    (g.skillOrder || []).forEach((s, i) => { skillOrder[i] = { key: s.key||`${s.hero}_${s.num}`, hero:s.hero, num:s.num, img:`${HERO_IMG_PATH}${s.hero}${s.num}.webp` }; });
+    renderSkillSlots(); renderSkillGrid('');
+    selectedPets = [null, null, null];
+    (g.pets || []).forEach((name, i) => { selectedPets[i] = name; });
+    renderPetSlots(); renderPetGrid();
+    const btn = document.getElementById('dBtnSubmit');
+    if (btn) btn.textContent = '✅ 방어팀 수정하기';
+};
+
+window.addDefComment = async function(guideId) {
+    const input = document.getElementById(`dcinput-${guideId}`);
+    const text = input.value.trim();
+    if (!text) return;
     try {
-        await deleteDoc(doc(db, 'defense_strategies', id));
-        alert('삭제되었습니다.');
+        const gRef = doc(db, 'defense_strategies', guideId);
+        const gSnap = await getDoc(gRef);
+        const comments = gSnap.data().comments || [];
+        comments.push({ id: Date.now().toString(), text, author: currentUser.nickname, uid: currentUser.uid, date: `${new Date().getMonth()+1}.${new Date().getDate()}` });
+        await updateDoc(gRef, { comments });
+        input.value = '';
+        await loadGuides();
+    } catch(e) { alert('댓글 등록 오류: ' + e.message); }
+};
+
+window.startEditDefComment = function(guideId, commentId) {
+    const textEl = document.getElementById(`dcmtext-${commentId}`);
+    const editEl = document.getElementById(`dcmedit-${commentId}`);
+    const inputEl = document.getElementById(`dcminput-${commentId}`);
+    if (!textEl || !editEl || !inputEl) return;
+    inputEl.value = textEl.innerText;
+    textEl.style.display = 'none'; editEl.style.display = 'block'; inputEl.focus();
+};
+
+window.cancelEditDefComment = function(commentId) {
+    const textEl = document.getElementById(`dcmtext-${commentId}`);
+    const editEl = document.getElementById(`dcmedit-${commentId}`);
+    if (textEl) textEl.style.display = 'block';
+    if (editEl) editEl.style.display = 'none';
+};
+
+window.saveEditDefComment = async function(guideId, commentId) {
+    const inputEl = document.getElementById(`dcminput-${commentId}`);
+    const newText = inputEl.value.trim();
+    if (!newText) { alert('내용을 입력해주세요.'); return; }
+    try {
+        const gRef = doc(db, 'defense_strategies', guideId);
+        const gSnap = await getDoc(gRef);
+        const comments = (gSnap.data().comments || []).map(c => c.id === commentId ? { ...c, text: newText } : c);
+        await updateDoc(gRef, { comments });
+        await loadGuides();
+    } catch(e) { alert('수정 오류: ' + e.message); }
+};
+
+window.deleteDefComment = async function(guideId, commentId) {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+    try {
+        const gRef = doc(db, 'defense_strategies', guideId);
+        const gSnap = await getDoc(gRef);
+        const comments = (gSnap.data().comments || []).filter(c => c.id !== commentId);
+        await updateDoc(gRef, { comments });
         await loadGuides();
     } catch(e) { alert('삭제 오류: ' + e.message); }
 };
