@@ -1611,77 +1611,80 @@ window.deleteComment = async function(guideId, commentId) {
     } catch(e) { alert('댓글 삭제 오류: ' + e.message); }
 };
 
-// 공략 수정 - 등록 폼으로 이동하며 기존 데이터 채우기
+// 공략 수정 - 슬롯 방식에 맞게 데이터 채우기
 window.editGuide = async function(id) {
     const g = allGuides.find(x => x.id === id);
     if (!g) return;
     editingId = id;
     aImgs = {1:[],2:[],3:[]};
 
-    // 폼으로 전환
+    // 폼으로 전환 먼저
     switchSub('form');
 
-    // 이름/메모/디테일
+    // 폼 초기화 후 데이터 채우기 (DOM 렌더 후 실행)
+    await new Promise(r => setTimeout(r, 50));
+
+    // 기본 정보
     document.getElementById('fName').value = g.name || '';
-    document.getElementById('fMemo').value = g.memo || '';
-    document.getElementById('fDetail').value = g.detail || '';
+    if (document.getElementById('fMemo')) document.getElementById('fMemo').value = g.memo || '';
+    if (document.getElementById('fDetail')) document.getElementById('fDetail').value = g.detail || '';
 
     // 속공 조건
     const radio = document.querySelector(`input[name="speedAtk"][value="${g.speedCondition||'무관'}"]`);
     if (radio) radio.checked = true;
 
-    // 방어팀
+    // 방어팀 슬롯 채우기
     const dt = g.defenseTeam || [];
     dt.forEach((h, i) => {
-        const gradeKey = Object.keys(HERO_DATA).find(gr => HERO_DATA[gr].includes(h));
-        const gs = document.getElementById(`adGrade${i+1}`);
-        const hs = document.getElementById(`adHero${i+1}`);
-        if (gs && hs && gradeKey) {
-            gs.value = gradeKey;
-            onGradeChange('ad', i+1, gradeKey);
-            setTimeout(() => { hs.value = h; }, 80);
-        }
+        if (!h) return;
+        defHeroes[i] = h;
+        const slot = document.getElementById(`defSlot${i}`);
+        const nameEl = document.getElementById(`defSlotName${i}`);
+        if (slot) { slot.innerHTML = heroImgEl(h); slot.className = 'hero-slot-img def-selected'; }
+        if (nameEl) nameEl.textContent = h;
     });
 
-    // 공격팀
+    // 공격팀 슬롯 채우기
     const at = g.attackTeam || [];
     const eq = g.equipData || [{},{},{}];
     at.forEach((h, i) => {
-        const gradeKey = Object.keys(HERO_DATA).find(gr => HERO_DATA[gr].includes(h));
-        const gs = document.getElementById(`aaGrade${i+1}`);
-        const hs = document.getElementById(`aaHero${i+1}`);
-        if (gs && hs && gradeKey) {
-            gs.value = gradeKey;
-            onGradeChange('aa', i+1, gradeKey);
-            setTimeout(() => {
-                hs.value = h;
-                onAtkHeroChange(i+1, h);
-                const e = eq[i] || {};
-                const n = i+1;
-                if (document.getElementById(`aSet${n}`)) document.getElementById(`aSet${n}`).value = e.set || '모두';
-                if (document.getElementById(`aW${n}1`)) document.getElementById(`aW${n}1`).value = e.wpn1 || '모두';
-                if (document.getElementById(`aW${n}2`)) document.getElementById(`aW${n}2`).value = e.wpn2 || '모두';
-                if (document.getElementById(`aA${n}1`)) document.getElementById(`aA${n}1`).value = e.arm1 || '모두';
-                if (document.getElementById(`aA${n}2`)) document.getElementById(`aA${n}2`).value = e.arm2 || '모두';
-                if (document.getElementById(`aDesc${n}`)) document.getElementById(`aDesc${n}`).value = e.description || '';
-            }, 100);
-        }
+        if (!h) return;
+        atkHeroes[i] = h;
+        const slot = document.getElementById(`atkSlot${i}`);
+        const nameEl = document.getElementById(`atkSlotName${i}`);
+        if (slot) { slot.innerHTML = heroImgEl(h); slot.className = 'hero-slot-img selected'; }
+        if (nameEl) nameEl.textContent = h;
+
+        // 장비 데이터 미리 세팅
+        equipData[i] = {
+            set: eq[i]?.set || '',
+            speed: eq[i]?.speed || '',
+            wpn1: eq[i]?.wpn1 || '',
+            wpn2: eq[i]?.wpn2 || '',
+            arm1: eq[i]?.arm1 || '',
+            arm2: eq[i]?.arm2 || '',
+            sub: eq[i]?.sub || '',
+            memo: eq[i]?.memo || '',
+            description: eq[i]?.description || '',
+        };
     });
 
+    // 장비 탭 렌더
+    renderEquipTabs();
+    if (atkHeroes[0]) { activeAtkIdx = 0; setActiveAtk(0); }
+
     // 스킬 순서 복원
-    setTimeout(() => {
-        updateAtkSkills();
-        skillOrder = [null, null, null];
-        (g.skillOrder || []).forEach((s, i) => {
-            skillOrder[i] = {
-                key: s.key || `${s.hero}_${s.num}`,
-                hero: s.hero, num: s.num,
-                img: `${HERO_IMG_PATH}${s.hero}${s.num}.webp`
-            };
-        });
-        renderSkillSlots();
-        renderSkillGrid('');
-    }, 200);
+    renderSkillGrid('');
+    skillOrder = [null, null, null];
+    (g.skillOrder || []).forEach((s, i) => {
+        skillOrder[i] = {
+            key: s.key || `${s.hero}_${s.num}`,
+            hero: s.hero, num: s.num,
+            img: `${HERO_IMG_PATH}${s.hero}${s.num}.webp`
+        };
+    });
+    renderSkillSlots();
+    renderSkillGrid('');
 
     // 펫 복원
     selectedPets = [null, null, null];
