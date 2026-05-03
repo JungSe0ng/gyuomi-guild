@@ -812,13 +812,6 @@ function addSkill(key, hero, num, img) {
     toggleSkill(key, hero, num, img);
 }
 
-function addSkill(key, hero, num, img) {
-    const idx = skillOrder.findIndex(s => s === null);
-    if (idx === -1) return;
-    skillOrder[idx] = { key, hero, num, img };
-    renderSkillSlots();
-    renderSkillGrid('');
-}
 
 function clearSkillSlot(idx) {
     if (!skillOrder[idx]) return;
@@ -1101,7 +1094,7 @@ async function loadGuides() {
     }).join('');
 }
 
-window.toggleDetail = function(id) {
+function toggleDetail(id) {
     const el = document.getElementById(id);
     if (!el) return;
     const idx = id.split('-')[1];
@@ -1111,13 +1104,13 @@ window.toggleDetail = function(id) {
     if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
 };
 
-window.deleteDefGuide = async function(id) {
+async function deleteDefGuide(id) {
     if (!confirm('이 방어팀을 삭제하시겠습니까?')) return;
     try { await deleteDoc(doc(db, 'defense_strategies', id)); alert('삭제되었습니다.'); await loadGuides(); }
     catch(e) { alert('삭제 오류: ' + e.message); }
 };
 
-window.editDefGuide = async function(id) {
+async function editDefGuide(id) {
     const g = allDefGuides.find(x => x.id === id);
     if (!g) return;
     editingDefId = id;
@@ -1152,7 +1145,7 @@ window.editDefGuide = async function(id) {
     if (btn) btn.textContent = '✅ 방어팀 수정하기';
 };
 
-window.addDefComment = async function(guideId) {
+async function addDefComment(guideId) {
     const input = document.getElementById(`dcinput-${guideId}`);
     const text = input.value.trim();
     if (!text) return;
@@ -1167,7 +1160,7 @@ window.addDefComment = async function(guideId) {
     } catch(e) { alert('댓글 등록 오류: ' + e.message); }
 };
 
-window.startEditDefComment = function(guideId, commentId) {
+function startEditDefComment(guideId, commentId) {
     const textEl = document.getElementById(`dcmtext-${commentId}`);
     const editEl = document.getElementById(`dcmedit-${commentId}`);
     const inputEl = document.getElementById(`dcminput-${commentId}`);
@@ -1176,14 +1169,14 @@ window.startEditDefComment = function(guideId, commentId) {
     textEl.style.display = 'none'; editEl.style.display = 'block'; inputEl.focus();
 };
 
-window.cancelEditDefComment = function(commentId) {
+function cancelEditDefComment(commentId) {
     const textEl = document.getElementById(`dcmtext-${commentId}`);
     const editEl = document.getElementById(`dcmedit-${commentId}`);
     if (textEl) textEl.style.display = 'block';
     if (editEl) editEl.style.display = 'none';
 };
 
-window.saveEditDefComment = async function(guideId, commentId) {
+async function saveEditDefComment(guideId, commentId) {
     const inputEl = document.getElementById(`dcminput-${commentId}`);
     const newText = inputEl.value.trim();
     if (!newText) { alert('내용을 입력해주세요.'); return; }
@@ -1196,7 +1189,7 @@ window.saveEditDefComment = async function(guideId, commentId) {
     } catch(e) { alert('수정 오류: ' + e.message); }
 };
 
-window.deleteDefComment = async function(guideId, commentId) {
+async function deleteDefComment(guideId, commentId) {
     if (!confirm('댓글을 삭제하시겠습니까?')) return;
     try {
         const gRef = doc(db, 'defense_strategies', guideId);
@@ -1222,8 +1215,9 @@ function closeSidebar()  { document.getElementById('sidebar').classList.remove('
 
 // ── window에 함수 등록 (onclick에서 사용) ──
 window.saveGuide = saveGuide;
-window.toggleDetail = toggleDetail;
-window.deleteDefGuide = deleteDefGuide;
+
+// ── window에 함수 등록 (onclick에서 사용) ──
+window.saveGuide = saveGuide;
 window.switchSub = switchSub;
 window.openHeroModal = openHeroModal;
 window.closeHeroModal = closeHeroModal;
@@ -1233,11 +1227,20 @@ window.setActiveHero = setActiveHero;
 window.saveEquip = saveEquip;
 window.renderSkillGrid = renderSkillGrid;
 window.addSkill = addSkill;
+window.toggleSkill = toggleSkill;
 window.clearSkillSlot = clearSkillSlot;
 window.addPet = addPet;
 window.clearPet = clearPet;
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
+window.toggleDetail = toggleDetail;
+window.deleteDefGuide = deleteDefGuide;
+window.editDefGuide = editDefGuide;
+window.addDefComment = addDefComment;
+window.startEditDefComment = startEditDefComment;
+window.cancelEditDefComment = cancelEditDefComment;
+window.saveEditDefComment = saveEditDefComment;
+window.deleteDefComment = deleteDefComment;
 
 // ── 초기화 ──
 initSlots();
