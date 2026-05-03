@@ -1247,6 +1247,11 @@ function renderPetSlots() {
 // 저장
 // ──────────────────────────────────────────
 async function saveGuide() {
+    if (!currentUser) { alert('로그인이 필요합니다.'); return; }
+    if (currentUser.role !== 'admin' && !editingId) {
+        alert('공략 등록은 관리자만 가능합니다.');
+        switchSub('list'); return;
+    }
     const name = document.getElementById('fName').value.trim();
     if (!name) { alert('공략 이름을 입력해주세요.'); return; }
     if (defHeroes.some(h => !h)) { alert('상대 방어팀 영웅 3명을 모두 선택해주세요.'); return; }
@@ -1757,6 +1762,12 @@ onAuthStateChanged(auth, async (user) => {
     if (currentUser.role === 'admin') {
         const adminEl = document.getElementById('adminSection');
         if (adminEl) adminEl.style.display = '';
+    } else {
+        // 일반 멤버 - 등록 버튼/탭 숨기기
+        const registerBtn = document.getElementById('atkSubForm');
+        if (registerBtn) registerBtn.style.display = 'none';
+        const addBtn = document.querySelector('.btn-add');
+        if (addBtn) addBtn.style.display = 'none';
     }
     await loadGuides();
 });
