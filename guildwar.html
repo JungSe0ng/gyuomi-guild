@@ -577,9 +577,33 @@
 
             <!-- 목록 뷰 -->
             <div id="atkViewList">
-                <div class="action-bar">
-                    <input class="search-input" type="text" placeholder="🔍 공략 이름, 영웅 이름 검색...">
-                    <button class="btn-add" onclick="switchSub('form')">✏️ 공략 등록</button>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+                    <!-- 검색 + 버튼 -->
+                    <div class="action-bar">
+                        <input class="search-input" id="atkSearchText" type="text" placeholder="🔍 공략 이름 검색..." oninput="filterGuides()">
+                        <button class="btn-add" onclick="switchSub('form')">✏️ 공략 등록</button>
+                    </div>
+                    <!-- 필터 바 -->
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <button onclick="openFilterModal()"
+                                style="display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:9px;background:var(--white);font-size:0.83em;font-weight:600;color:var(--text-sub);cursor:pointer;font-family:inherit;">
+                            🦸 영웅 선택
+                        </button>
+                        <!-- 선택된 영웅 칩들 -->
+                        <div id="filterChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+                        <!-- 속공 조건 필터 -->
+                        <select id="filterSpeed" onchange="filterGuides()"
+                                style="padding:7px 10px;border:1px solid var(--border);border-radius:9px;font-size:0.83em;font-family:inherit;background:var(--white);color:var(--text-sub);cursor:pointer;">
+                            <option value="">⚡ 전체</option>
+                            <option value="속내실">속내실</option>
+                            <option value="속공세팅">속공세팅</option>
+                            <option value="내실세팅">내실세팅</option>
+                        </select>
+                        <button id="filterResetBtn" onclick="resetFilter()"
+                                style="display:none;padding:7px 12px;border:1px solid var(--border);border-radius:9px;background:var(--white);font-size:0.82em;color:var(--text-muted);cursor:pointer;font-family:inherit;">
+                            ✕ 초기화
+                        </button>
+                    </div>
                 </div>
                 <div id="atkList">
                     <div class="empty-state">
@@ -756,6 +780,20 @@
     </div>
 </div>
 
+<!-- 영웅 필터 모달 -->
+<div class="hero-modal-overlay" id="filterModal">
+    <div class="hero-modal">
+        <div class="hero-modal-hd">
+            <div class="hero-modal-hd-title">🦸 영웅 선택 (방어팀 / 공격팀)</div>
+            <button class="hero-modal-close" onclick="closeFilterModal()">✕</button>
+        </div>
+        <div class="hero-modal-search">
+            <input type="text" id="filterHeroSearch" placeholder="영웅 이름 검색..." oninput="renderFilterHeroModal(this.value)">
+        </div>
+        <div class="hero-modal-body" id="filterHeroBody"></div>
+    </div>
+</div>
+
 <!-- 영웅 선택 모달 -->
 <div class="hero-modal-overlay" id="heroModal">
     <div class="hero-modal">
@@ -796,7 +834,92 @@ const days = ['일','월','화','수','목','금','토'], now = new Date();
 document.getElementById('topDate').textContent = `${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
 
 // ──────────────────────────────────────────
-// 영웅 데이터 & 이미지 경로 설정
+// 필터 기능
+// ──────────────────────────────────────────
+let filterHero = null;
+
+function openFilterModal() {
+    document.getElementById('filterHeroSearch').value = '';
+    renderFilterHeroModal('');
+    document.getElementById('filterModal').classList.add('open');
+}
+function closeFilterModal() {
+    document.getElementById('filterModal').classList.remove('open');
+}
+function renderFilterHeroModal(q) {
+    const lq = q.toLowerCase();
+    let html = '';
+    Object.entries(HERO_DATA).forEach(([grade, heroes]) => {
+        const filtered = q ? heroes.filter(h => h.toLowerCase().includes(lq)) : heroes;
+        if (!filtered.length) return;
+        html += `<div class="hero-grade-title">${grade}</div><div class="hero-grid-modal">`;
+        filtered.forEach(name => {
+            const isSelected = filterHero === name;
+            html += `<div class="hero-item" onclick="selectFilterHero('${name}')">
+                <div class="hero-item-img" style="border:2px solid ${isSelected?'var(--primary)':'transparent'};">
+                    ${heroImgEl(name)}
+                </div>
+                <div class="hero-item-name" style="color:${isSelected?'var(--primary)':''};">${name}</div>
+            </div>`;
+        });
+        html += '</div>';
+    });
+    document.getElementById('filterHeroBody').innerHTML = html ||
+        '<p style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">검색 결과 없음</p>';
+}
+function selectFilterHero(name) {
+    filterHero = name;
+    closeFilterModal();
+    renderFilterChips();
+    filterGuides();
+}
+function renderFilterChips() {
+    const chips = document.getElementById('filterChips');
+    const resetBtn = document.getElementById('filterResetBtn');
+    if (!filterHero) { chips.innerHTML = ''; resetBtn.style.display = 'none'; return; }
+    chips.innerHTML = `
+        <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:var(--primary-soft);border:1px solid var(--primary-soft);">
+            <div style="width:22px;height:22px;border-radius:5px;overflow:hidden;flex-shrink:0;">${heroImgEl(filterHero)}</div>
+            <span style="font-size:0.8em;font-weight:700;color:var(--primary);">${filterHero}</span>
+            <button onclick="resetFilter()" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:0.8em;padding:0 2px;">✕</button>
+        </div>`;
+    resetBtn.style.display = 'block';
+}
+function resetFilter() {
+    filterHero = null;
+    const t = document.getElementById('atkSearchText'); if (t) t.value = '';
+    const s = document.getElementById('filterSpeed'); if (s) s.value = '';
+    renderFilterChips();
+    filterGuides();
+}
+function filterGuides() {
+    const text = (document.getElementById('atkSearchText')?.value || '').toLowerCase();
+    const speed = document.getElementById('filterSpeed')?.value || '';
+    const filtered = allGuides.filter(g => {
+        const allHeroes = [...(g.defenseTeam||[]), ...(g.attackTeam||[])];
+        if (text && !g.name?.toLowerCase().includes(text)) return false;
+        if (filterHero && !allHeroes.includes(filterHero)) return false;
+        if (speed && g.speedCondition !== speed) return false;
+        return true;
+    });
+    renderGuideList(filtered);
+}
+function renderGuideList(guides) {
+    const el = document.getElementById('atkList');
+    if (!el) return;
+    if (!guides.length) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">조건에 맞는 공략이 없습니다.</div></div>';
+        return;
+    }
+    // loadGuides의 렌더링 코드 재활용 (guides 배열로 직접 렌더)
+    el.innerHTML = renderGuidesHTML(guides);
+}
+window.openFilterModal = openFilterModal;
+window.closeFilterModal = closeFilterModal;
+window.renderFilterHeroModal = renderFilterHeroModal;
+window.selectFilterHero = selectFilterHero;
+window.resetFilter = resetFilter;
+window.filterGuides = filterGuides;
 // ──────────────────────────────────────────
 // 📁 이미지 폴더 경로 (필요 시 수정)
 const HERO_IMG_PATH = './heroes/';   // 영웅 초상화: 카구라.png
@@ -1300,7 +1423,7 @@ async function saveGuide() {
 
 async function loadGuides() {
     const guides = await fbLoadGuides();
-    allGuides = guides; // 전역 업데이트
+    allGuides = guides;
 
     const countEl = document.getElementById('atkCount');
     if (countEl) countEl.textContent = guides.length;
@@ -1313,10 +1436,15 @@ async function loadGuides() {
         return;
     }
 
-    const SETS_LABEL = { '모두': '전체' };
+    el.innerHTML = renderGuidesHTML(guides);
+}
+
+function renderGuidesHTML(guides) {
+    if (!guides.length) return '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">조건에 맞는 공략이 없습니다.</div></div>';
+
     const heroColors = ['var(--secondary)', 'var(--primary)', '#2a9d8f'];
 
-    el.innerHTML = guides.map((g, gi) => {
+    return guides.map((g, gi) => {
         const dt = g.defenseTeam || [];
         const at = g.attackTeam || [];
         const eq = g.equipData || [{},{},{}];
@@ -1717,6 +1845,9 @@ window.deleteGuide = async function(id) {
 // ──────────────────────────────────────────
 document.getElementById('heroModal').addEventListener('click', function(e) {
     if (e.target === this) closeHeroModal();
+});
+document.getElementById('filterModal').addEventListener('click', function(e) {
+    if (e.target === this) closeFilterModal();
 });
 
 // 사이드바
