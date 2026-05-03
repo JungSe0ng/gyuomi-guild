@@ -616,7 +616,7 @@
         <!-- 하단 패널 -->
         <div class="bottom-grid fade-up d4">
             <div class="panel">
-                <div class="panel-hd">👥 길드원 목록</div>
+                <div class="panel-hd" id="membersListHd">👥 길드원 목록</div>
                 <div class="panel-body" id="membersList">
                     <p style="text-align:center;color:var(--text-muted);font-size:0.82em;padding:18px 0">로딩중...</p>
                 </div>
@@ -699,31 +699,46 @@
 
         loadStats();
         loadMembers(me);
+        updatePresence(me.uid);
     });
     }
 
     async function loadStats() {
         try {
-            const [gw, sg, ex, us] = await Promise.all([
-                getDocs(collection(db, 'guides')),
-                getDocs(collection(db, 'siegeGuides')),
-                getDocs(collection(db, 'expeditions')),
+            const [gwAtk, gwDef, sg, ex, us] = await Promise.all([
+                getDocs(collection(db, 'attack_strategies')),
+                getDocs(collection(db, 'defense_strategies')),
+                getDocs(collection(db, 'siege_strategies')),
+                getDocs(collection(db, 'expedition_strategies')),
                 getDocs(collection(db, 'users')),
             ]);
+            const gwTotal = gwAtk.size + gwDef.size;
             const mc = [...us.docs].filter(d => d.data().role !== 'pending').length;
-            document.getElementById('stGW').textContent = gw.size;
+            document.getElementById('stGW').textContent = gwTotal;
             document.getElementById('stSG').textContent = sg.size;
             document.getElementById('stEX').textContent = ex.size;
             document.getElementById('stMB').textContent = mc;
-            document.getElementById('mcGW').textContent = gw.size;
+            document.getElementById('mcGW').textContent = gwTotal;
             document.getElementById('mcSG').textContent = sg.size;
             document.getElementById('mcEX').textContent = ex.size;
-            document.getElementById('badgeGW').textContent = gw.size;
+            document.getElementById('badgeGW').textContent = gwTotal;
             document.getElementById('badgeSG').textContent = sg.size;
             document.getElementById('badgeEX').textContent = ex.size;
         } catch(e) {
-            ['stGW','stSG','stEX','stMB'].forEach(id => document.getElementById(id).textContent = '0');
+            ['stGW','stSG','stEX','stMB'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '0'; });
         }
+    }
+
+    // 접속 상태 업데이트 (5분마다 갱신)
+    async function updatePresence(uid) {
+        try {
+            const { updateDoc, doc: fsDoc, serverTimestamp: sTs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+            const lastSeen = new Date().toISOString();
+            await updateDoc(fsDoc(db, 'users', uid), { lastSeen });
+            setInterval(async () => {
+                await updateDoc(fsDoc(db, 'users', uid), { lastSeen: new Date().toISOString() });
+            }, 3 * 60 * 1000); // 3분마다
+        } catch(e) { console.log('presence 업데이트 실패', e); }
     }
 
     async function loadMembers(me) {
@@ -742,14 +757,29 @@
                 el.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.82em;padding:18px 0">등록된 길드원이 없습니다.</p>';
                 return;
             }
-            el.innerHTML = list.map((m,i) => `
+            const now = Date.now();
+            el.innerHTML = list.map((m,i) => {
+                // 5분 이내 접속 = 온라인
+                const lastSeen = m.lastSeen ? new Date(m.lastSeen).getTime() : 0;
+                const isOnline = (now - lastSeen) < 5 * 60 * 1000;
+                const onlineDot = isOnline
+                    ? `<span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;flex-shrink:0;" title="접속중"></span>`
+                    : `<span style="display:inline-block;width:8px;height:8px;background:#d1d5db;border-radius:50%;flex-shrink:0;" title="오프라인"></span>`;
+                return `
                 <div class="member-row">
                     <span class="m-num">${i+1}</span>
                     <div class="m-ava">${emojis[i%emojis.length]}</div>
                     <span class="m-name">${m.nickname}${m.uid===me.uid?' (나)':''}</span>
+                    ${onlineDot}
                     <span class="m-badge ${m.role}">${m.role==='admin'?'관리자':'멤버'}</span>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
+
+            // 온라인 수 표시
+            const onlineCount = list.filter(m => (now - (m.lastSeen ? new Date(m.lastSeen).getTime() : 0)) < 5 * 60 * 1000).length;
+            const hdEl = document.getElementById('membersListHd');
+            if (hdEl) hdEl.innerHTML = `👥 길드원 목록 <span style="font-size:0.78em;font-weight:400;color:#22c55e;margin-left:8px;">● ${onlineCount}명 접속중</span>`;
+
         } catch(e) {
             document.getElementById('membersList').innerHTML =
                 '<p style="text-align:center;color:var(--text-muted);font-size:0.82em;padding:18px 0">불러오기 실패</p>';
