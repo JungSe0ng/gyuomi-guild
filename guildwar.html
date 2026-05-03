@@ -608,13 +608,13 @@
                             <div class="panel-card-body">
                                 <div class="radio-group">
                                     <label class="radio-item">
-                                        <input type="radio" name="speedAtk" value="무관" checked> 무관
+                                        <input type="radio" name="speedAtk" value="속내실" checked> 속내실
                                     </label>
                                     <label class="radio-item">
-                                        <input type="radio" name="speedAtk" value="속공이길시"> 속공 이길시
+                                        <input type="radio" name="speedAtk" value="속공세팅"> 속공세팅
                                     </label>
                                     <label class="radio-item">
-                                        <input type="radio" name="speedAtk" value="속공질시"> 속공 질시
+                                        <input type="radio" name="speedAtk" value="내실세팅"> 내실세팅
                                     </label>
                                 </div>
                             </div>
@@ -1013,7 +1013,7 @@ function renderEquipBody() {
             </div>
             <div>
                 <label class="f-label">속공</label>
-                <input class="f-input" type="text" placeholder="예: 210" value="${d.speed||''}" oninput="saveEquip('speed',this.value)">
+                <input class="f-input" type="text" placeholder="예: 81 이상" value="${d.speed||''}" oninput="saveEquip('speed',this.value)">
             </div>
         </div>
 
@@ -1468,7 +1468,7 @@ async function loadGuides() {
                             </div>`).join('')}
                         </div>
                     </div>
-                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
+                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                     ${canManage ? `
@@ -1632,7 +1632,7 @@ window.editGuide = async function(id) {
     if (document.getElementById('fDetail')) document.getElementById('fDetail').value = g.detail || '';
 
     // 속공 조건
-    const radio = document.querySelector(`input[name="speedAtk"][value="${g.speedCondition||'무관'}"]`);
+    const radio = document.querySelector(`input[name="speedAtk"][value="${g.speedCondition||'속내실'}"]`);
     if (radio) radio.checked = true;
 
     // 방어팀 슬롯 채우기

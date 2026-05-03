@@ -148,7 +148,7 @@
         .skill-search { margin-bottom: 10px; }
         .skill-search input { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82em; font-family: inherit; }
         .skill-search input:focus { outline: none; border-color: var(--teal); }
-        .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; max-height: 180px; overflow-y: auto; padding: 2px; }
+        .skill-grid { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 2px; }
         .skill-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
         .skill-item-img { width: 52px; height: 52px; border-radius: 9px; border: 2px solid transparent; overflow: hidden; transition: all 0.18s; background: var(--bg); }
         .skill-item-img img { width: 100%; height: 100%; object-fit: cover; }
@@ -333,13 +333,13 @@
                         <div class="panel-card-body">
                             <div class="radio-group">
                                 <label class="radio-item">
-                                    <input type="radio" name="speedDef" value="무관" checked> 무관
+                                    <input type="radio" name="speedDef" value="속내실" checked> 속내실
                                 </label>
                                 <label class="radio-item">
-                                    <input type="radio" name="speedDef" value="속공이길시"> 속공 이길시
+                                    <input type="radio" name="speedDef" value="속공세팅"> 속공세팅
                                 </label>
                                 <label class="radio-item">
-                                    <input type="radio" name="speedDef" value="속공질시"> 속공 질시
+                                    <input type="radio" name="speedDef" value="내실세팅"> 내실세팅
                                 </label>
                             </div>
                         </div>
@@ -666,7 +666,7 @@ function renderEquipBody() {
             </div>
             <div>
                 <label class="f-label">속공</label>
-                <input class="f-input" type="text" placeholder="예: 210" value="${d.speed||''}" oninput="saveEquip('speed',this.value)">
+                <input class="f-input" type="text" placeholder="예: 81 이상" value="${d.speed||''}" oninput="saveEquip('speed',this.value)">
             </div>
         </div>
 
@@ -811,7 +811,7 @@ function toggleSkill(key, hero, num, img) {
 function addSkill(key, hero, num, img) {
     toggleSkill(key, hero, num, img);
 }
-
+}
 
 function clearSkillSlot(idx) {
     if (!skillOrder[idx]) return;
@@ -1062,7 +1062,7 @@ async function loadGuides() {
                             </div>`).join('')}
                         </div>
                     </div>
-                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'무관'}</div>
+                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                     ${canManage ? `
@@ -1119,7 +1119,7 @@ async function editDefGuide(id) {
     document.getElementById('fName').value = g.name || '';
     if (document.getElementById('fMemo')) document.getElementById('fMemo').value = g.memo || '';
     if (document.getElementById('fDetail')) document.getElementById('fDetail').value = g.detail || '';
-    const radio = document.querySelector(`input[name="speedDef"][value="${g.speedCondition||'무관'}"]`);
+    const radio = document.querySelector(`input[name="speedDef"][value="${g.speedCondition||'속내실'}"]`);
     if (radio) radio.checked = true;
     const heroes = g.defenseTeam || [];
     const eq = g.equipData || [{},{},{}];
