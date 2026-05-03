@@ -577,33 +577,26 @@
 
             <!-- 목록 뷰 -->
             <div id="atkViewList">
-                <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
-                    <!-- 검색 + 버튼 -->
-                    <div class="action-bar">
-                        <input class="search-input" id="atkSearchText" type="text" placeholder="🔍 공략 이름 검색..." oninput="filterGuides()">
-                        <button class="btn-add" onclick="switchSub('form')">✏️ 공략 등록</button>
-                    </div>
-                    <!-- 필터 바 -->
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <button onclick="openFilterModal()"
-                                style="display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:9px;background:var(--white);font-size:0.83em;font-weight:600;color:var(--text-sub);cursor:pointer;font-family:inherit;">
-                            🦸 영웅 선택
-                        </button>
-                        <!-- 선택된 영웅 칩들 -->
-                        <div id="filterChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-                        <!-- 속공 조건 필터 -->
-                        <select id="filterSpeed" onchange="filterGuides()"
-                                style="padding:7px 10px;border:1px solid var(--border);border-radius:9px;font-size:0.83em;font-family:inherit;background:var(--white);color:var(--text-sub);cursor:pointer;">
-                            <option value="">⚡ 전체</option>
-                            <option value="속내실">속내실</option>
-                            <option value="속공세팅">속공세팅</option>
-                            <option value="내실세팅">내실세팅</option>
-                        </select>
-                        <button id="filterResetBtn" onclick="resetFilter()"
-                                style="display:none;padding:7px 12px;border:1px solid var(--border);border-radius:9px;background:var(--white);font-size:0.82em;color:var(--text-muted);cursor:pointer;font-family:inherit;">
-                            ✕ 초기화
-                        </button>
-                    </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+                    <!-- 영웅 선택 버튼 -->
+                    <button onclick="openFilterModal()" id="filterHeroBtn"
+                            style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);font-size:0.84em;font-weight:600;color:var(--text-sub);cursor:pointer;font-family:inherit;transition:all 0.18s;">
+                        🦸 영웅 선택
+                    </button>
+                    <!-- 선택된 영웅 칩 -->
+                    <div id="filterChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+                    <!-- 속공 조건 -->
+                    <select id="filterSpeed" onchange="filterGuides()"
+                            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.84em;font-family:inherit;background:var(--white);color:var(--text-sub);cursor:pointer;">
+                        <option value="">⚡ 속공 조건 전체</option>
+                        <option value="속내실">속내실</option>
+                        <option value="속공세팅">속공세팅</option>
+                        <option value="내실세팅">내실세팅</option>
+                    </select>
+                    <!-- 초기화 -->
+                    <button id="filterResetBtn" onclick="resetFilter()" style="display:none;padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);font-size:0.82em;color:var(--text-muted);cursor:pointer;font-family:inherit;">✕ 초기화</button>
+                    <!-- 등록 버튼 -->
+                    <button class="btn-add" style="margin-left:auto;" onclick="switchSub('form')">✏️ 공략 등록</button>
                 </div>
                 <div id="atkList">
                     <div class="empty-state">
@@ -867,12 +860,6 @@ function renderFilterHeroModal(q) {
     document.getElementById('filterHeroBody').innerHTML = html ||
         '<p style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">검색 결과 없음</p>';
 }
-function selectFilterHero(name) {
-    filterHero = name;
-    closeFilterModal();
-    renderFilterChips();
-    filterGuides();
-}
 function renderFilterChips() {
     const chips = document.getElementById('filterChips');
     const resetBtn = document.getElementById('filterResetBtn');
@@ -887,17 +874,26 @@ function renderFilterChips() {
 }
 function resetFilter() {
     filterHero = null;
-    const t = document.getElementById('atkSearchText'); if (t) t.value = '';
     const s = document.getElementById('filterSpeed'); if (s) s.value = '';
+    const btn = document.getElementById('filterHeroBtn');
+    if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text-sub)'; btn.style.background = 'var(--white)'; }
+    renderFilterChips();
+    filterGuides();
+}
+
+function selectFilterHero(name) {
+    filterHero = name;
+    closeFilterModal();
+    // 영웅 선택 버튼 활성화 스타일
+    const btn = document.getElementById('filterHeroBtn');
+    if (btn) { btn.style.borderColor = 'var(--primary)'; btn.style.color = 'var(--primary)'; btn.style.background = 'var(--primary-soft)'; }
     renderFilterChips();
     filterGuides();
 }
 function filterGuides() {
-    const text = (document.getElementById('atkSearchText')?.value || '').toLowerCase();
     const speed = document.getElementById('filterSpeed')?.value || '';
     const filtered = allGuides.filter(g => {
         const allHeroes = [...(g.defenseTeam||[]), ...(g.attackTeam||[])];
-        if (text && !g.name?.toLowerCase().includes(text)) return false;
         if (filterHero && !allHeroes.includes(filterHero)) return false;
         if (speed && g.speedCondition !== speed) return false;
         return true;
