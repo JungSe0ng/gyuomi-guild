@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>길드전 - 귀요미 길드</title>
+    <title>방어 공략 - 귀요미 길드</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f4f5f9;
             --white: #ffffff;
             --primary: #7c5cbf;
-            --primary-light: #9b7fd4;
             --primary-soft: #ede8f8;
             --secondary: #e8609a;
             --secondary-soft: #fde8f2;
@@ -36,7 +35,7 @@
         .logo-wrap { display: flex; align-items: center; gap: 10px; }
         .logo-icon { width: 36px; height: 36px; background: var(--grad); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1em; flex-shrink: 0; }
         .logo-name { font-size: 0.95em; font-weight: 800; color: var(--primary); }
-        .logo-sub { font-size: 0.68em; color: var(--text-muted); }
+        .logo-sub  { font-size: 0.68em; color: var(--text-muted); }
         .sidebar-user { margin: 14px 12px; padding: 12px 14px; background: var(--primary-soft); border-radius: 12px; display: flex; align-items: center; gap: 10px; }
         .user-avatar { width: 32px; height: 32px; background: var(--grad); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85em; flex-shrink: 0; }
         .user-info { flex: 1; min-width: 0; }
@@ -58,436 +57,164 @@
         .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
         .topbar { height: 56px; background: var(--white); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
         .topbar-title { font-size: 0.9em; font-weight: 700; }
-        .topbar-date { font-size: 0.78em; color: var(--text-muted); }
-        .guild-chip { padding: 5px 12px; background: var(--primary-soft); border-radius: 20px; font-size: 0.78em; font-weight: 700; color: var(--primary); }
-
-        /* ── 콘텐츠 레이아웃 ── */
+        .topbar-date  { font-size: 0.78em; color: var(--text-muted); }
+        .guild-chip { padding: 5px 12px; background: var(--teal-soft); border-radius: 20px; font-size: 0.78em; font-weight: 700; color: var(--teal); }
         .content { padding: 24px 28px; flex: 1; }
 
-        .page-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        /* ── 헤더 ── */
+        .page-hd { margin-bottom: 20px; }
         .page-hd h1 { font-size: 1.2em; font-weight: 800; }
-        .page-hd p { font-size: 0.78em; color: var(--text-muted); margin-top: 2px; }
+        .page-hd p  { font-size: 0.78em; color: var(--text-muted); margin-top: 2px; }
 
-        /* 탭 */
+        /* ── 탭 ── */
         .main-tabs { display: flex; gap: 0; margin-bottom: 20px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 4px; width: fit-content; }
         .main-tab { padding: 8px 24px; border-radius: 9px; font-size: 0.88em; font-weight: 700; cursor: pointer; border: none; background: transparent; color: var(--text-muted); transition: all 0.2s; font-family: inherit; }
         .main-tab.active-atk { background: var(--primary-soft); color: var(--primary); }
         .main-tab.active-def { background: var(--teal-soft); color: var(--teal); }
 
-        /* 서브탭 */
         .sub-tabs { display: flex; gap: 6px; margin-bottom: 18px; }
         .sub-tab { padding: 6px 16px; border-radius: 20px; font-size: 0.82em; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--text-muted); transition: all 0.18s; font-family: inherit; }
-        .sub-tab.active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary-soft); }
+        .sub-tab.active-def { background: var(--teal-soft); color: var(--teal); border-color: var(--teal-soft); }
 
-        /* ── 등록 폼 메인 레이아웃 ── */
-        .form-layout {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 16px;
-            align-items: start;
-        }
+        /* ── 폼 레이아웃 ── */
+        .form-layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
 
-        /* 좌측 패널 */
-        .left-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        /* ── 좌측 패널 ── */
+        .left-panel { display: flex; flex-direction: column; gap: 12px; }
 
-        .panel-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .panel-card-title {
-            padding: 11px 14px;
-            font-size: 0.75em;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
+        .panel-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .panel-card-title { padding: 11px 14px; font-size: 0.75em; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
         .panel-card-body { padding: 14px; }
 
-        /* 속공 조건 라디오 */
+        /* 라디오 */
         .radio-group { display: flex; flex-direction: column; gap: 7px; }
-        .radio-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 11px; border-radius: 9px;
-            border: 1px solid var(--border);
-            cursor: pointer; transition: all 0.18s;
-            font-size: 0.82em; font-weight: 600;
-        }
-        .radio-item input[type=radio] { accent-color: var(--primary); }
-        .radio-item:has(input:checked) { background: var(--primary-soft); border-color: var(--primary-soft); color: var(--primary); }
+        .radio-item { display: flex; align-items: center; gap: 8px; padding: 8px 11px; border-radius: 9px; border: 1px solid var(--border); cursor: pointer; transition: all 0.18s; font-size: 0.82em; font-weight: 600; }
+        .radio-item input[type=radio] { accent-color: var(--teal); }
+        .radio-item:has(input:checked) { background: var(--teal-soft); border-color: var(--teal-soft); color: var(--teal); }
 
-        /* 텍스트 입력 */
-        .f-input, .f-textarea, .f-select {
-            width: 100%; padding: 8px 10px;
-            border: 1px solid var(--border); border-radius: 8px;
-            font-size: 0.83em; font-family: inherit; color: var(--text);
-            background: var(--white); transition: border-color 0.18s;
-        }
-        .f-input:focus, .f-textarea:focus, .f-select:focus { outline: none; border-color: var(--primary); }
+        /* 인풋 */
+        .f-input, .f-textarea, .f-select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.83em; font-family: inherit; color: var(--text); background: var(--white); transition: border-color 0.18s; }
+        .f-input:focus, .f-textarea:focus, .f-select:focus { outline: none; border-color: var(--teal); }
         .f-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
         .f-select { cursor: pointer; }
-        .f-select:disabled { background: var(--bg); color: var(--text-muted); cursor: not-allowed; }
         .f-label { font-size: 0.73em; font-weight: 700; color: var(--text-sub); margin-bottom: 5px; display: block; }
 
-        /* ── 우측 메인 패널 ── */
+        /* ── 우측 패널 ── */
         .right-panel { display: flex; flex-direction: column; gap: 14px; }
 
-        /* 팀 선택 섹션 */
-        .team-section {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .team-section-hd {
-            padding: 11px 16px;
-            font-size: 0.75em; font-weight: 800;
-            letter-spacing: 0.05em; text-transform: uppercase;
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 6px;
-        }
-
-        .team-section-hd.atk-hd { color: var(--primary); }
-        .team-section-hd.def-hd { color: var(--secondary); }
-
-        .team-slots {
-            padding: 14px 16px;
-            display: flex;
-            gap: 12px;
-        }
+        /* 팀 섹션 */
+        .team-section { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .team-section-hd { padding: 11px 16px; font-size: 0.75em; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .team-section-hd.def-hd { color: var(--teal); }
+        .team-slots { padding: 14px 16px; display: flex; gap: 12px; }
 
         /* 영웅 슬롯 */
-        .hero-slot {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .hero-slot-img {
-            width: 72px; height: 72px;
-            border-radius: 12px;
-            border: 2px dashed var(--border);
-            background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s;
-            overflow: hidden; position: relative;
-        }
-
-        .hero-slot-img:hover { border-color: var(--primary); background: var(--primary-soft); }
-        .hero-slot-img.selected { border: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(124,92,191,0.15); }
-        .hero-slot-img.active-hero { border: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(124,92,191,0.25); }
-        .hero-slot-img.def-selected { border: 2px solid var(--secondary); box-shadow: 0 0 0 3px rgba(232,96,154,0.15); }
-
+        .hero-slot { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .hero-slot-img { width: 72px; height: 72px; border-radius: 12px; border: 2px dashed var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; overflow: hidden; position: relative; }
+        .hero-slot-img:hover { border-color: var(--teal); background: var(--teal-soft); }
+        .hero-slot-img.selected { border: 2px solid var(--teal); box-shadow: 0 0 0 3px rgba(42,157,143,0.15); }
+        .hero-slot-img.active-hero { border: 2px solid var(--teal); box-shadow: 0 0 0 4px rgba(42,157,143,0.25); }
         .hero-slot-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-
-        .hero-slot-img .slot-empty {
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
-            color: var(--text-muted); font-size: 0.68em; font-weight: 600;
-        }
-        .hero-slot-img .slot-empty .slot-icon { font-size: 1.6em; }
-
-        .hero-slot-name {
-            font-size: 0.72em; font-weight: 700; color: var(--text);
-            text-align: center; min-height: 16px;
-        }
-
-        .hero-slot-btn {
-            font-size: 0.68em; padding: 3px 10px;
-            border-radius: 6px; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text-muted);
-            cursor: pointer; transition: all 0.18s;
-        }
-        .hero-slot-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .hero-slot-btn.active-btn { background: var(--primary); color: white; border-color: var(--primary); }
+        .slot-empty { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-muted); font-size: 0.68em; font-weight: 600; }
+        .slot-empty .slot-icon { font-size: 1.6em; }
+        .hero-slot-name { font-size: 0.72em; font-weight: 700; color: var(--text); text-align: center; min-height: 16px; }
+        .hero-slot-btn { font-size: 0.68em; padding: 3px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; transition: all 0.18s; font-family: inherit; }
+        .hero-slot-btn:hover { border-color: var(--teal); color: var(--teal); }
+        .hero-slot-btn.active-btn { background: var(--teal); color: white; border-color: var(--teal); }
 
         /* 장비 패널 */
-        .equip-panel {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .equip-panel-hd {
-            padding: 11px 16px;
-            display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .equip-hero-tabs {
-            display: flex; gap: 4px;
-        }
-
-        .equip-hero-tab {
-            display: flex; align-items: center; gap: 5px;
-            padding: 5px 12px; border-radius: 8px;
-            font-size: 0.78em; font-weight: 700;
-            cursor: pointer; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text-muted);
-            transition: all 0.18s;
-        }
+        .equip-panel { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .equip-panel-hd { padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+        .equip-hero-tabs { display: flex; gap: 4px; }
+        .equip-hero-tab { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 8px; font-size: 0.78em; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: all 0.18s; font-family: inherit; }
         .equip-hero-tab img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
-        .equip-hero-tab.active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary-soft); }
-
+        .equip-hero-tab.active { background: var(--teal-soft); color: var(--teal); border-color: var(--teal-soft); }
         .equip-body { padding: 16px; }
-
         .equip-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .equip-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 
-        /* 스킬 순서 섹션 */
-        .skill-section {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .skill-section-hd {
-            padding: 11px 16px;
-            font-size: 0.75em; font-weight: 800;
-            letter-spacing: 0.05em; text-transform: uppercase;
-            color: var(--gold); border-bottom: 1px solid var(--border);
-        }
-
+        /* 스킬 */
+        .skill-section { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .skill-section-hd { padding: 11px 16px; font-size: 0.75em; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid var(--border); }
         .skill-body { padding: 14px 16px; }
-
-        /* 스킬 선택 영역 */
-        .skill-selected-row {
-            display: flex; gap: 10px; margin-bottom: 14px; align-items: center;
-        }
-
-        .skill-order-slot {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-
-        .skill-order-num {
-            font-size: 0.65em; font-weight: 800; color: var(--text-muted);
-        }
-
-        .skill-order-img {
-            width: 52px; height: 52px; border-radius: 10px;
-            border: 2px dashed var(--border);
-            background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2em; color: var(--text-muted);
-            overflow: hidden; cursor: pointer; transition: all 0.18s;
-            position: relative;
-        }
+        .skill-selected-row { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; }
+        .skill-order-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .skill-order-num { font-size: 0.65em; font-weight: 800; color: var(--text-muted); }
+        .skill-order-img { width: 52px; height: 52px; border-radius: 10px; border: 2px dashed var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 1.2em; color: var(--text-muted); overflow: hidden; cursor: pointer; transition: all 0.18s; position: relative; }
         .skill-order-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
         .skill-order-img.filled { border: 2px solid var(--gold); box-shadow: 0 0 0 2px rgba(184,134,11,0.15); }
-        .skill-order-img .del-skill {
-            position: absolute; top: -4px; right: -4px;
-            width: 15px; height: 15px; background: #d94f4f; color: white;
-            border-radius: 50%; font-size: 0.6em; border: none;
-            display: none; align-items: center; justify-content: center; cursor: pointer;
-        }
+        .skill-order-img .del-skill { position: absolute; top: -4px; right: -4px; width: 15px; height: 15px; background: #d94f4f; color: white; border-radius: 50%; font-size: 0.6em; border: none; display: none; align-items: center; justify-content: center; cursor: pointer; }
         .skill-order-img:hover .del-skill { display: flex; }
-
         .skill-arrow { color: var(--text-muted); font-size: 1em; margin-top: 16px; }
-
-        /* 스킬 선택 그리드 */
         .skill-search { margin-bottom: 10px; }
         .skill-search input { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82em; font-family: inherit; }
-        .skill-search input:focus { outline: none; border-color: var(--primary); }
-
-        .skill-grid {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 2px;
-        }
-
-        .skill-item {
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
-            cursor: pointer;
-        }
-
-        .skill-item-img {
-            width: 52px; height: 52px; border-radius: 9px;
-            border: 2px solid transparent;
-            overflow: hidden; transition: all 0.18s;
-            background: var(--bg);
-        }
+        .skill-search input:focus { outline: none; border-color: var(--teal); }
+        .skill-grid { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 2px; }
+        .skill-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+        .skill-item-img { width: 52px; height: 52px; border-radius: 9px; border: 2px solid transparent; overflow: hidden; transition: all 0.18s; background: var(--bg); }
         .skill-item-img img { width: 100%; height: 100%; object-fit: cover; }
         .skill-item-img:hover { border-color: var(--gold); transform: scale(1.06); }
         .skill-item-img.used { opacity: 0.35; pointer-events: none; }
-
         .skill-item-name { font-size: 0.6em; color: var(--text-muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52px; }
 
-        /* 펫 섹션 */
-        .pet-section {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .pet-hd {
-            padding: 11px 16px;
-            display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-        }
-
+        /* 펫 */
+        .pet-section { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .pet-hd { padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
         .pet-hd-title { font-size: 0.75em; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--teal); }
         .pet-hd-count { font-size: 0.72em; color: var(--text-muted); }
-
         .pet-body { padding: 14px 16px; }
-
-        /* 선택된 펫 */
         .pet-selected-row { display: flex; gap: 10px; margin-bottom: 12px; }
-
-        .pet-slot {
-            width: 56px; height: 56px; border-radius: 10px;
-            border: 2px dashed var(--border);
-            background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.4em; color: var(--text-muted);
-            overflow: hidden; position: relative; cursor: pointer;
-            transition: all 0.18s;
-        }
+        .pet-slot { width: 56px; height: 56px; border-radius: 10px; border: 2px dashed var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 1.4em; color: var(--text-muted); overflow: hidden; position: relative; cursor: pointer; transition: all 0.18s; }
         .pet-slot img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
         .pet-slot.filled { border: 2px solid var(--teal); box-shadow: 0 0 0 2px rgba(42,157,143,0.15); }
-        .pet-slot .del-pet {
-            position: absolute; top: -4px; right: -4px;
-            width: 15px; height: 15px; background: #d94f4f; color: white;
-            border-radius: 50%; font-size: 0.6em; border: none;
-            display: none; align-items: center; justify-content: center; cursor: pointer;
-        }
+        .pet-slot .del-pet { position: absolute; top: -4px; right: -4px; width: 15px; height: 15px; background: #d94f4f; color: white; border-radius: 50%; font-size: 0.6em; border: none; display: none; align-items: center; justify-content: center; cursor: pointer; }
         .pet-slot:hover .del-pet { display: flex; }
-
-        /* 펫 그리드 */
-        .pet-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-            gap: 6px;
-            max-height: 160px;
-            overflow-y: auto;
-        }
-
-        .pet-item {
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
-            cursor: pointer;
-        }
-
-        .pet-item-img {
-            width: 52px; height: 52px; border-radius: 9px;
-            border: 2px solid transparent; overflow: hidden;
-            transition: all 0.18s; background: var(--bg);
-        }
+        .pet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; max-height: 160px; overflow-y: auto; }
+        .pet-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+        .pet-item-img { width: 52px; height: 52px; border-radius: 9px; border: 2px solid transparent; overflow: hidden; transition: all 0.18s; background: var(--bg); }
         .pet-item-img img { width: 100%; height: 100%; object-fit: cover; }
         .pet-item-img:hover { border-color: var(--teal); transform: scale(1.06); }
         .pet-item-img.selected { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(42,157,143,0.2); }
         .pet-item-name { font-size: 0.6em; color: var(--text-muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52px; }
 
-        /* 영웅 선택 모달 */
-        .hero-modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.4); z-index: 300;
-            align-items: center; justify-content: center;
-        }
-        .hero-modal-overlay.open { display: flex; }
-
-        .hero-modal {
-            background: var(--white); border-radius: 18px;
-            width: 100%; max-width: 560px; max-height: 80vh;
-            display: flex; flex-direction: column;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            animation: mIn 0.22s ease;
-        }
-        @keyframes mIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
-
-        .hero-modal-hd {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-            flex-shrink: 0;
-        }
-        .hero-modal-hd-title { font-size: 0.92em; font-weight: 800; color: var(--text); }
-        .hero-modal-close { background: none; border: none; font-size: 1.2em; color: var(--text-muted); cursor: pointer; }
-
-        .hero-modal-search {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-        .hero-modal-search input {
-            width: 100%; padding: 8px 12px;
-            border: 1px solid var(--border); border-radius: 9px;
-            font-size: 0.86em; font-family: inherit;
-        }
-        .hero-modal-search input:focus { outline: none; border-color: var(--primary); }
-
-        .hero-modal-body {
-            padding: 14px 20px;
-            overflow-y: auto; flex: 1;
-        }
-
-        .hero-grade-title {
-            font-size: 0.68em; font-weight: 800; letter-spacing: 0.08em;
-            text-transform: uppercase; color: var(--text-muted);
-            margin: 10px 0 8px; padding-left: 2px;
-        }
-        .hero-grade-title:first-child { margin-top: 0; }
-
-        .hero-grid-modal {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .hero-item {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            cursor: pointer;
-        }
-
-        .hero-item-img {
-            width: 64px; height: 64px; border-radius: 11px;
-            border: 2px solid transparent; overflow: hidden;
-            transition: all 0.18s; background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.65em; color: var(--text-muted);
-        }
-        .hero-item-img img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-item-img:hover { border-color: var(--primary); transform: scale(1.05); box-shadow: 0 4px 12px rgba(124,92,191,0.2); }
-
-        .hero-item-name { font-size: 0.68em; font-weight: 600; color: var(--text); text-align: center; }
-
-        /* 저장 버튼 */
-        .form-actions {
-            display: flex; justify-content: flex-end; gap: 9px;
-            margin-top: 16px;
-        }
-        .btn-cancel { padding: 9px 20px; border-radius: 9px; border: 1px solid var(--border); background: var(--white); color: var(--text-muted); font-size: 0.84em; font-weight: 700; cursor: pointer; font-family: inherit; }
-        .btn-cancel:hover { border-color: var(--secondary); color: var(--secondary); }
-        .btn-submit { padding: 9px 26px; border-radius: 9px; background: var(--grad); color: white; border: none; font-size: 0.84em; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.18s; }
-        .btn-submit:hover { opacity: 0.88; }
-
-        /* 목록 뷰 */
+        /* 액션 바 */
         .action-bar { display: flex; gap: 10px; margin-bottom: 18px; }
         .search-input { flex: 1; padding: 9px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.86em; font-family: inherit; color: var(--text); background: var(--white); }
-        .search-input:focus { outline: none; border-color: var(--primary); }
-        .btn-add { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--grad); color: white; border: none; border-radius: 10px; font-size: 0.85em; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+        .search-input:focus { outline: none; border-color: var(--teal); }
+        .btn-add { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: linear-gradient(135deg, var(--teal), #21867a); color: white; border: none; border-radius: 10px; font-size: 0.85em; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
         .btn-add:hover { opacity: 0.88; }
 
+        /* 폼 버튼 */
+        .form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; }
+        .btn-cancel { padding: 9px 20px; border-radius: 9px; border: 1px solid var(--border); background: var(--white); color: var(--text-muted); font-size: 0.84em; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-cancel:hover { border-color: var(--secondary); color: var(--secondary); }
+        .btn-submit { padding: 9px 26px; border-radius: 9px; background: linear-gradient(135deg, var(--teal), #21867a); color: white; border: none; font-size: 0.84em; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.18s; }
+        .btn-submit:hover { opacity: 0.88; }
+
+        /* 빈 상태 */
         .empty-state { text-align: center; padding: 56px 20px; color: var(--text-muted); background: var(--white); border: 1px solid var(--border); border-radius: 14px; }
         .empty-icon { font-size: 2.4em; margin-bottom: 9px; }
         .empty-text { font-size: 0.84em; }
+
+        /* 영웅 선택 모달 */
+        .hero-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; align-items: center; justify-content: center; }
+        .hero-modal-overlay.open { display: flex; }
+        .hero-modal { background: var(--white); border-radius: 18px; width: 100%; max-width: 560px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: mIn 0.22s ease; }
+        @keyframes mIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+        .hero-modal-hd { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .hero-modal-hd-title { font-size: 0.92em; font-weight: 800; }
+        .hero-modal-close { background: none; border: none; font-size: 1.2em; color: var(--text-muted); cursor: pointer; }
+        .hero-modal-search { padding: 12px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .hero-modal-search input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 9px; font-size: 0.86em; font-family: inherit; }
+        .hero-modal-search input:focus { outline: none; border-color: var(--teal); }
+        .hero-modal-body { padding: 14px 20px; overflow-y: auto; flex: 1; }
+        .hero-grade-title { font-size: 0.68em; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 10px 0 8px; }
+        .hero-grade-title:first-child { margin-top: 0; }
+        .hero-grid-modal { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; margin-bottom: 4px; }
+        .hero-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .hero-item-img { width: 64px; height: 64px; border-radius: 11px; border: 2px solid transparent; overflow: hidden; transition: all 0.18s; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 0.6em; color: var(--text-muted); text-align: center; }
+        .hero-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-item-img:hover { border-color: var(--teal); transform: scale(1.05); box-shadow: 0 4px 12px rgba(42,157,143,0.2); }
+        .hero-item-name { font-size: 0.68em; font-weight: 600; color: var(--text); text-align: center; }
 
         /* 모바일 */
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 90; }
@@ -533,7 +260,7 @@
         <div class="nav-label">메뉴</div>
         <a href="main.html" class="nav-item"><span class="nav-icon">🏠</span> 홈</a>
         <div class="nav-label">공략</div>
-        <a href="guildwar.html" class="nav-item active"><span class="nav-icon">⚔️</span> 길드전</a>
+        <a href="guildwar.html" class="nav-item"><span class="nav-icon">⚔️</span> 길드전</a>
         <a href="siege.html" class="nav-item"><span class="nav-icon">🏰</span> 공성전</a>
         <a href="expedition.html" class="nav-item"><span class="nav-icon">🌟</span> 강림원정대</a>
         <div class="nav-label">커뮤니티</div>
@@ -548,7 +275,7 @@
 <div class="main">
     <div class="topbar">
         <div>
-            <div class="topbar-title">길드전 공략</div>
+            <div class="topbar-title">방어 공략</div>
             <div class="topbar-date" id="topDate"></div>
         </div>
         <div class="guild-chip">🐰 귀요미 길드</div>
@@ -556,234 +283,188 @@
 
     <div class="content">
         <div class="page-hd">
-            <div>
-                <h1>⚔️ 길드전 공략</h1>
-                <p>공격 공략과 방어팀 구성을 관리해요</p>
-            </div>
+            <h1>🛡️ 방어 공략</h1>
+            <p>내 방어팀 구성과 장비 세팅을 등록해요</p>
         </div>
 
-        <!-- 메인 탭 -->
+        <!-- 탭 -->
         <div class="main-tabs">
-            <button class="main-tab active-atk" id="mainTabAtk" onclick="switchMainTab('atk')">⚔️ 공격 공략</button>
-            <button class="main-tab" id="mainTabDef" onclick="window.location.href='defense.html'">🛡️ 방어 공략</button>
+            <button class="main-tab" onclick="window.location.href='guildwar.html'">⚔️ 공격 공략</button>
+            <button class="main-tab active-def">🛡️ 방어 공략</button>
         </div>
 
-        <!-- 공격 공략 섹션 -->
-        <div id="sectionAtk">
-            <div class="sub-tabs">
-                <button class="sub-tab active" id="atkSubList" onclick="switchSub('list')">📋 목록 (<span id="atkCount">0</span>)</button>
-                <button class="sub-tab" id="atkSubForm" onclick="switchSub('form')">✏️ 공략 등록</button>
+        <!-- 서브탭 -->
+        <div class="sub-tabs">
+            <button class="sub-tab active-def" id="defSubList" onclick="switchSub('list')">📋 목록 (<span id="defCount">0</span>)</button>
+            <button class="sub-tab" id="defSubForm" onclick="switchSub('form')">✏️ 방어팀 등록</button>
+        </div>
+
+        <!-- 목록 뷰 -->
+        <div id="viewList">
+            <div class="action-bar">
+                <input class="search-input" type="text" placeholder="🔍 팀 이름, 영웅 이름 검색...">
+                <button class="btn-add" onclick="switchSub('form')">✏️ 방어팀 등록</button>
+            </div>
+            <div id="defList">
+                <div class="empty-state">
+                    <div class="empty-icon">🛡️</div>
+                    <div class="empty-text">로딩중...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 등록 폼 뷰 -->
+        <div id="viewForm" style="display:none;">
+
+            <!-- 팀 이름 -->
+            <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+                <label class="f-label">📝 방어팀 이름</label>
+                <input class="f-input" id="fName" type="text" placeholder="예: 갤리두스 방어팀">
             </div>
 
-            <!-- 목록 뷰 -->
-            <div id="atkViewList">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
-                    <!-- 영웅 선택 버튼 -->
-                    <button onclick="openFilterModal()" id="filterHeroBtn"
-                            style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);font-size:0.84em;font-weight:600;color:var(--text-sub);cursor:pointer;font-family:inherit;transition:all 0.18s;">
-                        🦸 영웅 선택
-                    </button>
-                    <!-- 선택된 영웅 칩 -->
-                    <div id="filterChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <div class="form-layout">
+
+                <!-- ── 좌측 패널 ── -->
+                <div class="left-panel">
+
                     <!-- 속공 조건 -->
-                    <select id="filterSpeed" onchange="filterGuides()"
-                            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.84em;font-family:inherit;background:var(--white);color:var(--text-sub);cursor:pointer;">
-                        <option value="">⚡ 속공 조건 전체</option>
-                        <option value="속내실">속내실</option>
-                        <option value="속공세팅">속공세팅</option>
-                        <option value="내실세팅">내실세팅</option>
-                    </select>
-                    <!-- 초기화 -->
-                    <button id="filterResetBtn" onclick="resetFilter()" style="display:none;padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);font-size:0.82em;color:var(--text-muted);cursor:pointer;font-family:inherit;">✕ 초기화</button>
-                    <!-- 등록 버튼 -->
-                    <button class="btn-add" style="margin-left:auto;" onclick="switchSub('form')">✏️ 공략 등록</button>
-                </div>
-                <div id="atkList">
-                    <div class="empty-state">
-                        <div class="empty-icon">⚔️</div>
-                        <div class="empty-text">로딩중...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 등록 폼 뷰 -->
-            <div id="atkViewForm" style="display:none;">
-
-                <!-- 공략 이름 -->
-                <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
-                    <label class="f-label">📝 공략 이름</label>
-                    <input class="f-input" id="fName" type="text" placeholder="예: 카구라 + 루나 + 카를로 공략">
-                </div>
-
-                <div class="form-layout">
-                    <!-- ── 좌측 패널 ── -->
-                    <div class="left-panel">
-
-                        <!-- 속공 조건 -->
-                        <div class="panel-card">
-                            <div class="panel-card-title" style="color:var(--primary);">⚡ 속공 조건</div>
-                            <div class="panel-card-body">
-                                <div class="radio-group">
-                                    <label class="radio-item">
-                                        <input type="radio" name="speedAtk" value="속내실" checked> 속내실
-                                    </label>
-                                    <label class="radio-item">
-                                        <input type="radio" name="speedAtk" value="속공세팅"> 속공세팅
-                                    </label>
-                                    <label class="radio-item">
-                                        <input type="radio" name="speedAtk" value="내실세팅"> 내실세팅
-                                    </label>
-                                </div>
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--teal);">⚡ 속공 조건</div>
+                        <div class="panel-card-body">
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="speedDef" value="속내실" checked> 속내실
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="speedDef" value="속공세팅"> 속공세팅
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="speedDef" value="내실세팅"> 내실세팅
+                                </label>
                             </div>
                         </div>
-
-                        <!-- 메모 -->
-                        <div class="panel-card">
-                            <div class="panel-card-title" style="color:var(--text-sub);">📌 메모</div>
-                            <div class="panel-card-body">
-                                <textarea class="f-textarea" id="fMemo" placeholder="간단한 메모..."></textarea>
-                            </div>
-                        </div>
-
-                        <!-- 공격 디테일 -->
-                        <div class="panel-card">
-                            <div class="panel-card-title" style="color:var(--teal);">💡 공격 디테일</div>
-                            <div class="panel-card-body">
-                                <textarea class="f-textarea" id="fDetail" placeholder="공격 순서, 주의사항, 운용법 등 상세히 작성하세요" style="min-height:120px;"></textarea>
-                            </div>
-                        </div>
-
                     </div>
 
-                    <!-- ── 우측 패널 ── -->
-                    <div class="right-panel">
-
-                        <!-- 상대 방어팀 -->
-                        <div class="team-section">
-                            <div class="team-section-hd def-hd">🛡️ 상대 방어팀 (3명)</div>
-                            <div class="team-slots" id="defSlots">
-                                <!-- JS로 생성 -->
-                            </div>
+                    <!-- 메모 -->
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--text-sub);">📌 메모</div>
+                        <div class="panel-card-body">
+                            <textarea class="f-textarea" id="fMemo" placeholder="간단한 메모..."></textarea>
                         </div>
-
-                        <!-- 내 공격팀 -->
-                        <div class="team-section">
-                            <div class="team-section-hd atk-hd">⚔️ 내 공격팀 (3명)</div>
-                            <div class="team-slots" id="atkSlots">
-                                <!-- JS로 생성 -->
-                            </div>
-                        </div>
-
-                        <!-- 장비 패널 -->
-                        <div class="equip-panel">
-                            <div class="equip-panel-hd">
-                                <div style="font-size:0.75em;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:var(--primary);">🎯 장비 설정</div>
-                                <div class="equip-hero-tabs" id="equipHeroTabs">
-                                    <!-- JS로 생성 -->
-                                </div>
-                            </div>
-                            <div class="equip-body" id="equipBody">
-                                <div style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">
-                                    공격팀 영웅을 먼저 선택해주세요
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 스킬 순서 -->
-                        <div class="skill-section">
-                            <div class="skill-section-hd">⭐ 스킬 순서 (3개 선택)</div>
-                            <div class="skill-body">
-                                <!-- 선택된 순서 표시 -->
-                                <div class="skill-selected-row" id="skillSelectedRow">
-                                    <div class="skill-order-slot">
-                                        <div class="skill-order-num">1순위</div>
-                                        <div class="skill-order-img" id="skillSlot0" onclick="clearSkillSlot(0)">
-                                            <span>?</span>
-                                            <button class="del-skill">×</button>
-                                        </div>
-                                    </div>
-                                    <div class="skill-arrow">→</div>
-                                    <div class="skill-order-slot">
-                                        <div class="skill-order-num">2순위</div>
-                                        <div class="skill-order-img" id="skillSlot1" onclick="clearSkillSlot(1)">
-                                            <span>?</span>
-                                            <button class="del-skill">×</button>
-                                        </div>
-                                    </div>
-                                    <div class="skill-arrow">→</div>
-                                    <div class="skill-order-slot">
-                                        <div class="skill-order-num">3순위</div>
-                                        <div class="skill-order-img" id="skillSlot2" onclick="clearSkillSlot(2)">
-                                            <span>?</span>
-                                            <button class="del-skill">×</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- 스킬 이미지 그리드 -->
-                                <div class="skill-search">
-                                    <input type="text" placeholder="스킬 검색..." oninput="renderSkillGrid(this.value)">
-                                </div>
-                                <div class="skill-grid" id="skillGrid">
-                                    <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">
-                                        공격팀 영웅을 선택하면 스킬이 표시됩니다
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 펫 -->
-                        <div class="pet-section">
-                            <div class="pet-hd">
-                                <div class="pet-hd-title">🐾 펫 (1~3개)</div>
-                                <div class="pet-hd-count" id="petCount">0 / 3</div>
-                            </div>
-                            <div class="pet-body">
-                                <!-- 선택된 펫 -->
-                                <div class="pet-selected-row" id="petSelectedRow">
-                                    <div class="pet-slot" id="petSlot0"><span>+</span><button class="del-pet" onclick="clearPet(0)">×</button></div>
-                                    <div class="pet-slot" id="petSlot1"><span>+</span><button class="del-pet" onclick="clearPet(1)">×</button></div>
-                                    <div class="pet-slot" id="petSlot2"><span>+</span><button class="del-pet" onclick="clearPet(2)">×</button></div>
-                                </div>
-                                <!-- 펫 그리드 -->
-                                <div class="pet-grid" id="petGrid">
-                                    <!-- JS로 생성 -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 저장 버튼 -->
-                        <div class="form-actions">
-                            <button class="btn-cancel" onclick="switchSub('list')">취소</button>
-                            <button class="btn-submit" id="aBtnSubmit" onclick="saveGuide()">✅ 공략 등록하기</button>
-                        </div>
-
                     </div>
+
+                    <!-- 우선순위 -->
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--gold);">⭐ 우선순위</div>
+                        <div class="panel-card-body">
+                            <div style="display:flex;flex-direction:column;gap:8px;">
+                                <div style="display:flex;gap:6px;" id="starRating">
+                                    <span class="star-btn" data-val="1" onclick="setStarRating(1)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="2" onclick="setStarRating(2)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="3" onclick="setStarRating(3)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="4" onclick="setStarRating(4)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="5" onclick="setStarRating(5)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                </div>
+                                <div style="font-size:0.75em;color:var(--text-muted);" id="starLabel">선택 안함</div>
+                                <input type="hidden" id="fPriority" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 방어 디테일 -->
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--teal);">💡 방어 디테일</div>
+                        <div class="panel-card-body">
+                            <textarea class="f-textarea" id="fDetail" placeholder="배치 의도, 상대 공략 방어법, 주의사항 등 상세히 작성하세요" style="min-height:120px;"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ── 우측 패널 ── -->
+                <div class="right-panel">
+
+                    <!-- 내 방어팀 -->
+                    <div class="team-section">
+                        <div class="team-section-hd def-hd">🛡️ 내 방어팀 (3명)</div>
+                        <div class="team-slots" id="defSlots"></div>
+                    </div>
+
+                    <!-- 장비 패널 -->
+                    <div class="equip-panel">
+                        <div class="equip-panel-hd">
+                            <div style="font-size:0.75em;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:var(--teal);">🎯 장비 설정</div>
+                            <div class="equip-hero-tabs" id="equipHeroTabs"></div>
+                        </div>
+                        <div class="equip-body" id="equipBody">
+                            <div style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">
+                                방어팀 영웅을 먼저 선택해주세요
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 스킬 순서 -->
+                    <div class="skill-section">
+                        <div class="skill-section-hd">⭐ 스킬 순서 (3개 선택)</div>
+                        <div class="skill-body">
+                            <div class="skill-selected-row">
+                                <div class="skill-order-slot">
+                                    <div class="skill-order-num">1순위</div>
+                                    <div class="skill-order-img" id="skillSlot0" onclick="clearSkillSlot(0)">
+                                        <span>?</span><button class="del-skill">×</button>
+                                    </div>
+                                </div>
+                                <div class="skill-arrow">→</div>
+                                <div class="skill-order-slot">
+                                    <div class="skill-order-num">2순위</div>
+                                    <div class="skill-order-img" id="skillSlot1" onclick="clearSkillSlot(1)">
+                                        <span>?</span><button class="del-skill">×</button>
+                                    </div>
+                                </div>
+                                <div class="skill-arrow">→</div>
+                                <div class="skill-order-slot">
+                                    <div class="skill-order-num">3순위</div>
+                                    <div class="skill-order-img" id="skillSlot2" onclick="clearSkillSlot(2)">
+                                        <span>?</span><button class="del-skill">×</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="skill-search">
+                                <input type="text" placeholder="스킬 검색..." oninput="renderSkillGrid(this.value)">
+                            </div>
+                            <div class="skill-grid" id="skillGrid">
+                                <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">
+                                    방어팀 영웅을 선택하면 스킬이 표시됩니다
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 펫 -->
+                    <div class="pet-section">
+                        <div class="pet-hd">
+                            <div class="pet-hd-title">🐾 펫 (1~3개)</div>
+                            <div class="pet-hd-count" id="petCount">0 / 3</div>
+                        </div>
+                        <div class="pet-body">
+                            <div class="pet-selected-row">
+                                <div class="pet-slot" id="petSlot0"><span>+</span><button class="del-pet" onclick="clearPet(0)">×</button></div>
+                                <div class="pet-slot" id="petSlot1"><span>+</span><button class="del-pet" onclick="clearPet(1)">×</button></div>
+                                <div class="pet-slot" id="petSlot2"><span>+</span><button class="del-pet" onclick="clearPet(2)">×</button></div>
+                            </div>
+                            <div class="pet-grid" id="petGrid"></div>
+                        </div>
+                    </div>
+
+                    <!-- 저장 -->
+                    <div class="form-actions">
+                        <button class="btn-cancel" onclick="switchSub('list')">취소</button>
+                        <button class="btn-submit" id="dBtnSubmit" onclick="saveGuide()">✅ 방어팀 등록하기</button>
+                    </div>
+
                 </div>
             </div>
         </div>
-
-        <!-- 방어 공략 섹션 (기존 유지) -->
-        <div id="sectionDef" style="display:none;">
-            <div class="empty-state">
-                <div class="empty-icon">🛡️</div>
-                <div class="empty-text">방어 공략 섹션 (기존 코드 연결)</div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<!-- 영웅 필터 모달 -->
-<div class="hero-modal-overlay" id="filterModal">
-    <div class="hero-modal">
-        <div class="hero-modal-hd">
-            <div class="hero-modal-hd-title">🦸 영웅 선택 (방어팀 / 공격팀)</div>
-            <button class="hero-modal-close" onclick="closeFilterModal()">✕</button>
-        </div>
-        <div class="hero-modal-search">
-            <input type="text" id="filterHeroSearch" placeholder="영웅 이름 검색..." oninput="renderFilterHeroModal(this.value)">
-        </div>
-        <div class="hero-modal-body" id="filterHeroBody"></div>
     </div>
 </div>
 
@@ -797,9 +478,7 @@
         <div class="hero-modal-search">
             <input type="text" id="heroSearch" placeholder="영웅 이름 검색..." oninput="renderHeroModal(this.value)">
         </div>
-        <div class="hero-modal-body" id="heroModalBody">
-            <!-- JS로 생성 -->
-        </div>
+        <div class="hero-modal-body" id="heroModalBody"></div>
     </div>
 </div>
 
@@ -820,107 +499,22 @@ const app = initializeApp(FB);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 let currentUser = null;
-// ──────────────────────────────────────────
+
+// ──────────────────────────────────
 // 날짜
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 const days = ['일','월','화','수','목','금','토'], now = new Date();
 document.getElementById('topDate').textContent = `${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
 
-// ──────────────────────────────────────────
-// 필터 기능
-// ──────────────────────────────────────────
-let filterHero = null;
+// ──────────────────────────────────
+// 이미지 경로 (폴더 이름 맞춰서 수정)
+// ──────────────────────────────────
+const HERO_IMG_PATH = './heroes/';
+const PET_IMG_PATH  = './pets/';
 
-function openFilterModal() {
-    document.getElementById('filterHeroSearch').value = '';
-    renderFilterHeroModal('');
-    document.getElementById('filterModal').classList.add('open');
-}
-function closeFilterModal() {
-    document.getElementById('filterModal').classList.remove('open');
-}
-function renderFilterHeroModal(q) {
-    const lq = q.toLowerCase();
-    let html = '';
-    Object.entries(HERO_DATA).forEach(([grade, heroes]) => {
-        const filtered = q ? heroes.filter(h => h.toLowerCase().includes(lq)) : heroes;
-        if (!filtered.length) return;
-        html += `<div class="hero-grade-title">${grade}</div><div class="hero-grid-modal">`;
-        filtered.forEach(name => {
-            const isSelected = filterHero === name;
-            html += `<div class="hero-item" onclick="selectFilterHero('${name}')">
-                <div class="hero-item-img" style="border:2px solid ${isSelected?'var(--primary)':'transparent'};">
-                    ${heroImgEl(name)}
-                </div>
-                <div class="hero-item-name" style="color:${isSelected?'var(--primary)':''};">${name}</div>
-            </div>`;
-        });
-        html += '</div>';
-    });
-    document.getElementById('filterHeroBody').innerHTML = html ||
-        '<p style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">검색 결과 없음</p>';
-}
-function renderFilterChips() {
-    const chips = document.getElementById('filterChips');
-    const resetBtn = document.getElementById('filterResetBtn');
-    if (!filterHero) { chips.innerHTML = ''; resetBtn.style.display = 'none'; return; }
-    chips.innerHTML = `
-        <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:var(--primary-soft);border:1px solid var(--primary-soft);">
-            <div style="width:22px;height:22px;border-radius:5px;overflow:hidden;flex-shrink:0;">${heroImgEl(filterHero)}</div>
-            <span style="font-size:0.8em;font-weight:700;color:var(--primary);">${filterHero}</span>
-            <button onclick="resetFilter()" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:0.8em;padding:0 2px;">✕</button>
-        </div>`;
-    resetBtn.style.display = 'block';
-}
-function resetFilter() {
-    filterHero = null;
-    const s = document.getElementById('filterSpeed'); if (s) s.value = '';
-    const btn = document.getElementById('filterHeroBtn');
-    if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text-sub)'; btn.style.background = 'var(--white)'; }
-    renderFilterChips();
-    filterGuides();
-}
-
-function selectFilterHero(name) {
-    filterHero = name;
-    closeFilterModal();
-    // 영웅 선택 버튼 활성화 스타일
-    const btn = document.getElementById('filterHeroBtn');
-    if (btn) { btn.style.borderColor = 'var(--primary)'; btn.style.color = 'var(--primary)'; btn.style.background = 'var(--primary-soft)'; }
-    renderFilterChips();
-    filterGuides();
-}
-function filterGuides() {
-    const speed = document.getElementById('filterSpeed')?.value || '';
-    const filtered = allGuides.filter(g => {
-        const allHeroes = [...(g.defenseTeam||[]), ...(g.attackTeam||[])];
-        if (filterHero && !allHeroes.includes(filterHero)) return false;
-        if (speed && g.speedCondition !== speed) return false;
-        return true;
-    });
-    renderGuideList(filtered);
-}
-function renderGuideList(guides) {
-    const el = document.getElementById('atkList');
-    if (!el) return;
-    if (!guides.length) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">조건에 맞는 공략이 없습니다.</div></div>';
-        return;
-    }
-    // loadGuides의 렌더링 코드 재활용 (guides 배열로 직접 렌더)
-    el.innerHTML = renderGuidesHTML(guides);
-}
-window.openFilterModal = openFilterModal;
-window.closeFilterModal = closeFilterModal;
-window.renderFilterHeroModal = renderFilterHeroModal;
-window.selectFilterHero = selectFilterHero;
-window.resetFilter = resetFilter;
-window.filterGuides = filterGuides;
-// ──────────────────────────────────────────
-// 📁 이미지 폴더 경로 (필요 시 수정)
-const HERO_IMG_PATH = './heroes/';   // 영웅 초상화: 카구라.png
-const PET_IMG_PATH  = './pets/';     // 펫: 펫이름.png
-
+// ──────────────────────────────────
+// 데이터
+// ──────────────────────────────────
 const HERO_DATA = {
     '구세나': ['밀리아','갤리두스','파이','쥬리','로지'],
     '찐스': ['나타', '델론즈', '라드그리드', '라이언', '란드그리드', '레긴레이프', '레이첼', '루디', '린', '멜키르', '미스트', '바네사', '브란즈&브란셀', '비스킷', '손오공', '스파이크', '실베스타', '아일린', '아킬라', '에이스', '엘리시아', '여포', '연희', '오를리', '오목', '제이브', '카구라', '카르마', '카일', '콜트', '크리스', '클라한', '키리엘', '태오', '트루드', '프레이야', '플라튼'],
@@ -928,91 +522,66 @@ const HERO_DATA = {
     '희귀': ['레이','진','캐티','블랙로즈','아수라','노호','클로에','메이','세라','제인','유이','실비아','루시','빅토리아','카론','조커','카린','에반','쥬피','스니퍼','소이','풍연','헤브니아','헬레니아','아리엘','리','사라','라니아','클레오','베인','레오','유리','라쿤','호킨','샤오','링링','조운']
 };
 Object.keys(HERO_DATA).forEach(g => HERO_DATA[g].sort((a,b) => a.localeCompare(b,'ko')));
-const ALL_HEROES = Object.values(HERO_DATA).flat();
 
-// 펫 목록 (pets/ 폴더 이미지명과 일치하게 관리)
 const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
+const PET_EXT = {'더지':'png','델로':'png','루':'png','리첼':'png','멜페로':'jpg','믹':'png','에리':'png','연지':'png','요랑':'png','윈디':'jpg','유':'png','이린':'png','제브':'jpg','제오':'jpg','카람':'jpg','크리':'png','파이크':'png'};
 
-// 장비 옵션
 const SETS = ['선봉장','성기사','암살자','복수자','조율자','수문장','수호자','추적자','주술사'];
 const WPN_OPTS = ['약점 공격 확률','치명타 확률','치명타 피해','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 적중'];
 const ARM_OPTS = ['받는 피해 감소','막기 확률','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 저항'];
 
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 // 상태
-// ──────────────────────────────────────────
-let defHeroes = [null, null, null]; // 방어팀
-let atkHeroes = [null, null, null]; // 공격팀
-let activeAtkIdx = 0; // 현재 활성 공격 영웅 탭
-let equipData = [{}, {}, {}]; // 각 공격영웅 장비
-let skillOrder = [null, null, null]; // 스킬 순서
-let selectedPets = [null, null, null]; // 펫
-let editingId = null; // 수정 중인 공략 ID
-let allGuides = []; // 공략 목록
-let aImgs = {1:[],2:[],3:[]}; // 업로드 이미지
+// ──────────────────────────────────
+let defHeroes   = [null, null, null];
+let activeDefIdx = 0;
+let equipData   = [{}, {}, {}];
+let skillOrder  = [null, null, null];
+let selectedPets = [null, null, null];
+let modalTargetIdx = 0;
+let editingDefId = null;
+let allDefGuides = [];
 
-let modalTarget = null; // { type: 'def'|'atk', idx: 0|1|2 }
-
-// ──────────────────────────────────────────
-// 탭 전환
-// ──────────────────────────────────────────
-function switchMainTab(tab) {
-    document.getElementById('sectionAtk').style.display = tab === 'atk' ? 'block' : 'none';
-    document.getElementById('sectionDef').style.display = tab === 'def' ? 'block' : 'none';
-    document.getElementById('mainTabAtk').className = 'main-tab' + (tab === 'atk' ? ' active-atk' : '');
-    document.getElementById('mainTabDef').className = 'main-tab' + (tab === 'def' ? ' active-def' : '');
-}
-
+// ──────────────────────────────────
+// 서브탭 전환
+// ──────────────────────────────────
 function switchSub(sub) {
-    document.getElementById('atkViewList').style.display = sub === 'list' ? 'block' : 'none';
-    document.getElementById('atkViewForm').style.display = sub === 'form' ? 'block' : 'none';
-    document.getElementById('atkSubList').className = 'sub-tab' + (sub === 'list' ? ' active' : '');
-    document.getElementById('atkSubForm').className = 'sub-tab' + (sub === 'form' ? ' active' : '');
+    document.getElementById('viewList').style.display = sub === 'list' ? 'block' : 'none';
+    document.getElementById('viewForm').style.display = sub === 'form' ? 'block' : 'none';
+    document.getElementById('defSubList').className = 'sub-tab' + (sub === 'list' ? ' active-def' : '');
+    document.getElementById('defSubForm').className = 'sub-tab' + (sub === 'form' ? ' active-def' : '');
 }
 
-// ──────────────────────────────────────────
-// 초기 슬롯 렌더
-// ──────────────────────────────────────────
+// ──────────────────────────────────
+// 슬롯 초기화
+// ──────────────────────────────────
 function initSlots() {
-    // 방어팀
     document.getElementById('defSlots').innerHTML = [0,1,2].map(i => `
         <div class="hero-slot">
-            <div class="hero-slot-img" id="defSlot${i}" onclick="openHeroModal('def',${i})">
+            <div class="hero-slot-img" id="defSlot${i}" onclick="openHeroModal(${i})">
                 <div class="slot-empty"><span class="slot-icon">🛡️</span><span>선택</span></div>
             </div>
             <div class="hero-slot-name" id="defSlotName${i}"></div>
-            <button class="hero-slot-btn" onclick="openHeroModal('def',${i})">선택</button>
+            <button class="hero-slot-btn" id="defSlotBtn${i}" onclick="setActiveHero(${i})">장비설정</button>
         </div>
     `).join('');
-
-    // 공격팀
-    document.getElementById('atkSlots').innerHTML = [0,1,2].map(i => `
-        <div class="hero-slot">
-            <div class="hero-slot-img" id="atkSlot${i}" onclick="openHeroModal('atk',${i})">
-                <div class="slot-empty"><span class="slot-icon">⚔️</span><span>선택</span></div>
-            </div>
-            <div class="hero-slot-name" id="atkSlotName${i}"></div>
-            <button class="hero-slot-btn" id="atkSlotBtn${i}" onclick="setActiveAtk(${i})">장비설정</button>
-        </div>
-    `).join('');
-
     renderPetGrid();
 }
 
-// ──────────────────────────────────────────
-// 영웅 이미지 헬퍼
-// ──────────────────────────────────────────
-function heroImgEl(name, cls='') {
-    return `<img src="${HERO_IMG_PATH}${name}.webp" alt="${name}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.7em;color:var(--text-muted);text-align:center;\\'>${name}</span>'" ${cls ? `class="${cls}"` : ''}>`;
+// ──────────────────────────────────
+// 영웅 이미지
+// ──────────────────────────────────
+function heroImg(name) {
+    return `<img src="${HERO_IMG_PATH}${name}.webp" alt="${name}"
+        onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.65em;color:var(--text-muted);text-align:center;padding:4px;\\'>${name}</span>'">`;
 }
 
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 // 영웅 선택 모달
-// ──────────────────────────────────────────
-function openHeroModal(type, idx) {
-    modalTarget = { type, idx };
-    const title = type === 'def' ? `방어팀 ${idx+1}번 영웅 선택` : `공격팀 ${idx+1}번 영웅 선택`;
-    document.getElementById('heroModalTitle').textContent = title;
+// ──────────────────────────────────
+function openHeroModal(idx) {
+    modalTargetIdx = idx;
+    document.getElementById('heroModalTitle').textContent = `방어팀 ${idx+1}번 영웅 선택`;
     document.getElementById('heroSearch').value = '';
     renderHeroModal('');
     document.getElementById('heroModal').classList.add('open');
@@ -1020,110 +589,94 @@ function openHeroModal(type, idx) {
 
 function closeHeroModal() {
     document.getElementById('heroModal').classList.remove('open');
-    modalTarget = null;
 }
 
 function renderHeroModal(q) {
-    const body = document.getElementById('heroModalBody');
     const lq = q.toLowerCase();
     let html = '';
-
     Object.entries(HERO_DATA).forEach(([grade, heroes]) => {
         const filtered = q ? heroes.filter(h => h.toLowerCase().includes(lq)) : heroes;
         if (!filtered.length) return;
         html += `<div class="hero-grade-title">${grade}</div><div class="hero-grid-modal">`;
         filtered.forEach(name => {
-            html += `
-            <div class="hero-item" onclick="selectHero('${name}')">
-                <div class="hero-item-img">${heroImgEl(name)}</div>
+            html += `<div class="hero-item" onclick="selectHero('${name}')">
+                <div class="hero-item-img">${heroImg(name)}</div>
                 <div class="hero-item-name">${name}</div>
             </div>`;
         });
         html += `</div>`;
     });
-
-    body.innerHTML = html || '<p style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">검색 결과 없음</p>';
+    document.getElementById('heroModalBody').innerHTML = html ||
+        '<p style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">검색 결과 없음</p>';
 }
 
 function selectHero(name) {
-    if (!modalTarget) return;
-    const { type, idx } = modalTarget;
+    const idx = modalTargetIdx;
+    defHeroes[idx] = name;
 
-    if (type === 'def') {
-        defHeroes[idx] = name;
-        const slot = document.getElementById(`defSlot${idx}`);
-        slot.innerHTML = heroImgEl(name);
-        slot.className = 'hero-slot-img def-selected';
-        document.getElementById(`defSlotName${idx}`).textContent = name;
-    } else {
-        atkHeroes[idx] = name;
-        const slot = document.getElementById(`atkSlot${idx}`);
-        slot.innerHTML = heroImgEl(name);
-        slot.className = 'hero-slot-img selected';
-        document.getElementById(`atkSlotName${idx}`).textContent = name;
-        setActiveAtk(idx);
-        renderEquipTabs();
-        renderSkillGrid('');
-    }
+    const slot = document.getElementById(`defSlot${idx}`);
+    slot.innerHTML = heroImg(name);
+    slot.className = 'hero-slot-img selected';
+    document.getElementById(`defSlotName${idx}`).textContent = name;
 
+    setActiveHero(idx);
+    renderEquipTabs();
+    renderSkillGrid('');
     closeHeroModal();
 }
 
-// ──────────────────────────────────────────
-// 공격팀 활성 탭
-// ──────────────────────────────────────────
-function setActiveAtk(idx) {
-    if (!atkHeroes[idx]) return;
-    activeAtkIdx = idx;
+// ──────────────────────────────────
+// 활성 영웅 전환
+// ──────────────────────────────────
+function setActiveHero(idx) {
+    if (!defHeroes[idx]) return;
+    activeDefIdx = idx;
 
-    // 슬롯 버튼 강조
     [0,1,2].forEach(i => {
-        const btn = document.getElementById(`atkSlotBtn${i}`);
-        const slot = document.getElementById(`atkSlot${i}`);
-        if (btn) btn.className = 'hero-slot-btn' + (i === idx ? ' active-btn' : '');
-        if (slot && atkHeroes[i]) slot.className = 'hero-slot-img' + (i === idx ? ' active-hero' : ' selected');
+        const btn  = document.getElementById(`defSlotBtn${i}`);
+        const slot = document.getElementById(`defSlot${i}`);
+        if (btn)  btn.className  = 'hero-slot-btn' + (i === idx ? ' active-btn' : '');
+        if (slot && defHeroes[i]) slot.className = 'hero-slot-img' + (i === idx ? ' active-hero' : ' selected');
     });
 
+    renderEquipTabs();
     renderEquipBody();
 }
 
+// ──────────────────────────────────
+// 장비 탭
+// ──────────────────────────────────
 function renderEquipTabs() {
-    const tabs = document.getElementById('equipHeroTabs');
-    tabs.innerHTML = [0,1,2].map(i => {
-        const name = atkHeroes[i];
+    document.getElementById('equipHeroTabs').innerHTML = [0,1,2].map(i => {
+        const name = defHeroes[i];
         if (!name) return '';
-        return `
-        <div class="equip-hero-tab ${i === activeAtkIdx ? 'active' : ''}" id="equipTab${i}" onclick="setActiveAtk(${i})">
+        return `<button class="equip-hero-tab ${i === activeDefIdx ? 'active' : ''}" onclick="setActiveHero(${i})">
             <img src="${HERO_IMG_PATH}${name}.webp" alt="${name}" onerror="this.style.display='none'">
             ${name}
-        </div>`;
+        </button>`;
     }).join('');
 }
 
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 // 장비 폼 렌더
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 function renderEquipBody() {
-    const name = atkHeroes[activeAtkIdx];
+    const name = defHeroes[activeDefIdx];
     if (!name) return;
-    const d = equipData[activeAtkIdx];
+    const d = equipData[activeDefIdx];
 
-    renderEquipTabs();
-
-    const selOpts = (opts, val) => opts.map(o => `<option value="${o}" ${d[val]===o?'selected':''}>${o}</option>`).join('');
+    const selOpts = (opts, key) => opts.map(o => `<option value="${o}" ${d[key]===o?'selected':''}>${o}</option>`).join('');
     const setOpts = SETS.map(s => `<option value="${s}" ${d.set===s?'selected':''}>${s}</option>`).join('');
 
     document.getElementById('equipBody').innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-            <div style="width:52px;height:52px;border-radius:12px;overflow:hidden;border:2px solid var(--primary-soft);flex-shrink:0;background:var(--bg);">
-                <img src="${HERO_IMG_PATH}${name}.webp" alt="${name}"
-                     style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.innerHTML='<span style=\\'font-size:1.4em;display:flex;align-items:center;justify-content:center;height:100%;\\'></span>'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+            <div style="width:44px;height:44px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);flex-shrink:0;">
+                ${heroImg(name)}
             </div>
-            <div style="font-size:0.95em;font-weight:800;color:var(--primary);">${name} 장비</div>
+            <div style="font-size:0.92em;font-weight:800;color:var(--teal);">${name} 장비</div>
         </div>
 
-        <div class="equip-grid-2" style="margin-bottom:10px;">
+        <div class="equip-grid-2">
             <div>
                 <label class="f-label">무기 세트</label>
                 <select class="f-select" onchange="saveEquip('set',this.value)">
@@ -1136,7 +689,7 @@ function renderEquipBody() {
             </div>
         </div>
 
-        <div class="equip-grid-2" style="margin-bottom:10px;">
+        <div class="equip-grid-2" style="margin-top:10px;">
             <div>
                 <label class="f-label">무기 메인옵 1</label>
                 <select class="f-select" onchange="saveEquip('wpn1',this.value)">
@@ -1151,7 +704,7 @@ function renderEquipBody() {
             </div>
         </div>
 
-        <div class="equip-grid-2" style="margin-bottom:10px;">
+        <div class="equip-grid-2" style="margin-top:10px;">
             <div>
                 <label class="f-label">무기 메인옵 2</label>
                 <select class="f-select" onchange="saveEquip('wpn2',this.value)">
@@ -1166,7 +719,7 @@ function renderEquipBody() {
             </div>
         </div>
 
-        <div class="equip-grid-2">
+        <div class="equip-grid-2" style="margin-top:10px;">
             <div>
                 <label class="f-label">부옵</label>
                 <input class="f-input" type="text" placeholder="예: 치명타확률+생명력%" value="${d.sub||''}" oninput="saveEquip('sub',this.value)">
@@ -1180,15 +733,15 @@ function renderEquipBody() {
 }
 
 function saveEquip(key, val) {
-    equipData[activeAtkIdx][key] = val;
+    equipData[activeDefIdx][key] = val;
 }
 
-// ──────────────────────────────────────────
-// 스킬 그리드
-// ──────────────────────────────────────────
+// ──────────────────────────────────
+// 스킬 순서
+// ──────────────────────────────────
 function getAvailableSkills() {
     const skills = [];
-    atkHeroes.forEach(name => {
+    defHeroes.forEach(name => {
         if (!name) return;
         skills.push({ hero: name, num: 1, key: `${name}_1`, img: `${HERO_IMG_PATH}${name}1.webp` });
         skills.push({ hero: name, num: 2, key: `${name}_2`, img: `${HERO_IMG_PATH}${name}2.webp` });
@@ -1202,14 +755,13 @@ function renderSkillGrid(q) {
     const usedKeys = skillOrder.filter(Boolean).map(s => s.key);
 
     if (!skills.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">공격팀 영웅을 선택하면 스킬이 표시됩니다</div>';
+        grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">방어팀 영웅을 선택하면 스킬이 표시됩니다</div>';
         return;
     }
 
     const lq = q.toLowerCase();
     const filtered = q ? skills.filter(s => s.hero.toLowerCase().includes(lq)) : skills;
 
-    // 영웅별로 그룹핑
     const grouped = {};
     filtered.forEach(s => {
         if (!grouped[s.hero]) grouped[s.hero] = [];
@@ -1224,7 +776,7 @@ function renderSkillGrid(q) {
             <div onclick="toggleSkill('${s.key}','${s.hero}',${s.num},'${s.img}')"
                  style="position:relative;width:52px;height:52px;border-radius:10px;overflow:hidden;border:2px solid ${used ? '#b8860b' : 'var(--border)'};cursor:pointer;background:var(--bg);transition:all 0.18s;">
                 <img src="${s.img}" style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.style.background='var(--primary-soft)'">
+                     onerror="this.parentElement.style.background='var(--teal-soft)'">
                 ${used ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.25);display:flex;align-items:center;justify-content:center;">
                     <span style="background:#b8860b;color:white;font-size:0.75em;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${orderIdx+1}</span>
                 </div>` : ''}
@@ -1239,7 +791,7 @@ function renderSkillGrid(q) {
             return `<div onclick="toggleSkill('${s.key}','${s.hero}',${s.num},'${s.img}')"
                  style="position:relative;width:52px;height:52px;border-radius:10px;overflow:hidden;border:2px solid ${used ? '#b8860b' : 'var(--border)'};cursor:pointer;background:var(--bg);transition:all 0.18s;">
                 <img src="${s.img}" style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.style.background='var(--primary-soft)'">
+                     onerror="this.parentElement.style.background='var(--teal-soft)'">
                 ${used ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.25);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.75em;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${orderIdx+1}</span></div>` : ''}
             </div>`;
         }).join('');
@@ -1247,12 +799,10 @@ function renderSkillGrid(q) {
         return `
         <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:10px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
             <div style="display:flex;align-items:center;gap:6px;">
-                <!-- 초상화 왼쪽 크게 -->
                 <div style="width:72px;height:72px;border-radius:12px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:var(--white);">
                     <img src="${HERO_IMG_PATH}${hero}.webp" style="width:100%;height:100%;object-fit:cover;"
                          onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.65em;text-align:center;color:var(--text-muted);padding:2px;\\'>${hero}</div>'">
                 </div>
-                <!-- 스킬: S2 위, S1 아래 -->
                 <div style="display:flex;flex-direction:column;gap:4px;">
                     ${skillsVertical}
                 </div>
@@ -1265,12 +815,10 @@ function renderSkillGrid(q) {
 function toggleSkill(key, hero, num, img) {
     const existIdx = skillOrder.findIndex(s => s && s.key === key);
     if (existIdx !== -1) {
-        // 이미 선택된 경우 → 제거 후 재정렬
         skillOrder[existIdx] = null;
         skillOrder = skillOrder.filter(Boolean);
         while (skillOrder.length < 3) skillOrder.push(null);
     } else {
-        // 미선택 → 빈 슬롯에 추가
         const emptyIdx = skillOrder.findIndex(s => s === null);
         if (emptyIdx === -1) return;
         skillOrder[emptyIdx] = { key, hero, num, img };
@@ -1286,7 +834,6 @@ function addSkill(key, hero, num, img) {
 function clearSkillSlot(idx) {
     if (!skillOrder[idx]) return;
     skillOrder[idx] = null;
-    // 뒤를 앞으로 당기기
     skillOrder = skillOrder.filter(Boolean);
     while (skillOrder.length < 3) skillOrder.push(null);
     renderSkillSlots();
@@ -1300,7 +847,7 @@ function renderSkillSlots() {
         if (s) {
             slot.className = 'skill-order-img filled';
             slot.innerHTML = `<img src="${s.img}" alt="${s.hero} 스킬${s.num}"
-                onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.62em;text-align:center;\\'>${s.hero}<br>S${s.num}</span>'">
+                onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.6em;text-align:center;\\'>${s.hero}<br>S${s.num}</span>'">
                 <button class="del-skill" onclick="event.stopPropagation();clearSkillSlot(${i})">×</button>`;
         } else {
             slot.className = 'skill-order-img';
@@ -1309,16 +856,16 @@ function renderSkillSlots() {
     });
 }
 
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 // 펫
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 function renderPetGrid() {
     const grid = document.getElementById('petGrid');
     grid.innerHTML = PET_LIST.map(name => {
         const sel = selectedPets.includes(name);
-        return `<div class="pet-item" id="pi-${name.replace(/[^a-zA-Z0-9]/g,'')}" onclick="addPet('${name}')">
+        return `<div class="pet-item" onclick="addPet('${name}')">
             <div class="pet-item-img ${sel ? 'selected' : ''}">
-                <img src="${PET_IMG_PATH}${name}.png" alt="${name}"
+                <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
                      onerror="this.closest('.pet-item').style.display='none'">
             </div>
             <div class="pet-item-name">${name}</div>
@@ -1327,9 +874,9 @@ function renderPetGrid() {
 }
 
 function addPet(name) {
-    if (selectedPets.includes(name)) return; // 이미 선택됨
+    if (selectedPets.includes(name)) return;
     const idx = selectedPets.findIndex(p => p === null);
-    if (idx === -1) return; // 3개 꽉참
+    if (idx === -1) return;
     selectedPets[idx] = name;
     renderPetSlots();
     renderPetGrid();
@@ -1350,7 +897,7 @@ function renderPetSlots() {
         const name = selectedPets[i];
         if (name) {
             slot.className = 'pet-slot filled';
-            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.png" alt="${name}"
+            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
                 onerror="this.style.background='var(--teal-soft)'">
                 <button class="del-pet" onclick="event.stopPropagation();clearPet(${i})">×</button>`;
         } else {
@@ -1358,51 +905,48 @@ function renderPetSlots() {
             slot.innerHTML = `<span>+</span><button class="del-pet" onclick="clearPet(${i})">×</button>`;
         }
     });
-    const cnt = selectedPets.filter(Boolean).length;
-    document.getElementById('petCount').textContent = `${cnt} / 3`;
+    document.getElementById('petCount').textContent = `${selectedPets.filter(Boolean).length} / 3`;
 }
 
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 // 저장
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 async function saveGuide() {
     if (!currentUser) { alert('로그인이 필요합니다.'); return; }
-    if (currentUser.role !== 'admin' && !editingId) {
-        alert('공략 등록은 관리자만 가능합니다.');
+    if (currentUser.role !== 'admin' && !editingDefId) {
+        alert('방어팀 등록은 관리자만 가능합니다.');
         switchSub('list'); return;
     }
     const name = document.getElementById('fName').value.trim();
-    if (!name) { alert('공략 이름을 입력해주세요.'); return; }
-    if (defHeroes.some(h => !h)) { alert('상대 방어팀 영웅 3명을 모두 선택해주세요.'); return; }
-    if (atkHeroes.some(h => !h)) { alert('내 공격팀 영웅 3명을 모두 선택해주세요.'); return; }
+    if (!name) { alert('방어팀 이름을 입력해주세요.'); return; }
+    if (defHeroes.some(h => !h)) { alert('방어팀 영웅 3명을 모두 선택해주세요.'); return; }
+    if (!selectedPets.filter(Boolean).length) { alert('펫을 최소 1개 이상 선택해주세요.'); return; }
 
-    const btn = document.getElementById('aBtnSubmit');
-    if (!btn) { console.error('저장 버튼을 찾을 수 없습니다.'); return; }
-    const isEditing = !!editingId;
+    const btn = document.getElementById('dBtnSubmit');
+    if (!btn) return;
+    const isEditing = !!editingDefId;
     btn.textContent = '저장중...'; btn.disabled = true;
 
     try {
         const data = {
             name,
-            speedCondition: document.querySelector('input[name="speedAtk"]:checked')?.value,
+            speedCondition: document.querySelector('input[name="speedDef"]:checked')?.value,
             memo: document.getElementById('fMemo').value,
             detail: document.getElementById('fDetail').value,
             defenseTeam: [...defHeroes],
-            attackTeam: [...atkHeroes],
             equipData: JSON.parse(JSON.stringify(equipData)),
             skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
             pets: selectedPets.filter(Boolean),
+            priority: currentStarRating || 0,
         };
 
         if (isEditing) {
-            await updateDoc(doc(db, 'attack_strategies', editingId), {
-                ...data, updatedAt: serverTimestamp()
-            });
-            alert('공략이 수정되었습니다! ✅');
-            editingId = null;
+            await updateDoc(doc(db, 'defense_strategies', editingDefId), { ...data, updatedAt: serverTimestamp() });
+            alert('방어팀이 수정되었습니다! ✅');
+            editingDefId = null;
         } else {
-            await fbSaveGuide(data);
-            alert('공략이 등록되었습니다! ✅');
+            await fbSave(data);
+            alert('방어팀이 등록되었습니다! ✅');
         }
         switchSub('list');
         await loadGuides();
@@ -1410,62 +954,45 @@ async function saveGuide() {
         console.error(e);
         alert('저장 오류: ' + e.message);
     } finally {
-        if (btn) {
-            btn.textContent = isEditing ? '✅ 공략 수정하기' : '✅ 공략 등록하기';
-            btn.disabled = false;
-        }
+        if (btn) { btn.textContent = isEditing ? '✅ 방어팀 수정하기' : '✅ 방어팀 등록하기'; btn.disabled = false; }
     }
 }
 
 async function loadGuides() {
-    const guides = await fbLoadGuides();
-    allGuides = guides;
-
-    const countEl = document.getElementById('atkCount');
+    const guides = await fbLoad();
+    allDefGuides = guides;
+    const countEl = document.getElementById('defCount');
     if (countEl) countEl.textContent = guides.length;
-
-    const el = document.getElementById('atkList');
+    const el = document.getElementById('defList');
     if (!el) return;
 
     if (!guides.length) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚔️</div><div class="empty-text">등록된 공략이 없습니다.</div></div>';
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🛡️</div><div class="empty-text">등록된 방어팀이 없습니다.</div></div>';
         return;
     }
 
-    el.innerHTML = renderGuidesHTML(guides);
-}
-
-function renderGuidesHTML(guides) {
-    if (!guides.length) return '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">조건에 맞는 공략이 없습니다.</div></div>';
-
     const heroColors = ['var(--secondary)', 'var(--primary)', '#2a9d8f'];
 
-    return guides.map((g, gi) => {
-        const dt = g.defenseTeam || [];
-        const at = g.attackTeam || [];
+    el.innerHTML = guides.map((g, gi) => {
+        const heroes = g.defenseTeam || [];
         const eq = g.equipData || [{},{},{}];
         const sk = g.skillOrder || [];
         const pets = g.pets || [];
         const date = g.createdAt?.toDate ? `${g.createdAt.toDate().getMonth()+1}.${g.createdAt.toDate().getDate()}` : '';
         const canManage = currentUser && (currentUser.uid === g.authorUid || currentUser.role === 'admin');
 
-        // 장비 카드 (영웅 초상화 배경)
-        const equipCards = at.map((name, i) => {
+        // 장비 카드
+        const equipCards = heroes.map((name, i) => {
             const e = eq[i] || {};
             return `
             <div style="position:relative;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;flex:1;min-width:150px;overflow:hidden;">
-                <!-- 배경 영웅 이미지 -->
                 <img src="${HERO_IMG_PATH}${name}.webp" alt=""
                      style="position:absolute;right:-10px;bottom:-10px;width:100px;height:100px;object-fit:cover;opacity:0.08;border-radius:8px;pointer-events:none;"
                      onerror="this.style.display='none'">
-                <!-- 영웅명 -->
                 <div style="position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
-                    <img src="${HERO_IMG_PATH}${name}.webp"
-                         style="width:28px;height:28px;border-radius:6px;object-fit:cover;border:1px solid var(--border);"
-                         onerror="this.style.display='none'">
+                    <img src="${HERO_IMG_PATH}${name}.webp" style="width:28px;height:28px;border-radius:6px;object-fit:cover;border:1px solid var(--border);" onerror="this.style.display='none'">
                     <span style="font-size:0.84em;font-weight:800;color:${heroColors[i]};">${name}</span>
                 </div>
-                <!-- 장비 정보 -->
                 <div style="position:relative;">
                     ${e.set ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">📦 세트</span><span style="font-weight:700;">${e.set}</span></div>` : ''}
                     ${e.speed ? `<div style="display:flex;justify-content:space-between;font-size:0.75em;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><span style="color:var(--text-muted);">⚡ 속공</span><span style="font-weight:700;">${e.speed}</span></div>` : ''}
@@ -1479,21 +1006,7 @@ function renderGuidesHTML(guides) {
             </div>`;
         }).join('');
 
-        // 스킬 순서 (이미지 크게)
-        const skillBadges = sk.map((s, i) => `
-            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
-                <div style="position:relative;">
-                    <div style="width:52px;height:52px;border-radius:10px;overflow:hidden;border:2px solid #ffe58f;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;">
-                        <img src="${HERO_IMG_PATH}${s.hero}${s.num}.webp"
-                             style="width:100%;height:100%;object-fit:cover;"
-                             onerror="this.parentElement.innerHTML='<span style=\\'font-size:1.4em;\\'>⭐</span>'">
-                    </div>
-                    <div style="position:absolute;top:-5px;left:-5px;width:18px;height:18px;background:#b8860b;color:white;border-radius:50%;font-size:0.65em;font-weight:800;display:flex;align-items:center;justify-content:center;">${i+1}</div>
-                </div>
-                <div style="font-size:0.68em;font-weight:700;color:#b8860b;text-align:center;">${s.hero}<br>S${s.num}</div>
-            </div>`).join('');
-
-        // 스킬 순서 (등록 UI와 동일: 초상화+S2위+S1아래)
+        // 스킬 순서 (선택된 스킬에 번호)
         const skillCards = sk.map((s, i) => `
             <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
                 <div style="display:flex;align-items:center;gap:5px;">
@@ -1504,17 +1017,13 @@ function renderGuidesHTML(guides) {
                         </div>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:3px;">
-                        <!-- S2 위 -->
                         <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===2?'#b8860b':'var(--border)'};background:var(--bg);">
-                            <img src="${HERO_IMG_PATH}${s.hero}2.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.style.background='var(--primary-soft)'">
-                            ${s.num===2 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
+                            <img src="${HERO_IMG_PATH}${s.hero}2.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='var(--teal-soft)'">
+                            ${s.num===2 ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
                         </div>
-                        <!-- S1 아래 -->
                         <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===1?'#b8860b':'var(--border)'};background:var(--bg);">
-                            <img src="${HERO_IMG_PATH}${s.hero}1.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.style.background='var(--primary-soft)'">
-                            ${s.num===1 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
+                            <img src="${HERO_IMG_PATH}${s.hero}1.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='var(--teal-soft)'">
+                            ${s.num===1 ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -1527,8 +1036,7 @@ function renderGuidesHTML(guides) {
                 ${pi > 0 ? '<div style="font-size:1.1em;font-weight:700;color:var(--text-muted);line-height:1;padding-bottom:18px;">></div>' : ''}
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                     <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
-                        <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;"
-                             onerror="this.parentElement.parentElement.parentElement.style.display='none'">
+                        <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.parentElement.parentElement.style.display='none'">
                     </div>
                     <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
                 </div>
@@ -1539,24 +1047,20 @@ function renderGuidesHTML(guides) {
         const commentsHtml = comments.map(cm => {
             const canEditCm = currentUser && (currentUser.uid === cm.uid || currentUser.role === 'admin');
             return `
-            <div id="cm-${cm.id}" style="background:var(--bg);border-radius:10px;padding:10px 12px;border-left:3px solid var(--primary-soft);">
+            <div id="dcm-${cm.id}" style="background:var(--bg);border-radius:10px;padding:10px 12px;border-left:3px solid var(--teal-soft);">
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-                    <span style="font-size:0.78em;font-weight:700;color:var(--primary);">${cm.author}</span>
+                    <span style="font-size:0.78em;font-weight:700;color:var(--teal);">${cm.author}</span>
                     <span style="font-size:0.7em;color:var(--text-muted);margin-left:auto;">${cm.date||''}</span>
                     ${canEditCm ? `
-                    <button onclick="startEditComment('${g.id}','${cm.id}')"
-                            style="font-size:0.7em;color:var(--primary);background:none;border:none;cursor:pointer;padding:0 2px;">수정</button>
-                    <button onclick="deleteComment('${g.id}','${cm.id}')"
-                            style="font-size:0.7em;color:#d94f4f;background:none;border:none;cursor:pointer;padding:0 2px;">삭제</button>` : ''}
+                    <button onclick="startEditDefComment('${g.id}','${cm.id}')" style="font-size:0.7em;color:var(--teal);background:none;border:none;cursor:pointer;padding:0 2px;">수정</button>
+                    <button onclick="deleteDefComment('${g.id}','${cm.id}')" style="font-size:0.7em;color:#d94f4f;background:none;border:none;cursor:pointer;padding:0 2px;">삭제</button>` : ''}
                 </div>
-                <div id="cmtext-${cm.id}" style="font-size:0.83em;color:var(--text-sub);line-height:1.5;white-space:pre-wrap;">${cm.text}</div>
-                <div id="cmedit-${cm.id}" style="display:none;margin-top:6px;">
-                    <textarea id="cminput-${cm.id}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82em;font-family:inherit;resize:vertical;min-height:56px;"></textarea>
+                <div id="dcmtext-${cm.id}" style="font-size:0.83em;color:var(--text-sub);line-height:1.5;white-space:pre-wrap;">${cm.text}</div>
+                <div id="dcmedit-${cm.id}" style="display:none;margin-top:6px;">
+                    <textarea id="dcminput-${cm.id}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82em;font-family:inherit;resize:vertical;min-height:56px;"></textarea>
                     <div style="display:flex;gap:6px;margin-top:5px;justify-content:flex-end;">
-                        <button onclick="cancelEditComment('${cm.id}')"
-                                style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text-muted);font-size:0.78em;cursor:pointer;">취소</button>
-                        <button onclick="saveEditComment('${g.id}','${cm.id}')"
-                                style="padding:5px 12px;border-radius:7px;border:none;background:var(--primary-soft);color:var(--primary);font-size:0.78em;font-weight:700;cursor:pointer;">저장</button>
+                        <button onclick="cancelEditDefComment('${cm.id}')" style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text-muted);font-size:0.78em;cursor:pointer;">취소</button>
+                        <button onclick="saveEditDefComment('${g.id}','${cm.id}')" style="padding:5px 12px;border-radius:7px;border:none;background:var(--teal-soft);color:var(--teal);font-size:0.78em;font-weight:700;cursor:pointer;">저장</button>
                     </div>
                 </div>
             </div>`;
@@ -1564,18 +1068,17 @@ function renderGuidesHTML(guides) {
 
         return `
         <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;">
-
             <!-- 헤더 -->
-            <div onclick="toggleDetail('guide-${gi}')" style="padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+            <div onclick="toggleDetail('def-${gi}')" style="padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:10px;">${g.name}</div>
                     <!-- 방어팀 초상화 -->
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                        <span style="font-size:0.68em;font-weight:800;color:var(--secondary);min-width:70px;flex-shrink:0;">상대 방어팀</span>
+                        <span style="font-size:0.68em;font-weight:800;color:var(--teal);min-width:70px;flex-shrink:0;">내 방어팀</span>
                         <div style="display:flex;gap:6px;">
-                            ${dt.map(h=>`
+                            ${heroes.map(h=>`
                             <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-                                <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--secondary-soft);background:var(--bg);">
+                                <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
                                     <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
                                          onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\\'>${h}</div>'">
                                 </div>
@@ -1583,276 +1086,213 @@ function renderGuidesHTML(guides) {
                             </div>`).join('')}
                         </div>
                     </div>
-                    <!-- 공격팀 초상화 -->
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                        <span style="font-size:0.68em;font-weight:800;color:var(--primary);min-width:70px;flex-shrink:0;">아군 공격팀</span>
-                        <div style="display:flex;gap:6px;">
-                            ${at.map(h=>`
-                            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-                                <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--primary-soft);background:var(--bg);">
-                                    <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
-                                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\\'>${h}</div>'">
-                                </div>
-                                <span style="font-size:0.62em;font-weight:600;color:var(--text-sub);">${h}</span>
-                            </div>`).join('')}
-                        </div>
-                    </div>
-                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}</div>
+                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}${g.priority ? ` · <span style='color:#b8860b;'>${'★'.repeat(g.priority)}${'☆'.repeat(5-g.priority)}</span>` : ''}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                     ${canManage ? `
-                    <button onclick="event.stopPropagation();editGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:var(--primary-soft);color:var(--primary);font-size:0.74em;font-weight:700;cursor:pointer;">수정</button>
-                    <button onclick="event.stopPropagation();deleteGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:#fdeaea;color:#d94f4f;font-size:0.74em;font-weight:700;cursor:pointer;">삭제</button>
-                    ` : ''}
-                    <span id="toggle-${gi}" style="color:var(--text-muted);font-size:0.8em;transition:transform 0.2s;">▼</span>
+                    <button onclick="event.stopPropagation();editDefGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:var(--teal-soft);color:var(--teal);font-size:0.74em;font-weight:700;cursor:pointer;">수정</button>
+                    <button onclick="event.stopPropagation();deleteDefGuide('${g.id}')" style="padding:4px 10px;border-radius:7px;border:none;background:#fdeaea;color:#d94f4f;font-size:0.74em;font-weight:700;cursor:pointer;">삭제</button>` : ''}
+                    <span id="dtoggle-${gi}" style="color:var(--text-muted);font-size:0.8em;transition:transform 0.2s;">▼</span>
                 </div>
             </div>
-
-            <!-- 상세 내용 -->
-            <div id="guide-${gi}" style="display:none;border-top:1px solid var(--border);padding:18px 20px;">
-
-                <!-- 공격팀 장비 -->
-                ${at.length ? `
-                <div style="margin-bottom:18px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--primary);margin-bottom:10px;">⚔️ 공격팀 장비</div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;">${equipCards}</div>
-                </div>` : ''}
-
-                <!-- 스킬 순서 -->
-                ${sk.length ? `
-                <div style="margin-bottom:18px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:10px;">⭐ 스킬 순서</div>
-                    <div style="display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;">${skillCards}</div>
-                </div>` : ''}
-
-                <!-- 펫 -->
-                ${pets.length ? `
-                <div style="margin-bottom:18px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">🐾 펫</div>
-                    <div style="display:flex;align-items:flex-start;gap:0;flex-wrap:wrap;">${petChips}</div>
-                </div>` : ''}
-
-                <!-- 메모 -->
-                ${g.memo ? `
-                <div style="margin-bottom:14px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">📌 메모</div>
-                    <div style="font-size:0.83em;color:var(--text-sub);line-height:1.6;">${g.memo}</div>
-                </div>` : ''}
-
-                <!-- 공격 디테일 -->
-                ${g.detail ? `
-                <div style="margin-bottom:18px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">💡 공격 디테일</div>
-                    <div style="font-size:0.83em;color:var(--text-sub);line-height:1.7;white-space:pre-wrap;">${g.detail}</div>
-                </div>` : ''}
-
+            <!-- 상세 -->
+            <div id="def-${gi}" style="display:none;border-top:1px solid var(--border);padding:18px 20px;">
+                ${heroes.length ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:10px;">🛡️ 방어팀 장비</div><div style="display:flex;gap:10px;flex-wrap:wrap;">${equipCards}</div></div>` : ''}
+                ${sk.length ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:10px;">⭐ 스킬 순서</div><div style="display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;">${skillCards}</div></div>` : ''}
+                ${pets.length ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">🐾 펫</div><div style="display:flex;align-items:flex-start;gap:0;flex-wrap:wrap;">${petChips}</div></div>` : ''}
+                ${g.memo ? `<div style="margin-bottom:14px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">📌 메모</div><div style="font-size:0.83em;color:var(--text-sub);line-height:1.6;">${g.memo}</div></div>` : ''}
+                ${g.detail ? `<div style="margin-bottom:18px;"><div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">💡 방어 디테일</div><div style="font-size:0.83em;color:var(--text-sub);line-height:1.7;white-space:pre-wrap;">${g.detail}</div></div>` : ''}
                 <!-- 댓글 -->
                 <div style="border-top:1px solid var(--border);padding-top:14px;">
                     <div style="font-size:0.78em;font-weight:700;color:var(--text);margin-bottom:10px;">💬 댓글 (${comments.length})</div>
-                    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;" id="clist-${g.id}">
-                        ${commentsHtml || '<p style="font-size:0.78em;color:var(--text-muted);padding:4px 0;">첫 댓글을 남겨보세요!</p>'}
-                    </div>
+                    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;">${commentsHtml || '<p style="font-size:0.78em;color:var(--text-muted);padding:4px 0;">첫 댓글을 남겨보세요!</p>'}</div>
                     <div style="display:flex;gap:8px;">
-                        <input id="cinput-${g.id}" type="text" placeholder="댓글을 입력하세요..."
+                        <input id="dcinput-${g.id}" type="text" placeholder="댓글을 입력하세요..."
                                style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.84em;font-family:inherit;"
-                               onkeydown="if(event.key==='Enter') addComment('${g.id}')">
-                        <button onclick="addComment('${g.id}')"
-                                style="padding:8px 16px;background:var(--primary-soft);color:var(--primary);border:none;border-radius:9px;font-size:0.82em;font-weight:700;cursor:pointer;white-space:nowrap;">등록</button>
+                               onkeydown="if(event.key==='Enter') addDefComment('${g.id}')">
+                        <button onclick="addDefComment('${g.id}')" style="padding:8px 16px;background:var(--teal-soft);color:var(--teal);border:none;border-radius:9px;font-size:0.82em;font-weight:700;cursor:pointer;white-space:nowrap;">등록</button>
                     </div>
                 </div>
-
             </div>
         </div>`;
     }).join('');
 }
 
-window.toggleDetail = function(id) {
+function toggleDetail(id) {
     const el = document.getElementById(id);
     if (!el) return;
     const idx = id.split('-')[1];
-    const arrow = document.getElementById(`toggle-${idx}`);
+    const arrow = document.getElementById(`dtoggle-${idx}`);
     const isOpen = el.style.display !== 'none';
     el.style.display = isOpen ? 'none' : 'block';
     if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
 };
 
-window.addComment = async function(guideId) {
-    const input = document.getElementById(`cinput-${guideId}`);
+async function deleteDefGuide(id) {
+    if (!confirm('이 방어팀을 삭제하시겠습니까?')) return;
+    try { await deleteDoc(doc(db, 'defense_strategies', id)); alert('삭제되었습니다.'); await loadGuides(); }
+    catch(e) { alert('삭제 오류: ' + e.message); }
+};
+
+async function editDefGuide(id) {
+    const g = allDefGuides.find(x => x.id === id);
+    if (!g) return;
+    editingDefId = id;
+    switchSub('form');
+    await new Promise(r => setTimeout(r, 50));
+    document.getElementById('fName').value = g.name || '';
+    if (document.getElementById('fMemo')) document.getElementById('fMemo').value = g.memo || '';
+    setStarRating(g.priority || 0);
+    if (document.getElementById('fDetail')) document.getElementById('fDetail').value = g.detail || '';
+    const radio = document.querySelector(`input[name="speedDef"][value="${g.speedCondition||'속내실'}"]`);
+    if (radio) radio.checked = true;
+    const heroes = g.defenseTeam || [];
+    const eq = g.equipData || [{},{},{}];
+    heroes.forEach((h, i) => {
+        if (!h) return;
+        defHeroes[i] = h;
+        const slot = document.getElementById(`defSlot${i}`);
+        const nameEl = document.getElementById(`defSlotName${i}`);
+        if (slot) { slot.innerHTML = heroImg(h); slot.className = 'hero-slot-img selected'; }
+        if (nameEl) nameEl.textContent = h;
+        equipData[i] = { set:eq[i]?.set||'', speed:eq[i]?.speed||'', wpn1:eq[i]?.wpn1||'', wpn2:eq[i]?.wpn2||'', arm1:eq[i]?.arm1||'', arm2:eq[i]?.arm2||'', sub:eq[i]?.sub||'', memo:eq[i]?.memo||'' };
+    });
+    renderEquipTabs();
+    if (defHeroes[0]) { activeDefIdx = 0; setActiveHero(0); }
+    renderSkillGrid('');
+    skillOrder = [null, null, null];
+    (g.skillOrder || []).forEach((s, i) => { skillOrder[i] = { key: s.key||`${s.hero}_${s.num}`, hero:s.hero, num:s.num, img:`${HERO_IMG_PATH}${s.hero}${s.num}.webp` }; });
+    renderSkillSlots(); renderSkillGrid('');
+    selectedPets = [null, null, null];
+    (g.pets || []).forEach((name, i) => { selectedPets[i] = name; });
+    renderPetSlots(); renderPetGrid();
+    const btn = document.getElementById('dBtnSubmit');
+    if (btn) btn.textContent = '✅ 방어팀 수정하기';
+};
+
+async function addDefComment(guideId) {
+    const input = document.getElementById(`dcinput-${guideId}`);
     const text = input.value.trim();
     if (!text) return;
     try {
-        const gRef = doc(db, 'attack_strategies', guideId);
+        const gRef = doc(db, 'defense_strategies', guideId);
         const gSnap = await getDoc(gRef);
         const comments = gSnap.data().comments || [];
-        comments.push({
-            id: Date.now().toString(),
-            text,
-            author: currentUser.nickname,
-            uid: currentUser.uid,
-            date: `${new Date().getMonth()+1}.${new Date().getDate()}`
-        });
+        comments.push({ id: Date.now().toString(), text, author: currentUser.nickname, uid: currentUser.uid, date: `${new Date().getMonth()+1}.${new Date().getDate()}` });
         await updateDoc(gRef, { comments });
         input.value = '';
         await loadGuides();
     } catch(e) { alert('댓글 등록 오류: ' + e.message); }
 };
 
-window.startEditComment = function(guideId, commentId) {
-    const textEl = document.getElementById(`cmtext-${commentId}`);
-    const editEl = document.getElementById(`cmedit-${commentId}`);
-    const inputEl = document.getElementById(`cminput-${commentId}`);
+function startEditDefComment(guideId, commentId) {
+    const textEl = document.getElementById(`dcmtext-${commentId}`);
+    const editEl = document.getElementById(`dcmedit-${commentId}`);
+    const inputEl = document.getElementById(`dcminput-${commentId}`);
     if (!textEl || !editEl || !inputEl) return;
     inputEl.value = textEl.innerText;
-    textEl.style.display = 'none';
-    editEl.style.display = 'block';
-    inputEl.focus();
+    textEl.style.display = 'none'; editEl.style.display = 'block'; inputEl.focus();
 };
 
-window.cancelEditComment = function(commentId) {
-    const textEl = document.getElementById(`cmtext-${commentId}`);
-    const editEl = document.getElementById(`cmedit-${commentId}`);
-    if (!textEl || !editEl) return;
-    textEl.style.display = 'block';
-    editEl.style.display = 'none';
+function cancelEditDefComment(commentId) {
+    const textEl = document.getElementById(`dcmtext-${commentId}`);
+    const editEl = document.getElementById(`dcmedit-${commentId}`);
+    if (textEl) textEl.style.display = 'block';
+    if (editEl) editEl.style.display = 'none';
 };
 
-window.saveEditComment = async function(guideId, commentId) {
-    const inputEl = document.getElementById(`cminput-${commentId}`);
+async function saveEditDefComment(guideId, commentId) {
+    const inputEl = document.getElementById(`dcminput-${commentId}`);
     const newText = inputEl.value.trim();
     if (!newText) { alert('내용을 입력해주세요.'); return; }
     try {
-        const gRef = doc(db, 'attack_strategies', guideId);
+        const gRef = doc(db, 'defense_strategies', guideId);
         const gSnap = await getDoc(gRef);
-        const comments = (gSnap.data().comments || []).map(c =>
-            c.id === commentId ? { ...c, text: newText } : c
-        );
+        const comments = (gSnap.data().comments || []).map(c => c.id === commentId ? { ...c, text: newText } : c);
         await updateDoc(gRef, { comments });
         await loadGuides();
     } catch(e) { alert('수정 오류: ' + e.message); }
 };
 
-window.deleteComment = async function(guideId, commentId) {
+async function deleteDefComment(guideId, commentId) {
     if (!confirm('댓글을 삭제하시겠습니까?')) return;
     try {
-        const gRef = doc(db, 'attack_strategies', guideId);
+        const gRef = doc(db, 'defense_strategies', guideId);
         const gSnap = await getDoc(gRef);
         const comments = (gSnap.data().comments || []).filter(c => c.id !== commentId);
         await updateDoc(gRef, { comments });
         await loadGuides();
-    } catch(e) { alert('댓글 삭제 오류: ' + e.message); }
-};
-
-// 공략 수정 - 슬롯 방식에 맞게 데이터 채우기
-window.editGuide = async function(id) {
-    const g = allGuides.find(x => x.id === id);
-    if (!g) return;
-    editingId = id;
-    aImgs = {1:[],2:[],3:[]};
-
-    // 폼으로 전환 먼저
-    switchSub('form');
-
-    // 폼 초기화 후 데이터 채우기 (DOM 렌더 후 실행)
-    await new Promise(r => setTimeout(r, 50));
-
-    // 기본 정보
-    document.getElementById('fName').value = g.name || '';
-    if (document.getElementById('fMemo')) document.getElementById('fMemo').value = g.memo || '';
-    if (document.getElementById('fDetail')) document.getElementById('fDetail').value = g.detail || '';
-
-    // 속공 조건
-    const radio = document.querySelector(`input[name="speedAtk"][value="${g.speedCondition||'속내실'}"]`);
-    if (radio) radio.checked = true;
-
-    // 방어팀 슬롯 채우기
-    const dt = g.defenseTeam || [];
-    dt.forEach((h, i) => {
-        if (!h) return;
-        defHeroes[i] = h;
-        const slot = document.getElementById(`defSlot${i}`);
-        const nameEl = document.getElementById(`defSlotName${i}`);
-        if (slot) { slot.innerHTML = heroImgEl(h); slot.className = 'hero-slot-img def-selected'; }
-        if (nameEl) nameEl.textContent = h;
-    });
-
-    // 공격팀 슬롯 채우기
-    const at = g.attackTeam || [];
-    const eq = g.equipData || [{},{},{}];
-    at.forEach((h, i) => {
-        if (!h) return;
-        atkHeroes[i] = h;
-        const slot = document.getElementById(`atkSlot${i}`);
-        const nameEl = document.getElementById(`atkSlotName${i}`);
-        if (slot) { slot.innerHTML = heroImgEl(h); slot.className = 'hero-slot-img selected'; }
-        if (nameEl) nameEl.textContent = h;
-
-        // 장비 데이터 미리 세팅
-        equipData[i] = {
-            set: eq[i]?.set || '',
-            speed: eq[i]?.speed || '',
-            wpn1: eq[i]?.wpn1 || '',
-            wpn2: eq[i]?.wpn2 || '',
-            arm1: eq[i]?.arm1 || '',
-            arm2: eq[i]?.arm2 || '',
-            sub: eq[i]?.sub || '',
-            memo: eq[i]?.memo || '',
-            description: eq[i]?.description || '',
-        };
-    });
-
-    // 장비 탭 렌더
-    renderEquipTabs();
-    if (atkHeroes[0]) { activeAtkIdx = 0; setActiveAtk(0); }
-
-    // 스킬 순서 복원
-    renderSkillGrid('');
-    skillOrder = [null, null, null];
-    (g.skillOrder || []).forEach((s, i) => {
-        skillOrder[i] = {
-            key: s.key || `${s.hero}_${s.num}`,
-            hero: s.hero, num: s.num,
-            img: `${HERO_IMG_PATH}${s.hero}${s.num}.webp`
-        };
-    });
-    renderSkillSlots();
-    renderSkillGrid('');
-
-    // 펫 복원
-    selectedPets = [null, null, null];
-    (g.pets || []).forEach((name, i) => { selectedPets[i] = name; });
-    renderPetSlots();
-    renderPetGrid();
-
-    // 버튼 텍스트 변경
-    const btn = document.getElementById('aBtnSubmit');
-    if (btn) btn.textContent = '✅ 공략 수정하기';
-};
-
-window.deleteGuide = async function(id) {
-    if (!confirm('이 공략을 삭제하시겠습니까?')) return;
-    try {
-        await deleteDoc(doc(db, 'attack_strategies', id));
-        alert('삭제되었습니다.');
-        await loadGuides();
     } catch(e) { alert('삭제 오류: ' + e.message); }
 };
-// ──────────────────────────────────────────
+
+
+// ──────────────────────────────────
 // 모달 외부 클릭
-// ──────────────────────────────────────────
+// ──────────────────────────────────
 document.getElementById('heroModal').addEventListener('click', function(e) {
     if (e.target === this) closeHeroModal();
-});
-document.getElementById('filterModal').addEventListener('click', function(e) {
-    if (e.target === this) closeFilterModal();
 });
 
 // 사이드바
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
-function closeSidebar()  { document.getElementById('sidebar').classList.remove('open');  document.getElementById('overlay').classList.remove('open'); }
+function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+
+// ── 별점 기능 ──
+let currentStarRating = 0;
+
+function setStarRating(val) {
+    currentStarRating = val;
+    const hiddenEl = document.getElementById('fPriority');
+    if (hiddenEl) hiddenEl.value = val;
+    const stars = document.querySelectorAll('.star-btn');
+    const labels = ['', '★ 낮음', '★★ 보통 이하', '★★★ 보통', '★★★★ 높음', '★★★★★ 최우선'];
+    stars.forEach((s, i) => {
+        s.textContent = i < val ? '★' : '☆';
+        s.style.color = i < val ? '#b8860b' : '#ccc';
+    });
+    const lbl = document.getElementById('starLabel');
+    if (lbl) lbl.textContent = labels[val] || '선택 안함';
+}
+
+function renderStars(val) {
+    return '★'.repeat(val||0) + '☆'.repeat(5-(val||0));
+}
+
+// ── window에 함수 등록 (onclick에서 사용) ──
+window.saveGuide = saveGuide;
+window.setStarRating = setStarRating;
+window.switchSub = switchSub;
+window.openHeroModal = openHeroModal;
+window.closeHeroModal = closeHeroModal;
+window.renderHeroModal = renderHeroModal;
+window.selectHero = selectHero;
+window.setActiveHero = setActiveHero;
+window.saveEquip = saveEquip;
+window.renderSkillGrid = renderSkillGrid;
+window.addSkill = addSkill;
+window.toggleSkill = toggleSkill;
+window.clearSkillSlot = clearSkillSlot;
+window.addPet = addPet;
+window.clearPet = clearPet;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
+window.toggleDetail = toggleDetail;
+window.deleteDefGuide = deleteDefGuide;
+window.editDefGuide = editDefGuide;
+window.addDefComment = addDefComment;
+window.startEditDefComment = startEditDefComment;
+window.cancelEditDefComment = cancelEditDefComment;
+window.saveEditDefComment = saveEditDefComment;
+window.deleteDefComment = deleteDefComment;
+
+// ── 초기화 ──
+initSlots();
+
 
 // ── Firebase 저장/로드 ──
-async function fbSaveGuide(data) {
-    await addDoc(collection(db, 'attack_strategies'), {
+async function fbSave(data) {
+    await addDoc(collection(db, 'defense_strategies'), {
         ...data,
         author: currentUser.nickname,
         authorUid: currentUser.uid,
@@ -1861,20 +1301,22 @@ async function fbSaveGuide(data) {
     });
 }
 
-async function fbLoadGuides() {
+async function fbLoad() {
     try {
-        const q = query(collection(db, 'attack_strategies'), orderBy('createdAt','desc'));
+        const q = query(collection(db, 'defense_strategies'), orderBy('createdAt','desc'));
         const snap = await getDocs(q);
-        const guides = [];
-        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
-        return guides;
+        const list = [];
+        snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+        return list;
     } catch(e) {
-        const snap = await getDocs(collection(db, 'attack_strategies'));
-        const guides = [];
-        snap.forEach(d => guides.push({ id: d.id, ...d.data() }));
-        return guides;
+        const snap = await getDocs(collection(db, 'defense_strategies'));
+        const list = [];
+        snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+        return list;
     }
 }
+
+
 
 // ── 인증 ──
 onAuthStateChanged(auth, async (user) => {
@@ -1891,7 +1333,7 @@ onAuthStateChanged(auth, async (user) => {
         if (adminEl) adminEl.style.display = '';
     } else {
         // 일반 멤버 - 등록 버튼/탭 숨기기
-        const registerBtn = document.getElementById('atkSubForm');
+        const registerBtn = document.getElementById('defSubForm');
         if (registerBtn) registerBtn.style.display = 'none';
         const addBtn = document.querySelector('.btn-add');
         if (addBtn) addBtn.style.display = 'none';
@@ -1903,38 +1345,8 @@ window.handleLogout = async () => {
     if (!confirm('로그아웃 하시겠습니까?')) return;
     await signOut(auth); window.location.href = 'index.html';
 };
-
-
-
-
-// ── window에 함수 등록 (onclick에서 사용) ──
-window.saveGuide = saveGuide;
-window.toggleSkill = toggleSkill;
-window.addComment = addComment;
-window.deleteComment = deleteComment;
-window.startEditComment = startEditComment;
-window.cancelEditComment = cancelEditComment;
-window.saveEditComment = saveEditComment;
-window.editGuide = editGuide;
-window.switchMainTab = switchMainTab;
-window.switchSub = switchSub;
-window.openHeroModal = openHeroModal;
-window.closeHeroModal = closeHeroModal;
-window.renderHeroModal = renderHeroModal;
-window.selectHero = selectHero;
-window.setActiveAtk = setActiveAtk;
-window.saveEquip = saveEquip;
-window.renderSkillGrid = renderSkillGrid;
-window.addSkill = addSkill;
-window.clearSkillSlot = clearSkillSlot;
-window.addPet = addPet;
-window.clearPet = clearPet;
-window.toggleSidebar = toggleSidebar;
-window.closeSidebar = closeSidebar;
-
-// ── 초기화 ──
-initSlots();
 </script>
+
 
 </body>
 </html>

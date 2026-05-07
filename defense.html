@@ -353,6 +353,24 @@
                         </div>
                     </div>
 
+                    <!-- 우선순위 -->
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--gold);">⭐ 우선순위</div>
+                        <div class="panel-card-body">
+                            <div style="display:flex;flex-direction:column;gap:8px;">
+                                <div style="display:flex;gap:6px;" id="starRating">
+                                    <span class="star-btn" data-val="1" onclick="setStarRating(1)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="2" onclick="setStarRating(2)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="3" onclick="setStarRating(3)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="4" onclick="setStarRating(4)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                    <span class="star-btn" data-val="5" onclick="setStarRating(5)" style="font-size:1.8em;cursor:pointer;line-height:1;transition:transform 0.15s;">☆</span>
+                                </div>
+                                <div style="font-size:0.75em;color:var(--text-muted);" id="starLabel">선택 안함</div>
+                                <input type="hidden" id="fPriority" value="0">
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 방어 디테일 -->
                     <div class="panel-card">
                         <div class="panel-card-title" style="color:var(--teal);">💡 방어 디테일</div>
@@ -506,6 +524,7 @@ const HERO_DATA = {
 Object.keys(HERO_DATA).forEach(g => HERO_DATA[g].sort((a,b) => a.localeCompare(b,'ko')));
 
 const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
+const PET_EXT = {'더지':'png','델로':'png','루':'png','리첼':'png','멜페로':'jpg','믹':'png','에리':'png','연지':'png','요랑':'png','윈디':'jpg','유':'png','이린':'png','제브':'jpg','제오':'jpg','카람':'jpg','크리':'png','파이크':'png'};
 
 const SETS = ['선봉장','성기사','암살자','복수자','조율자','수문장','수호자','추적자','주술사'];
 const WPN_OPTS = ['약점 공격 확률','치명타 확률','치명타 피해','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 적중'];
@@ -846,7 +865,7 @@ function renderPetGrid() {
         const sel = selectedPets.includes(name);
         return `<div class="pet-item" onclick="addPet('${name}')">
             <div class="pet-item-img ${sel ? 'selected' : ''}">
-                <img src="${PET_IMG_PATH}${name}.png" alt="${name}"
+                <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
                      onerror="this.closest('.pet-item').style.display='none'">
             </div>
             <div class="pet-item-name">${name}</div>
@@ -878,7 +897,7 @@ function renderPetSlots() {
         const name = selectedPets[i];
         if (name) {
             slot.className = 'pet-slot filled';
-            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.png" alt="${name}"
+            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
                 onerror="this.style.background='var(--teal-soft)'">
                 <button class="del-pet" onclick="event.stopPropagation();clearPet(${i})">×</button>`;
         } else {
@@ -918,6 +937,7 @@ async function saveGuide() {
             equipData: JSON.parse(JSON.stringify(equipData)),
             skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
             pets: selectedPets.filter(Boolean),
+            priority: currentStarRating || 0,
         };
 
         if (isEditing) {
@@ -1016,7 +1036,7 @@ async function loadGuides() {
                 ${pi > 0 ? '<div style="font-size:1.1em;font-weight:700;color:var(--text-muted);line-height:1;padding-bottom:18px;">></div>' : ''}
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                     <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
-                        <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.parentElement.parentElement.style.display='none'">
+                        <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.parentElement.parentElement.style.display='none'">
                     </div>
                     <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
                 </div>
@@ -1066,7 +1086,7 @@ async function loadGuides() {
                             </div>`).join('')}
                         </div>
                     </div>
-                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}</div>
+                    <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}${g.priority ? ` · <span style='color:#b8860b;'>${'★'.repeat(g.priority)}${'☆'.repeat(5-g.priority)}</span>` : ''}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                     ${canManage ? `
@@ -1122,6 +1142,7 @@ async function editDefGuide(id) {
     await new Promise(r => setTimeout(r, 50));
     document.getElementById('fName').value = g.name || '';
     if (document.getElementById('fMemo')) document.getElementById('fMemo').value = g.memo || '';
+    setStarRating(g.priority || 0);
     if (document.getElementById('fDetail')) document.getElementById('fDetail').value = g.detail || '';
     const radio = document.querySelector(`input[name="speedDef"][value="${g.speedCondition||'속내실'}"]`);
     if (radio) radio.checked = true;
@@ -1217,11 +1238,30 @@ function toggleSidebar() { document.getElementById('sidebar').classList.toggle('
 function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
 
-// ── window에 함수 등록 (onclick에서 사용) ──
-window.saveGuide = saveGuide;
+// ── 별점 기능 ──
+let currentStarRating = 0;
+
+function setStarRating(val) {
+    currentStarRating = val;
+    const hiddenEl = document.getElementById('fPriority');
+    if (hiddenEl) hiddenEl.value = val;
+    const stars = document.querySelectorAll('.star-btn');
+    const labels = ['', '★ 낮음', '★★ 보통 이하', '★★★ 보통', '★★★★ 높음', '★★★★★ 최우선'];
+    stars.forEach((s, i) => {
+        s.textContent = i < val ? '★' : '☆';
+        s.style.color = i < val ? '#b8860b' : '#ccc';
+    });
+    const lbl = document.getElementById('starLabel');
+    if (lbl) lbl.textContent = labels[val] || '선택 안함';
+}
+
+function renderStars(val) {
+    return '★'.repeat(val||0) + '☆'.repeat(5-(val||0));
+}
 
 // ── window에 함수 등록 (onclick에서 사용) ──
 window.saveGuide = saveGuide;
+window.setStarRating = setStarRating;
 window.switchSub = switchSub;
 window.openHeroModal = openHeroModal;
 window.closeHeroModal = closeHeroModal;
