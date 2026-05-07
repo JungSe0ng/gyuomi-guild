@@ -301,9 +301,35 @@
 
         <!-- 목록 뷰 -->
         <div id="viewList">
-            <div class="action-bar">
-                <input class="search-input" type="text" placeholder="🔍 팀 이름, 영웅 이름 검색...">
-                <button class="btn-add" onclick="switchSub('form')">✏️ 방어팀 등록</button>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+                <!-- 영웅 선택 -->
+                <button onclick="openDefFilterModal()" id="defFilterHeroBtn"
+                        style="display:flex;align-items:center;gap:8px;padding:8px 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);font-size:0.84em;font-weight:600;color:var(--text-sub);cursor:pointer;font-family:inherit;transition:all 0.18s;">
+                    🦸 영웅 선택
+                </button>
+                <div id="defFilterChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+                <!-- 속공 조건 -->
+                <select id="defFilterSpeed" onchange="filterDefGuides()"
+                        style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.84em;font-family:inherit;background:var(--white);color:var(--text-sub);cursor:pointer;">
+                    <option value="">⚡ 속공 조건 전체</option>
+                    <option value="속내실">속내실</option>
+                    <option value="속공세팅">속공세팅</option>
+                    <option value="내실세팅">내실세팅</option>
+                </select>
+                <!-- 우선순위 필터 -->
+                <select id="defFilterPriority" onchange="filterDefGuides()"
+                        style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.84em;font-family:inherit;background:var(--white);color:var(--text-sub);cursor:pointer;">
+                    <option value="0">⭐ 우선순위 전체</option>
+                    <option value="1">★ 이상</option>
+                    <option value="2">★★ 이상</option>
+                    <option value="3">★★★ 이상</option>
+                    <option value="4">★★★★ 이상</option>
+                    <option value="5">★★★★★</option>
+                </select>
+                <!-- 초기화 -->
+                <button id="defFilterResetBtn" onclick="resetDefFilter()" style="display:none;padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);font-size:0.82em;color:var(--text-muted);cursor:pointer;font-family:inherit;">✕ 초기화</button>
+                <!-- 등록 버튼 -->
+                <button class="btn-add" style="margin-left:auto;" onclick="switchSub('form')">✏️ 방어팀 등록</button>
             </div>
             <div id="defList">
                 <div class="empty-state">
@@ -345,14 +371,6 @@
                         </div>
                     </div>
 
-                    <!-- 메모 -->
-                    <div class="panel-card">
-                        <div class="panel-card-title" style="color:var(--text-sub);">📌 메모</div>
-                        <div class="panel-card-body">
-                            <textarea class="f-textarea" id="fMemo" placeholder="간단한 메모..."></textarea>
-                        </div>
-                    </div>
-
                     <!-- 우선순위 -->
                     <div class="panel-card">
                         <div class="panel-card-title" style="color:var(--gold);">⭐ 우선순위</div>
@@ -368,6 +386,14 @@
                                 <div style="font-size:0.75em;color:var(--text-muted);" id="starLabel">선택 안함</div>
                                 <input type="hidden" id="fPriority" value="0">
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- 메모 -->
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--text-sub);">📌 메모</div>
+                        <div class="panel-card-body">
+                            <textarea class="f-textarea" id="fMemo" placeholder="간단한 메모..."></textarea>
                         </div>
                     </div>
 
@@ -482,6 +508,20 @@
     </div>
 </div>
 
+<!-- 영웅 필터 모달 -->
+<div class="hero-modal-overlay" id="defFilterModal">
+    <div class="hero-modal">
+        <div class="hero-modal-hd">
+            <div class="hero-modal-hd-title">🦸 영웅 선택 (방어팀 검색)</div>
+            <button class="hero-modal-close" onclick="closeDefFilterModal()">✕</button>
+        </div>
+        <div class="hero-modal-search">
+            <input type="text" id="defFilterHeroSearch" placeholder="영웅 이름 검색..." oninput="renderDefFilterModal(this.value)">
+        </div>
+        <div class="hero-modal-body" id="defFilterHeroBody"></div>
+    </div>
+</div>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -524,7 +564,6 @@ const HERO_DATA = {
 Object.keys(HERO_DATA).forEach(g => HERO_DATA[g].sort((a,b) => a.localeCompare(b,'ko')));
 
 const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
-const PET_EXT = {'더지':'png','델로':'png','루':'png','리첼':'png','멜페로':'jpg','믹':'png','에리':'png','연지':'png','요랑':'png','윈디':'jpg','유':'png','이린':'png','제브':'jpg','제오':'jpg','카람':'jpg','크리':'png','파이크':'png'};
 
 const SETS = ['선봉장','성기사','암살자','복수자','조율자','수문장','수호자','추적자','주술사'];
 const WPN_OPTS = ['약점 공격 확률','치명타 확률','치명타 피해','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 적중'];
@@ -865,7 +904,7 @@ function renderPetGrid() {
         const sel = selectedPets.includes(name);
         return `<div class="pet-item" onclick="addPet('${name}')">
             <div class="pet-item-img ${sel ? 'selected' : ''}">
-                <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
+                <img src="${PET_IMG_PATH}${name}.png" alt="${name}"
                      onerror="this.closest('.pet-item').style.display='none'">
             </div>
             <div class="pet-item-name">${name}</div>
@@ -897,7 +936,7 @@ function renderPetSlots() {
         const name = selectedPets[i];
         if (name) {
             slot.className = 'pet-slot filled';
-            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
+            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.png" alt="${name}"
                 onerror="this.style.background='var(--teal-soft)'">
                 <button class="del-pet" onclick="event.stopPropagation();clearPet(${i})">×</button>`;
         } else {
@@ -965,15 +1004,19 @@ async function loadGuides() {
     if (countEl) countEl.textContent = guides.length;
     const el = document.getElementById('defList');
     if (!el) return;
-
     if (!guides.length) {
         el.innerHTML = '<div class="empty-state"><div class="empty-icon">🛡️</div><div class="empty-text">등록된 방어팀이 없습니다.</div></div>';
         return;
     }
+    el.innerHTML = renderDefGuidesHTML(guides);
+}
 
+function renderDefGuidesHTML(guides) {
+    if (!guides.length) return '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">조건에 맞는 방어팀이 없습니다.</div></div>';
     const heroColors = ['var(--secondary)', 'var(--primary)', '#2a9d8f'];
 
-    el.innerHTML = guides.map((g, gi) => {
+    return guides.map((g, gi) => {
+
         const heroes = g.defenseTeam || [];
         const eq = g.equipData || [{},{},{}];
         const sk = g.skillOrder || [];
@@ -1036,7 +1079,7 @@ async function loadGuides() {
                 ${pi > 0 ? '<div style="font-size:1.1em;font-weight:700;color:var(--text-muted);line-height:1;padding-bottom:18px;">></div>' : ''}
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                     <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
-                        <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.parentElement.parentElement.style.display='none'">
+                        <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.parentElement.parentElement.style.display='none'">
                     </div>
                     <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
                 </div>
@@ -1232,6 +1275,9 @@ async function deleteDefComment(guideId, commentId) {
 document.getElementById('heroModal').addEventListener('click', function(e) {
     if (e.target === this) closeHeroModal();
 });
+document.getElementById('defFilterModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDefFilterModal();
+});
 
 // 사이드바
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
@@ -1259,9 +1305,104 @@ function renderStars(val) {
     return '★'.repeat(val||0) + '☆'.repeat(5-(val||0));
 }
 
+// ── 필터 기능 ──
+let defFilterHero = null;
+
+function openDefFilterModal() {
+    document.getElementById('defFilterHeroSearch').value = '';
+    renderDefFilterModal('');
+    document.getElementById('defFilterModal').classList.add('open');
+}
+function closeDefFilterModal() {
+    document.getElementById('defFilterModal').classList.remove('open');
+}
+function renderDefFilterModal(q) {
+    const lq = q.toLowerCase();
+    let html = '';
+    Object.entries(HERO_DATA).forEach(([grade, heroes]) => {
+        const filtered = q ? heroes.filter(h => h.toLowerCase().includes(lq)) : heroes;
+        if (!filtered.length) return;
+        html += `<div class="hero-grade-title">${grade}</div><div class="hero-grid-modal">`;
+        filtered.forEach(name => {
+            const isSel = defFilterHero === name;
+            html += `<div class="hero-item" onclick="selectDefFilterHero('${name}')">
+                <div class="hero-item-img" style="border:2px solid ${isSel?'var(--teal)':'transparent'};">${heroImg(name)}</div>
+                <div class="hero-item-name" style="color:${isSel?'var(--teal)':''};">${name}</div>
+            </div>`;
+        });
+        html += '</div>';
+    });
+    document.getElementById('defFilterHeroBody').innerHTML = html ||
+        '<p style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">검색 결과 없음</p>';
+}
+function selectDefFilterHero(name) {
+    defFilterHero = name;
+    closeDefFilterModal();
+    const btn = document.getElementById('defFilterHeroBtn');
+    if (btn) { btn.style.borderColor = 'var(--teal)'; btn.style.color = 'var(--teal)'; btn.style.background = 'var(--teal-soft)'; }
+    renderDefFilterChips();
+    filterDefGuides();
+}
+function renderDefFilterChips() {
+    const chips = document.getElementById('defFilterChips');
+    const resetBtn = document.getElementById('defFilterResetBtn');
+    if (!defFilterHero) { chips.innerHTML = ''; if(resetBtn) resetBtn.style.display = 'none'; return; }
+    chips.innerHTML = `
+        <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:var(--teal-soft);border:1px solid var(--teal-soft);">
+            <div style="width:22px;height:22px;border-radius:5px;overflow:hidden;flex-shrink:0;">${heroImg(defFilterHero)}</div>
+            <span style="font-size:0.8em;font-weight:700;color:var(--teal);">${defFilterHero}</span>
+            <button onclick="resetDefFilter()" style="background:none;border:none;color:var(--teal);cursor:pointer;font-size:0.8em;padding:0 2px;">✕</button>
+        </div>`;
+    if(resetBtn) resetBtn.style.display = 'block';
+}
+function resetDefFilter() {
+    defFilterHero = null;
+    const s = document.getElementById('defFilterSpeed'); if(s) s.value = '';
+    const p = document.getElementById('defFilterPriority'); if(p) p.value = '0';
+    const btn = document.getElementById('defFilterHeroBtn');
+    if(btn) { btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text-sub)'; btn.style.background = 'var(--white)'; }
+    const resetBtn = document.getElementById('defFilterResetBtn');
+    if(resetBtn) resetBtn.style.display = 'none';
+    renderDefFilterChips();
+    filterDefGuides();
+}
+function filterDefGuides() {
+    const speed = document.getElementById('defFilterSpeed')?.value || '';
+    const minPriority = parseInt(document.getElementById('defFilterPriority')?.value || '0');
+    const filtered = allDefGuides.filter(g => {
+        const heroes = g.defenseTeam || [];
+        if (defFilterHero && !heroes.includes(defFilterHero)) return false;
+        if (speed && g.speedCondition !== speed) return false;
+        if (minPriority > 0) {
+            if (minPriority === 5) { if ((g.priority||0) !== 5) return false; }
+            else { if ((g.priority||0) < minPriority) return false; }
+        }
+        return true;
+    });
+    const hasFilter = defFilterHero || speed || minPriority > 0;
+    const resetBtn = document.getElementById('defFilterResetBtn');
+    if(resetBtn) resetBtn.style.display = hasFilter ? 'block' : 'none';
+    renderDefGuideList(filtered);
+}
+function renderDefGuideList(guides) {
+    const el = document.getElementById('defList');
+    if (!el) return;
+    if (!guides.length) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">조건에 맞는 방어팀이 없습니다.</div></div>';
+        return;
+    }
+    el.innerHTML = renderDefGuidesHTML(guides);
+}
+
 // ── window에 함수 등록 (onclick에서 사용) ──
 window.saveGuide = saveGuide;
 window.setStarRating = setStarRating;
+window.openDefFilterModal = openDefFilterModal;
+window.closeDefFilterModal = closeDefFilterModal;
+window.renderDefFilterModal = renderDefFilterModal;
+window.selectDefFilterHero = selectDefFilterHero;
+window.resetDefFilter = resetDefFilter;
+window.filterDefGuides = filterDefGuides;
 window.switchSub = switchSub;
 window.openHeroModal = openHeroModal;
 window.closeHeroModal = closeHeroModal;

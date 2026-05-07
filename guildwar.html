@@ -593,6 +593,15 @@
                         <option value="속공세팅">속공세팅</option>
                         <option value="내실세팅">내실세팅</option>
                     </select>
+                    <!-- 성공률 필터 -->
+                    <select id="filterSuccess" onchange="filterGuides()"
+                            style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.84em;font-family:inherit;background:var(--white);color:var(--text-sub);cursor:pointer;">
+                        <option value="0">📊 성공률 전체</option>
+                        <option value="50">50% 이상</option>
+                        <option value="70">70% 이상</option>
+                        <option value="80">80% 이상</option>
+                        <option value="90">90% 이상</option>
+                    </select>
                     <!-- 초기화 -->
                     <button id="filterResetBtn" onclick="resetFilter()" style="display:none;padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);font-size:0.82em;color:var(--text-muted);cursor:pointer;font-family:inherit;">✕ 초기화</button>
                     <!-- 등록 버튼 -->
@@ -637,14 +646,6 @@
                             </div>
                         </div>
 
-                        <!-- 메모 -->
-                        <div class="panel-card">
-                            <div class="panel-card-title" style="color:var(--text-sub);">📌 메모</div>
-                            <div class="panel-card-body">
-                                <textarea class="f-textarea" id="fMemo" placeholder="간단한 메모..."></textarea>
-                            </div>
-                        </div>
-
                         <!-- 성공률 -->
                         <div class="panel-card">
                             <div class="panel-card-title" style="color:var(--secondary);">📊 성공률</div>
@@ -655,6 +656,14 @@
                                     <span style="font-size:1em;font-weight:700;color:var(--text-sub);">%</span>
                                     <span style="font-size:0.78em;color:var(--text-muted);">0 ~ 100</span>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- 메모 -->
+                        <div class="panel-card">
+                            <div class="panel-card-title" style="color:var(--text-sub);">📌 메모</div>
+                            <div class="panel-card-body">
+                                <textarea class="f-textarea" id="fMemo" placeholder="간단한 메모..."></textarea>
                             </div>
                         </div>
 
@@ -888,8 +897,11 @@ function renderFilterChips() {
 function resetFilter() {
     filterHero = null;
     const s = document.getElementById('filterSpeed'); if (s) s.value = '';
+    const sr = document.getElementById('filterSuccess'); if (sr) sr.value = '0';
     const btn = document.getElementById('filterHeroBtn');
     if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text-sub)'; btn.style.background = 'var(--white)'; }
+    const resetBtn = document.getElementById('filterResetBtn');
+    if (resetBtn) resetBtn.style.display = 'none';
     renderFilterChips();
     filterGuides();
 }
@@ -905,12 +917,18 @@ function selectFilterHero(name) {
 }
 function filterGuides() {
     const speed = document.getElementById('filterSpeed')?.value || '';
+    const minSuccess = parseInt(document.getElementById('filterSuccess')?.value || '0');
     const filtered = allGuides.filter(g => {
         const allHeroes = [...(g.defenseTeam||[]), ...(g.attackTeam||[])];
         if (filterHero && !allHeroes.includes(filterHero)) return false;
         if (speed && g.speedCondition !== speed) return false;
+        if (minSuccess > 0 && (g.successRate||0) < minSuccess) return false;
         return true;
     });
+    // 초기화 버튼 표시
+    const hasFilter = filterHero || speed || minSuccess > 0;
+    const resetBtn = document.getElementById('filterResetBtn');
+    if (resetBtn) resetBtn.style.display = hasFilter ? 'block' : 'none';
     renderGuideList(filtered);
 }
 function renderGuideList(guides) {
@@ -945,7 +963,6 @@ const ALL_HEROES = Object.values(HERO_DATA).flat();
 
 // 펫 목록 (pets/ 폴더 이미지명과 일치하게 관리)
 const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
-const PET_EXT = {'더지':'png','델로':'png','루':'png','리첼':'png','멜페로':'jpg','믹':'png','에리':'png','연지':'png','요랑':'png','윈디':'jpg','유':'png','이린':'png','제브':'jpg','제오':'jpg','카람':'jpg','크리':'png','파이크':'png'};
 
 // 장비 옵션
 const SETS = ['선봉장','성기사','암살자','복수자','조율자','수문장','수호자','추적자','주술사'];
@@ -1332,7 +1349,7 @@ function renderPetGrid() {
         const sel = selectedPets.includes(name);
         return `<div class="pet-item" id="pi-${name.replace(/[^a-zA-Z0-9]/g,'')}" onclick="addPet('${name}')">
             <div class="pet-item-img ${sel ? 'selected' : ''}">
-                <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
+                <img src="${PET_IMG_PATH}${name}.png" alt="${name}"
                      onerror="this.closest('.pet-item').style.display='none'">
             </div>
             <div class="pet-item-name">${name}</div>
@@ -1364,7 +1381,7 @@ function renderPetSlots() {
         const name = selectedPets[i];
         if (name) {
             slot.className = 'pet-slot filled';
-            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" alt="${name}"
+            slot.innerHTML = `<img src="${PET_IMG_PATH}${name}.png" alt="${name}"
                 onerror="this.style.background='var(--teal-soft)'">
                 <button class="del-pet" onclick="event.stopPropagation();clearPet(${i})">×</button>`;
         } else {
@@ -1542,7 +1559,7 @@ function renderGuidesHTML(guides) {
                 ${pi > 0 ? '<div style="font-size:1.1em;font-weight:700;color:var(--text-muted);line-height:1;padding-bottom:18px;">></div>' : ''}
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                     <div style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid var(--teal-soft);background:var(--bg);">
-                        <img src="${PET_IMG_PATH}${name}.${PET_EXT[name]||'png'}" style="width:100%;height:100%;object-fit:cover;"
+                        <img src="${PET_IMG_PATH}${name}.png" style="width:100%;height:100%;object-fit:cover;"
                              onerror="this.parentElement.parentElement.parentElement.style.display='none'">
                     </div>
                     <div style="font-size:0.68em;font-weight:700;color:var(--teal);">${name}</div>
