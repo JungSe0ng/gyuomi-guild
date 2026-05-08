@@ -562,7 +562,13 @@
         <div class="stats-row fade-up d2">
             <div class="stat-card">
                 <div class="stat-icon si-purple">⚔️</div>
-                <div><div class="stat-val" id="stGW">-</div><div class="stat-lbl">길드전 공략</div></div>
+                <div>
+                    <div class="stat-val" id="stGW">-</div>
+                    <div class="stat-lbl">길드전 공략</div>
+                    <div style="font-size:0.7em;color:var(--text-muted);margin-top:2px;">
+                        공격 <span id="stGWAtk">-</span>개 · 방어 <span id="stGWDef">-</span>개
+                    </div>
+                </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon si-pink">🏰</div>
@@ -591,7 +597,7 @@
                 </div>
                 <div class="mc-title">길드전</div>
                 <div class="mc-desc">상대 방어팀 공략법과 팀 구성을 관리해요</div>
-                <div class="mc-count">📋 공략 <span id="mcGW">0</span>개</div>
+                <div class="mc-count">⚔️ 공격 <span id="mcGWAtk">0</span>개 · 🛡️ 방어 <span id="mcGWDef">0</span>개</div>
             </a>
             <a href="siege.html" class="menu-card mc-pink">
                 <div class="mc-top">
@@ -715,10 +721,13 @@
             const gwTotal = gwAtk.size + gwDef.size;
             const mc = [...us.docs].filter(d => d.data().role !== 'pending').length;
             document.getElementById('stGW').textContent = gwTotal;
+            const stGWAtk = document.getElementById('stGWAtk'); if(stGWAtk) stGWAtk.textContent = gwAtk.size;
+            const stGWDef = document.getElementById('stGWDef'); if(stGWDef) stGWDef.textContent = gwDef.size;
             document.getElementById('stSG').textContent = sg.size;
             document.getElementById('stEX').textContent = ex.size;
             document.getElementById('stMB').textContent = mc;
-            document.getElementById('mcGW').textContent = gwTotal;
+            const mcGWAtk = document.getElementById('mcGWAtk'); if(mcGWAtk) mcGWAtk.textContent = gwAtk.size;
+            const mcGWDef = document.getElementById('mcGWDef'); if(mcGWDef) mcGWDef.textContent = gwDef.size;
             document.getElementById('mcSG').textContent = sg.size;
             document.getElementById('mcEX').textContent = ex.size;
             document.getElementById('badgeGW').textContent = gwTotal;
