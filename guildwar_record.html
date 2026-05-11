@@ -256,6 +256,7 @@
         <div class="modal-body">
             <div><label class="f-label">시즌</label><input class="f-input" type="number" id="inSeason" min="1" placeholder="예: 1"></div>
             <div><label class="f-label">라운드 (1~15)</label><input class="f-input" type="number" id="inRound" min="1" max="15" placeholder="예: 3"></div>
+            <div><label class="f-label">VS 상대 길드</label><input class="f-input" type="text" id="inGuild" placeholder="예: 최강길드"></div>
         </div>
         <div class="modal-ft">
             <button class="btn-cancel" onclick="closeSeasonModal()">취소</button>
@@ -313,16 +314,19 @@ async function loadMembers() {
 async function loadSeasons() {
     const snap = await getDocs(collection(db,'guild_records'));
     seasonIds = [];
-    snap.forEach(d => seasonIds.push(d.id));
+    const vsGuildMap = {}; // id → 상대길드명
+    snap.forEach(d => {
+        seasonIds.push(d.id);
+        vsGuildMap[d.id] = d.data().vsGuild || '';
+    });
 
-    // 시즌별 그룹핑
     const seasonMap = {};
     seasonIds.forEach(id => {
         const [s, r] = id.split('_R');
         const sNum = parseInt(s.replace('S',''));
         const rNum = parseInt(r);
         if (!seasonMap[sNum]) seasonMap[sNum] = [];
-        seasonMap[sNum].push(rNum);
+        seasonMap[sNum].push({ round: rNum, vsGuild: vsGuildMap[id] || '' });
     });
 
     const seasonNums = Object.keys(seasonMap).map(Number).sort((a,b)=>a-b);
@@ -334,24 +338,25 @@ async function loadSeasons() {
     }
 
     container.innerHTML = seasonNums.map(sNum => {
-        const rounds = seasonMap[sNum].sort((a,b)=>a-b);
+        const rounds = seasonMap[sNum].sort((a,b)=>a.round-b.round);
         return `
         <div class="season-card">
             <div class="season-card-title">⚔️ 시즌 ${sNum}</div>
-            <select id="roundSel_${sNum}" onchange="onRoundSelect(${sNum}, this.value)">
+            <select id="roundSel_${sNum}" onchange="onRoundSelect(${sNum}, this.value, this.options[this.selectedIndex].dataset.guild)">
                 <option value="">라운드 선택</option>
-                ${rounds.map(r=>`<option value="${r}">라운드 ${r}</option>`).join('')}
+                ${rounds.map(({round, vsGuild}) =>
+                    `<option value="${round}" data-guild="${vsGuild}">R${round}${vsGuild ? ` vs ${vsGuild}` : ''}</option>`
+                ).join('')}
             </select>
         </div>`;
     }).join('');
 }
 
-window.onRoundSelect = async function(season, round) {
+window.onRoundSelect = async function(season, round, vsGuild) {
     if (!round) {
         document.getElementById('recordArea').innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>라운드를 선택해주세요</p></div>';
         return;
     }
-    // 다른 시즌 드롭다운 초기화
     document.querySelectorAll('[id^="roundSel_"]').forEach(sel => {
         const s = parseInt(sel.id.replace('roundSel_',''));
         if (s !== season) sel.value = '';
@@ -362,11 +367,11 @@ window.onRoundSelect = async function(season, round) {
     try {
         const snap = await getDoc(doc(db,'guild_records',curId));
         recordData = snap.exists() ? (snap.data().records||{}) : {};
+        vsGuild = vsGuild || (snap.exists() ? snap.data().vsGuild||'' : '');
     } catch(e) { recordData={}; }
 
-    // 테이블 제목 업데이트
     document.getElementById('recordArea').innerHTML = '';
-    renderTable(season, round);
+    renderTable(season, round, vsGuild);
 };
 
 // ── 탭 전환 ──
@@ -560,13 +565,15 @@ function renderHeroStats(records) {
     </div>`;
 }
 
-function renderTable(season, round) {
+function renderTable(season, round, vsGuild) {
     if (!members.length) { document.getElementById('recordArea').innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>길드원 없음</p></div>'; return; }
-    let wins_total=0, atk_total=0;
+    const vsTag = vsGuild ? `<span style="margin-left:8px;font-size:.8em;font-weight:700;color:var(--secondary);background:var(--secondary-soft);padding:3px 10px;border-radius:20px;">VS ${vsGuild}</span>` : '';
     let html = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-size:.95em;font-weight:800;">⚔️ 시즌 ${season} · 라운드 ${round}</div>
-        <div id="totalScore" style="font-size:.82em;color:var(--text-muted);"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:.95em;font-weight:800;">⚔️ 시즌 ${season} · 라운드 ${round}</span>
+            ${vsTag}
+        </div>
     </div>
     <div class="record-wrap"><table class="record-table"><thead><tr><th style="text-align:left;min-width:90px;">닉네임</th><th>1차</th><th>2차</th><th>3차</th><th>4차</th><th>5차</th><th>전적</th></tr></thead><tbody>`;
     members.forEach(m => {
@@ -648,9 +655,10 @@ window.saveRecord = async function() {
     try {
         await setDoc(doc(db,'guild_records',curId), {records:recordData}, {merge:true});
         closeAtkModal();
-        // curId에서 season, round 추출
         const [cS, cR] = curId.split('_R');
-        renderTable(parseInt(cS.replace('S','')), parseInt(cR));
+        const sel = document.getElementById(`roundSel_${parseInt(cS.replace('S',''))}`);
+        const vsGuild = sel ? (sel.options[sel.selectedIndex]?.dataset.guild || '') : '';
+        renderTable(parseInt(cS.replace('S','')), parseInt(cR), vsGuild);
     } catch(e) { alert('저장 오류: '+e.message); }
 };
 
@@ -685,13 +693,14 @@ window.openSeasonModal = () => document.getElementById('seasonModal').classList.
 window.closeSeasonModal = () => document.getElementById('seasonModal').classList.remove('open');
 window.addSeason = async function() {
     const s=document.getElementById('inSeason').value, r=document.getElementById('inRound').value;
+    const g=document.getElementById('inGuild').value.trim();
     if (!s||!r) { alert('시즌과 라운드를 입력해주세요.'); return; }
     const id=`S${s}_R${r}`;
-    await setDoc(doc(db,'guild_records',id), {records:{}, createdAt:serverTimestamp()}, {merge:true});
+    await setDoc(doc(db,'guild_records',id), {records:{}, vsGuild:g||'', createdAt:serverTimestamp()}, {merge:true});
     if (!seasonIds.includes(id)) seasonIds.push(id);
+    document.getElementById('inGuild').value = '';
     closeSeasonModal();
     await loadSeasons();
-    // 추가된 시즌/라운드 자동 선택
     const sel = document.getElementById(`roundSel_${s}`);
     if (sel) { sel.value = r; onRoundSelect(parseInt(s), r); }
 };
