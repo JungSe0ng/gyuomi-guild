@@ -201,26 +201,26 @@
     <div class="modal">
         <div class="modal-hd"><div class="modal-hd-title" id="atkTitle">공격 기록</div><button class="modal-close" onclick="closeAtkModal()">✕</button></div>
         <div class="modal-body">
-            <div>
+            <div style="background:var(--secondary-soft);border:1.5px solid #f8c8dc;border-radius:12px;padding:14px;">
                 <div class="sec-title" style="color:var(--secondary);">🛡️ 상대 방어팀</div>
-                <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+                <div style="display:flex;gap:6px;align-items:center;">
                     <div class="slots-row" style="flex:1;">
                         <div class="slot-wrap"><div class="slot-img def" id="mDef0" onclick="openHeroSel('def',0)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN0">선택</div></div>
                         <div class="slot-wrap"><div class="slot-img def" id="mDef1" onclick="openHeroSel('def',1)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN1">선택</div></div>
                         <div class="slot-wrap"><div class="slot-img def" id="mDef2" onclick="openHeroSel('def',2)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN2">선택</div></div>
                     </div>
-                    <button onclick="openHeroSel('def')" style="padding:7px 14px;border-radius:9px;border:1.5px solid var(--secondary-soft);background:var(--secondary-soft);color:var(--secondary);font-size:.8em;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ 선택</button>
+                    <button onclick="openHeroSel('def')" style="padding:8px 14px;border-radius:9px;border:none;background:var(--secondary);color:white;font-size:.8em;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">상대 방어팀 선택</button>
                 </div>
             </div>
-            <div>
+            <div style="background:var(--primary-soft);border:1.5px solid #d4c5f0;border-radius:12px;padding:14px;">
                 <div class="sec-title" style="color:var(--primary);">⚔️ 내 공격팀</div>
-                <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+                <div style="display:flex;gap:6px;align-items:center;">
                     <div class="slots-row" style="flex:1;">
                         <div class="slot-wrap"><div class="slot-img" id="mAtk0" onclick="openHeroSel('atk',0)"><span style="font-size:1.3em;">⚔️</span></div><div class="slot-name" id="mAN0">선택</div></div>
                         <div class="slot-wrap"><div class="slot-img" id="mAtk1" onclick="openHeroSel('atk',1)"><span style="font-size:1.3em;">⚔️</span></div><div class="slot-name" id="mAN1">선택</div></div>
                         <div class="slot-wrap"><div class="slot-img" id="mAtk2" onclick="openHeroSel('atk',2)"><span style="font-size:1.3em;">⚔️</span></div><div class="slot-name" id="mAN2">선택</div></div>
                     </div>
-                    <button onclick="openHeroSel('atk')" style="padding:7px 14px;border-radius:9px;border:1.5px solid var(--primary-soft);background:var(--primary-soft);color:var(--primary);font-size:.8em;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ 선택</button>
+                    <button onclick="openHeroSel('atk')" style="padding:8px 14px;border-radius:9px;border:none;background:var(--primary);color:white;font-size:.8em;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">내 공격팀 선택</button>
                 </div>
             </div>
             <div>
