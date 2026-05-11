@@ -38,10 +38,13 @@
         .page-hd{margin-bottom:20px;}
         .page-hd h1{font-size:1.2em;font-weight:800;}
         .page-hd p{font-size:.78em;color:var(--text-muted);margin-top:2px;}
-        .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
-        .f-sel{padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.86em;font-family:inherit;background:var(--white);color:var(--text);cursor:pointer;font-weight:600;}
-        .f-sel:focus{outline:none;border-color:var(--primary);}
-        .btn-primary{padding:9px 18px;background:var(--grad);color:white;border:none;border-radius:10px;font-size:.84em;font-weight:700;cursor:pointer;font-family:inherit;}
+        .season-cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-start;}
+        .season-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;min-width:130px;}
+        .season-card-title{font-size:.82em;font-weight:800;color:var(--primary);}
+        .season-card select{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.82em;font-family:inherit;background:var(--white);color:var(--text);cursor:pointer;font-weight:600;width:100%;}
+        .season-card select:focus{outline:none;border-color:var(--primary);}
+        .season-card select.active{border-color:var(--primary);background:var(--primary-soft);color:var(--primary);}
+        .btn-add-season{padding:8px 14px;background:var(--grad);color:white;border:none;border-radius:10px;font-size:.82em;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;align-self:flex-end;margin-bottom:4px;}
         .record-wrap{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:auto;}
         .record-table{width:100%;border-collapse:collapse;min-width:600px;}
         .record-table th{padding:11px 14px;text-align:center;font-size:.76em;font-weight:700;color:var(--text-muted);background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;}
@@ -151,10 +154,11 @@
     </div>
     <div class="content">
         <div class="page-hd"><h1>📊 길드전 기록실</h1><p>시즌별 공격 조합과 전적을 기록해요</p></div>
-        <div class="filter-bar">
-            <select class="f-sel" id="selSeason" onchange="onSeasonChange()"><option value="">시즌 선택</option></select>
-            <select class="f-sel" id="selRound" onchange="loadRecord()"><option value="">라운드 선택</option></select>
-            <button class="btn-primary" id="btnAddSeason" onclick="openSeasonModal()" style="display:none;">+ 시즌/라운드 추가</button>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+            <div class="season-cards" id="seasonCards">
+                <div class="empty-state" style="padding:16px 20px;font-size:.84em;">등록된 시즌이 없습니다</div>
+            </div>
+            <button class="btn-add-season" id="btnAddSeason" onclick="openSeasonModal()" style="display:none;">+ 시즌/라운드 추가</button>
         </div>
         <div id="recordArea"><div class="empty-state"><div class="empty-icon">📊</div><p>시즌과 라운드를 선택해주세요</p></div></div>
     </div>
@@ -278,34 +282,74 @@ async function loadSeasons() {
     const snap = await getDocs(collection(db,'guild_records'));
     seasonIds = [];
     snap.forEach(d => seasonIds.push(d.id));
-    const seasonNums = [...new Set(seasonIds.map(id => parseInt(id.split('_R')[0].replace('S',''))))].sort((a,b)=>b-a);
-    const sel = document.getElementById('selSeason');
-    sel.innerHTML = '<option value="">시즌 선택</option>' + seasonNums.map(s=>`<option value="${s}">시즌 ${s}</option>`).join('');
+
+    // 시즌별 그룹핑
+    const seasonMap = {};
+    seasonIds.forEach(id => {
+        const [s, r] = id.split('_R');
+        const sNum = parseInt(s.replace('S',''));
+        const rNum = parseInt(r);
+        if (!seasonMap[sNum]) seasonMap[sNum] = [];
+        seasonMap[sNum].push(rNum);
+    });
+
+    const seasonNums = Object.keys(seasonMap).map(Number).sort((a,b)=>a-b);
+    const container = document.getElementById('seasonCards');
+
+    if (!seasonNums.length) {
+        container.innerHTML = '<p style="font-size:.84em;color:var(--text-muted);padding:8px 0;">등록된 시즌이 없습니다</p>';
+        return;
+    }
+
+    container.innerHTML = seasonNums.map(sNum => {
+        const rounds = seasonMap[sNum].sort((a,b)=>a-b);
+        return `
+        <div class="season-card">
+            <div class="season-card-title">⚔️ 시즌 ${sNum}</div>
+            <select id="roundSel_${sNum}" onchange="onRoundSelect(${sNum}, this.value)">
+                <option value="">라운드 선택</option>
+                ${rounds.map(r=>`<option value="${r}">라운드 ${r}</option>`).join('')}
+            </select>
+        </div>`;
+    }).join('');
 }
 
-window.onSeasonChange = function() {
-    const season = document.getElementById('selSeason').value;
-    const sel = document.getElementById('selRound');
-    if (!season) { sel.innerHTML='<option value="">라운드 선택</option>'; return; }
-    const rounds = seasonIds.filter(id=>id.startsWith(`S${season}_R`)).map(id=>parseInt(id.split('_R')[1])).sort((a,b)=>a-b);
-    sel.innerHTML = '<option value="">라운드 선택</option>' + rounds.map(r=>`<option value="${r}">라운드 ${r}</option>`).join('');
-    document.getElementById('recordArea').innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>라운드를 선택해주세요</p></div>';
-};
+window.onRoundSelect = async function(season, round) {
+    if (!round) {
+        document.getElementById('recordArea').innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>라운드를 선택해주세요</p></div>';
+        return;
+    }
+    // 다른 시즌 드롭다운 초기화
+    document.querySelectorAll('[id^="roundSel_"]').forEach(sel => {
+        const s = parseInt(sel.id.replace('roundSel_',''));
+        if (s !== season) sel.value = '';
+        sel.className = (s === season && round) ? 'active' : '';
+    });
 
-window.loadRecord = async function() {
-    const season=document.getElementById('selSeason').value, round=document.getElementById('selRound').value;
-    if (!season||!round) return;
     curId = `S${season}_R${round}`;
     try {
         const snap = await getDoc(doc(db,'guild_records',curId));
         recordData = snap.exists() ? (snap.data().records||{}) : {};
     } catch(e) { recordData={}; }
-    renderTable();
+
+    // 테이블 제목 업데이트
+    document.getElementById('recordArea').innerHTML = '';
+    renderTable(season, round);
 };
 
-function renderTable() {
+// 구버전 호환 (addSeason 후 자동 선택)
+window.loadRecord = async function() {};
+window.onSeasonChange = function() {};
+
+function renderTable(season, round) {
     if (!members.length) { document.getElementById('recordArea').innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>길드원 없음</p></div>'; return; }
-    let html = `<div class="record-wrap"><table class="record-table"><thead><tr><th style="text-align:left;min-width:90px;">닉네임</th><th>1차</th><th>2차</th><th>3차</th><th>4차</th><th>5차</th><th>전적</th></tr></thead><tbody>`;
+    let wins_total=0, atk_total=0;
+    let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:.95em;font-weight:800;">⚔️ 시즌 ${season} · 라운드 ${round}</div>
+        <div id="totalScore" style="font-size:.82em;color:var(--text-muted);"></div>
+    </div>
+    <div class="record-wrap"><table class="record-table"><thead><tr><th style="text-align:left;min-width:90px;">닉네임</th><th>1차</th><th>2차</th><th>3차</th><th>4차</th><th>5차</th><th>전적</th></tr></thead><tbody>`;
     members.forEach(m => {
         let wins=0, total=0;
         html += `<tr><td class="member-name">${m.nickname}</td>`;
@@ -384,7 +428,10 @@ window.saveRecord = async function() {
     recordData[key] = { uid:mUid, nickname:mNick, defTeam:mDef.filter(Boolean), atkTeam:mAtk.filter(Boolean), pet:mPet, win:mResult, memo:document.getElementById('mMemo').value, updatedAt:new Date().toISOString() };
     try {
         await setDoc(doc(db,'guild_records',curId), {records:recordData}, {merge:true});
-        closeAtkModal(); renderTable();
+        closeAtkModal();
+        // curId에서 season, round 추출
+        const [cS, cR] = curId.split('_R');
+        renderTable(parseInt(cS.replace('S','')), parseInt(cR));
     } catch(e) { alert('저장 오류: '+e.message); }
 };
 
@@ -425,10 +472,9 @@ window.addSeason = async function() {
     if (!seasonIds.includes(id)) seasonIds.push(id);
     closeSeasonModal();
     await loadSeasons();
-    document.getElementById('selSeason').value=s;
-    onSeasonChange();
-    document.getElementById('selRound').value=r;
-    await loadRecord();
+    // 추가된 시즌/라운드 자동 선택
+    const sel = document.getElementById(`roundSel_${s}`);
+    if (sel) { sel.value = r; onRoundSelect(parseInt(s), r); }
 };
 
 ['atkModal','heroSelModal','seasonModal'].forEach(id => {
