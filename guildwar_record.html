@@ -154,13 +154,45 @@
     </div>
     <div class="content">
         <div class="page-hd"><h1>📊 길드전 기록실</h1><p>시즌별 공격 조합과 전적을 기록해요</p></div>
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-            <div class="season-cards" id="seasonCards">
-                <div class="empty-state" style="padding:16px 20px;font-size:.84em;">등록된 시즌이 없습니다</div>
-            </div>
-            <button class="btn-add-season" id="btnAddSeason" onclick="openSeasonModal()" style="display:none;">+ 시즌/라운드 추가</button>
+
+        <!-- 메인 탭 -->
+        <div style="display:flex;gap:0;margin-bottom:20px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content;">
+            <button class="main-tab active-tab" id="tabRecord" onclick="switchTab('record')"
+                    style="padding:8px 22px;border-radius:9px;font-size:.88em;font-weight:700;cursor:pointer;border:none;background:var(--primary-soft);color:var(--primary);font-family:inherit;transition:all .2s;">
+                📋 기록 입력
+            </button>
+            <button class="main-tab" id="tabStats" onclick="switchTab('stats')"
+                    style="padding:8px 22px;border-radius:9px;font-size:.88em;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--text-muted);font-family:inherit;transition:all .2s;">
+                📊 통계
+            </button>
         </div>
-        <div id="recordArea"><div class="empty-state"><div class="empty-icon">📊</div><p>시즌과 라운드를 선택해주세요</p></div></div>
+
+        <!-- 기록 입력 섹션 -->
+        <div id="sectionRecord">
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+                <div class="season-cards" id="seasonCards">
+                    <div class="empty-state" style="padding:16px 20px;font-size:.84em;">등록된 시즌이 없습니다</div>
+                </div>
+                <button class="btn-add-season" id="btnAddSeason" onclick="openSeasonModal()" style="display:none;">+ 시즌/라운드 추가</button>
+            </div>
+            <div id="recordArea"><div class="empty-state"><div class="empty-icon">📊</div><p>시즌과 라운드를 선택해주세요</p></div></div>
+        </div>
+
+        <!-- 통계 섹션 -->
+        <div id="sectionStats" style="display:none;">
+            <!-- 통계 필터 -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                <select id="statSelSeason" onchange="loadStats()"
+                        style="padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.84em;font-family:inherit;background:var(--white);color:var(--text);cursor:pointer;font-weight:600;">
+                    <option value="">전체 시즌</option>
+                </select>
+                <select id="statSelRound" onchange="loadStats()"
+                        style="padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.84em;font-family:inherit;background:var(--white);color:var(--text);cursor:pointer;font-weight:600;">
+                    <option value="">전체 라운드</option>
+                </select>
+            </div>
+            <div id="statsArea"><div class="empty-state"><div class="empty-icon">📊</div><p>데이터를 불러오는 중...</p></div></div>
+        </div>
     </div>
 </div>
 
@@ -337,9 +369,196 @@ window.onRoundSelect = async function(season, round) {
     renderTable(season, round);
 };
 
-// 구버전 호환 (addSeason 후 자동 선택)
-window.loadRecord = async function() {};
-window.onSeasonChange = function() {};
+// ── 탭 전환 ──
+window.switchTab = function(tab) {
+    document.getElementById('sectionRecord').style.display = tab === 'record' ? 'block' : 'none';
+    document.getElementById('sectionStats').style.display  = tab === 'stats'  ? 'block' : 'none';
+    document.getElementById('tabRecord').style.background = tab === 'record' ? 'var(--primary-soft)' : 'transparent';
+    document.getElementById('tabRecord').style.color      = tab === 'record' ? 'var(--primary)' : 'var(--text-muted)';
+    document.getElementById('tabStats').style.background  = tab === 'stats'  ? 'var(--primary-soft)' : 'transparent';
+    document.getElementById('tabStats').style.color       = tab === 'stats'  ? 'var(--primary)' : 'var(--text-muted)';
+    if (tab === 'stats') { updateStatFilters(); loadStats(); }
+};
+
+// ── 통계 필터 업데이트 ──
+function updateStatFilters() {
+    const seasonMap = {};
+    seasonIds.forEach(id => {
+        const [s,r] = id.split('_R');
+        const sNum = parseInt(s.replace('S',''));
+        if (!seasonMap[sNum]) seasonMap[sNum] = [];
+        seasonMap[sNum].push(parseInt(r));
+    });
+    const sNums = Object.keys(seasonMap).map(Number).sort((a,b)=>a-b);
+    const statSelSeason = document.getElementById('statSelSeason');
+    statSelSeason.innerHTML = '<option value="">전체 시즌</option>' +
+        sNums.map(s=>`<option value="${s}">시즌 ${s}</option>`).join('');
+
+    const statSelRound = document.getElementById('statSelRound');
+    statSelRound.innerHTML = '<option value="">전체 라운드</option>';
+
+    statSelSeason.onchange = function() {
+        const s = this.value;
+        if (!s) { statSelRound.innerHTML = '<option value="">전체 라운드</option>'; }
+        else {
+            const rounds = (seasonMap[parseInt(s)]||[]).sort((a,b)=>a-b);
+            statSelRound.innerHTML = '<option value="">전체 라운드</option>' + rounds.map(r=>`<option value="${r}">라운드 ${r}</option>`).join('');
+        }
+        loadStats();
+    };
+}
+
+// ── 통계 로드 ──
+window.loadStats = async function() {
+    const statsArea = document.getElementById('statsArea');
+    statsArea.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>통계 계산 중...</p></div>';
+
+    const selSeason = document.getElementById('statSelSeason').value;
+    const selRound  = document.getElementById('statSelRound').value;
+
+    // 대상 시즌ID 필터링
+    let targetIds = [...seasonIds];
+    if (selSeason) targetIds = targetIds.filter(id => id.startsWith(`S${selSeason}_`));
+    if (selRound)  targetIds = targetIds.filter(id => id.endsWith(`_R${selRound}`));
+
+    if (!targetIds.length) {
+        statsArea.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>해당 조건의 데이터가 없습니다</p></div>';
+        return;
+    }
+
+    // 모든 기록 수집
+    const allRecords = [];
+    for (const id of targetIds) {
+        try {
+            const snap = await getDoc(doc(db,'guild_records',id));
+            if (snap.exists()) {
+                const records = snap.data().records || {};
+                Object.values(records).forEach(r => { if(r.win !== undefined) allRecords.push(r); });
+            }
+        } catch(e) {}
+    }
+
+    if (!allRecords.length) {
+        statsArea.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>기록된 데이터가 없습니다</p></div>';
+        return;
+    }
+
+    statsArea.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            ${renderComboStats(allRecords)}
+            ${renderHeroStats(allRecords)}
+        </div>`;
+};
+
+// ── 2. 조합별 승률 ──
+function renderComboStats(records) {
+    const comboMap = {};
+    records.forEach(r => {
+        const atk = (r.atkTeam||[]).sort().join('+');
+        const def = (r.defTeam||[]).sort().join('+');
+        const key = `${atk}||${def}`;
+        if (!comboMap[key]) comboMap[key] = { atk: r.atkTeam||[], def: r.defTeam||[], win:0, total:0 };
+        comboMap[key].total++;
+        if (r.win) comboMap[key].win++;
+    });
+
+    const sorted = Object.values(comboMap).sort((a,b) => (b.win/b.total) - (a.win/a.total) || b.total - a.total);
+    const top = sorted.slice(0, 10);
+
+    const rows = top.map(c => {
+        const rate = Math.round(c.win/c.total*100);
+        const color = rate >= 80 ? '#22c55e' : rate >= 50 ? '#b8860b' : '#ef4444';
+        const atkImgs = c.atk.map(h=>`
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                <div style="width:32px;height:32px;border-radius:7px;overflow:hidden;border:1px solid var(--border);background:var(--bg);">
+                    <img src="${HERO_IMG}${h}.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                </div>
+                <span style="font-size:.56em;color:var(--text-muted);">${h}</span>
+            </div>`).join('');
+        const defImgs = c.def.map(h=>`
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                <div style="width:28px;height:28px;border-radius:6px;overflow:hidden;border:1px solid var(--border);background:var(--bg);">
+                    <img src="${HERO_IMG}${h}.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                </div>
+                <span style="font-size:.52em;color:var(--text-muted);">${h}</span>
+            </div>`).join('');
+
+        return `
+        <div style="padding:12px;background:var(--bg);border-radius:10px;display:flex;align-items:center;gap:10px;">
+            <!-- 공격팀 -->
+            <div style="display:flex;gap:4px;align-items:flex-start;">${atkImgs}</div>
+            <div style="font-size:.7em;color:var(--text-muted);flex-shrink:0;">vs</div>
+            <!-- 방어팀 작게 -->
+            <div style="display:flex;gap:3px;align-items:flex-start;">${defImgs.length ? defImgs : '<span style="font-size:.72em;color:var(--text-muted);">-</span>'}</div>
+            <div style="margin-left:auto;text-align:right;flex-shrink:0;">
+                <div style="font-size:.9em;font-weight:800;color:${color};">${rate}%</div>
+                <div style="font-size:.7em;color:var(--text-muted);">${c.win}승 ${c.total-c.win}패</div>
+            </div>
+        </div>`;
+    }).join('');
+
+    return `
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;grid-column:1/-1;">
+        <div style="font-size:.82em;font-weight:800;color:var(--primary);margin-bottom:12px;letter-spacing:.04em;">⚔️ 조합별 승률 TOP10</div>
+        <div style="font-size:.72em;color:var(--text-muted);margin-bottom:10px;">공격팀 · vs · 상대 방어팀 · 승률</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${rows || '<p style="color:var(--text-muted);font-size:.82em;">데이터 없음</p>'}</div>
+    </div>`;
+}
+
+// ── 3. 영웅 출현 통계 ──
+function renderHeroStats(records) {
+    const atkMap = {}, defMap = {};
+
+    records.forEach(r => {
+        (r.atkTeam||[]).forEach(h => {
+            if (!atkMap[h]) atkMap[h] = { count:0, win:0 };
+            atkMap[h].count++; if(r.win) atkMap[h].win++;
+        });
+        (r.defTeam||[]).forEach(h => {
+            if (!defMap[h]) defMap[h] = { count:0 };
+            defMap[h].count++;
+        });
+    });
+
+    const topAtk = Object.entries(atkMap).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
+    const topDef = Object.entries(defMap).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
+    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+
+    const atkRows = topAtk.map(([name,d],i) => {
+        const rate = Math.round(d.win/d.count*100);
+        const color = rate >= 80 ? '#22c55e' : rate >= 50 ? '#b8860b' : '#ef4444';
+        return `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg);border-radius:9px;">
+            <span style="font-size:.9em;">${medals[i]}</span>
+            <div style="width:32px;height:32px;border-radius:7px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
+                <img src="${HERO_IMG}${name}.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+            </div>
+            <span style="font-size:.82em;font-weight:700;flex:1;">${name}</span>
+            <span style="font-size:.76em;color:var(--text-muted);">${d.count}회</span>
+            <span style="font-size:.78em;font-weight:700;color:${color};">${rate}%</span>
+        </div>`;
+    }).join('');
+
+    const defRows = topDef.map(([name,d],i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg);border-radius:9px;">
+            <span style="font-size:.9em;">${medals[i]}</span>
+            <div style="width:32px;height:32px;border-radius:7px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
+                <img src="${HERO_IMG}${name}.webp" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+            </div>
+            <span style="font-size:.82em;font-weight:700;flex:1;">${name}</span>
+            <span style="font-size:.76em;color:var(--text-muted);">${d.count}회 상대</span>
+        </div>`).join('');
+
+    return `
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;">
+        <div style="font-size:.82em;font-weight:800;color:var(--primary);margin-bottom:12px;">⚔️ 많이 쓴 공격 영웅 TOP5</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">${atkRows||'<p style="color:var(--text-muted);font-size:.82em;">데이터 없음</p>'}</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;">
+        <div style="font-size:.82em;font-weight:800;color:var(--secondary);margin-bottom:12px;">🛡️ 많이 상대한 방어 영웅 TOP5</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">${defRows||'<p style="color:var(--text-muted);font-size:.82em;">데이터 없음</p>'}</div>
+    </div>`;
+}
 
 function renderTable(season, round) {
     if (!members.length) { document.getElementById('recordArea').innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>길드원 없음</p></div>'; return; }
