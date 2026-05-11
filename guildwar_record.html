@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>길드전 기록실 - 귀요미 길드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#f4f5f9;--white:#fff;--primary:#7c5cbf;--primary-soft:#ede8f8;--secondary:#e8609a;--secondary-soft:#fde8f2;--teal:#2a9d8f;--teal-soft:#e6f7f5;--gold:#b8860b;--grad:linear-gradient(135deg,#7c5cbf,#e8609a);--text:#1a1a2e;--text-sub:#5a5a7a;--text-muted:#9898b8;--border:#e8e8f0;--sidebar-w:240px;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+        .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--white);border-right:1px solid var(--border);position:fixed;top:0;left:0;display:flex;flex-direction:column;z-index:100;transition:transform .28s cubic-bezier(.4,0,.2,1);}
+        .sidebar-logo{padding:24px 20px 18px;border-bottom:1px solid var(--border);}
+        .logo-wrap{display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:36px;height:36px;background:var(--grad);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1em;flex-shrink:0;}
+        .logo-name{font-size:.95em;font-weight:800;color:var(--primary);}
+        .logo-sub{font-size:.68em;color:var(--text-muted);}
+        .sidebar-user{margin:14px 12px;padding:12px 14px;background:var(--primary-soft);border-radius:12px;display:flex;align-items:center;gap:10px;}
+        .user-avatar{width:32px;height:32px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85em;flex-shrink:0;}
+        .user-info{flex:1;min-width:0;}
+        .user-name{font-size:.85em;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .user-role{font-size:.68em;color:var(--primary);font-weight:600;margin-top:1px;}
+        .logout-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8em;padding:4px 6px;}
+        .sidebar-nav{flex:1;padding:8px 12px;overflow-y:auto;}
+        .nav-label{font-size:.62em;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);padding:14px 10px 6px;}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:.875em;font-weight:600;color:var(--text-sub);text-decoration:none;transition:all .18s;margin-bottom:2px;}
+        .nav-item:hover{background:var(--bg);color:var(--primary);}
+        .nav-item.active{background:var(--primary-soft);color:var(--primary);}
+        .nav-icon{font-size:1em;width:20px;text-align:center;flex-shrink:0;}
+        .sidebar-bottom{padding:12px;border-top:1px solid var(--border);}
+        .admin-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:.875em;font-weight:600;color:var(--secondary);text-decoration:none;background:var(--secondary-soft);}
+        .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+        .topbar{height:56px;background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+        .topbar-title{font-size:.9em;font-weight:700;}
+        .topbar-date{font-size:.78em;color:var(--text-muted);}
+        .guild-chip{padding:5px 12px;background:var(--primary-soft);border-radius:20px;font-size:.78em;font-weight:700;color:var(--primary);}
+        .content{padding:24px 28px;flex:1;}
+        .page-hd{margin-bottom:20px;}
+        .page-hd h1{font-size:1.2em;font-weight:800;}
+        .page-hd p{font-size:.78em;color:var(--text-muted);margin-top:2px;}
+        .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+        .f-sel{padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.86em;font-family:inherit;background:var(--white);color:var(--text);cursor:pointer;font-weight:600;}
+        .f-sel:focus{outline:none;border-color:var(--primary);}
+        .btn-primary{padding:9px 18px;background:var(--grad);color:white;border:none;border-radius:10px;font-size:.84em;font-weight:700;cursor:pointer;font-family:inherit;}
+        .record-wrap{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:auto;}
+        .record-table{width:100%;border-collapse:collapse;min-width:600px;}
+        .record-table th{padding:11px 14px;text-align:center;font-size:.76em;font-weight:700;color:var(--text-muted);background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;}
+        .record-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle;}
+        .record-table tr:last-child td{border-bottom:none;}
+        .atk-cell{width:76px;height:66px;border-radius:10px;border:2px dashed var(--border);background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;gap:2px;margin:0 auto;}
+        .atk-cell:hover{border-color:var(--primary);background:var(--primary-soft);}
+        .atk-cell.win{border:2px solid #22c55e;background:#f0fdf4;}
+        .atk-cell.lose{border:2px solid #ef4444;background:#fef2f2;}
+        .atk-heroes{display:flex;gap:2px;justify-content:center;}
+        .atk-hero-img{width:18px;height:18px;border-radius:3px;object-fit:cover;}
+        .atk-result{font-size:.68em;font-weight:800;}
+        .atk-result.win{color:#22c55e;}
+        .atk-result.lose{color:#ef4444;}
+        .atk-add{font-size:.72em;color:var(--text-muted);}
+        .score-cell{font-size:.84em;font-weight:800;white-space:nowrap;}
+        .member-name{font-size:.86em;font-weight:700;color:var(--text);text-align:left;white-space:nowrap;}
+        /* 모달 */
+        .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;}
+        .overlay.open{display:flex;}
+        .modal{background:var(--white);border-radius:18px;width:100%;max-width:500px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:mIn .2s ease;overflow:hidden;}
+        .modal.sm{max-width:360px;}
+        @keyframes mIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+        .modal-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+        .modal-hd-title{font-size:.9em;font-weight:800;}
+        .modal-close{background:none;border:none;font-size:1.2em;color:var(--text-muted);cursor:pointer;}
+        .modal-body{padding:18px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px;}
+        .modal-ft{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+        .sec-title{font-size:.72em;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+        .slots-row{display:flex;gap:8px;}
+        .slot-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+        .slot-img{width:64px;height:64px;border-radius:11px;border:2px dashed var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:all .18s;}
+        .slot-img:hover{border-color:var(--primary);background:var(--primary-soft);}
+        .slot-img.def:hover{border-color:var(--secondary);background:var(--secondary-soft);}
+        .slot-img.filled{border-style:solid;}
+        .slot-img img{width:100%;height:100%;object-fit:cover;}
+        .slot-name{font-size:.66em;font-weight:600;color:var(--text-sub);text-align:center;}
+        .result-row{display:flex;gap:10px;}
+        .res-btn{flex:1;padding:11px;border-radius:10px;border:2px solid var(--border);background:var(--white);font-size:.88em;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;}
+        .res-btn.win-btn.active{background:#f0fdf4;border-color:#22c55e;color:#16a34a;}
+        .res-btn.lose-btn.active{background:#fef2f2;border-color:#ef4444;color:#dc2626;}
+        .pet-grid{display:flex;gap:5px;flex-wrap:wrap;}
+        .pet-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
+        .pet-img-wrap{width:38px;height:38px;border-radius:7px;overflow:hidden;border:2px solid transparent;transition:all .18s;background:var(--bg);}
+        .pet-img-wrap:hover{border-color:var(--teal);}
+        .pet-img-wrap.selected{border-color:var(--teal);box-shadow:0 0 0 2px rgba(42,157,143,.2);}
+        .pet-img-wrap img{width:100%;height:100%;object-fit:cover;}
+        .pet-nm{font-size:.56em;color:var(--text-muted);text-align:center;}
+        /* 영웅 선택 */
+        .hero-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;align-items:center;justify-content:center;}
+        .hero-overlay.open{display:flex;}
+        .hero-modal{background:var(--white);border-radius:18px;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+        .hero-modal-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+        .hero-search-wrap{padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+        .hero-search-wrap input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:9px;font-size:.86em;font-family:inherit;}
+        .hero-search-wrap input:focus{outline:none;border-color:var(--primary);}
+        .hero-modal-body{padding:14px 20px;overflow-y:auto;flex:1;}
+        .hero-grade-title{font-size:.68em;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin:10px 0 8px;}
+        .hero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:7px;margin-bottom:4px;}
+        .hero-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+        .hero-item-img{width:60px;height:60px;border-radius:10px;border:2px solid transparent;overflow:hidden;transition:all .18s;background:var(--bg);}
+        .hero-item-img img{width:100%;height:100%;object-fit:cover;}
+        .hero-item-img:hover{border-color:var(--primary);transform:scale(1.05);}
+        .hero-item-name{font-size:.65em;font-weight:600;color:var(--text);text-align:center;}
+        .btn-save{padding:9px 22px;border-radius:9px;background:var(--grad);color:white;border:none;font-size:.84em;font-weight:700;cursor:pointer;font-family:inherit;}
+        .btn-cancel{padding:9px 18px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--text-muted);font-size:.84em;cursor:pointer;font-family:inherit;}
+        .f-input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:9px;font-size:.84em;font-family:inherit;}
+        .f-label{font-size:.76em;font-weight:700;color:var(--text-sub);display:block;margin-bottom:5px;}
+        .empty-state{text-align:center;padding:56px 20px;color:var(--text-muted);}
+        .empty-icon{font-size:2.4em;margin-bottom:9px;}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:90;}
+        .sidebar-overlay.open{display:block;}
+        .hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--white);border:1px solid var(--border);border-radius:9px;padding:9px;cursor:pointer;flex-direction:column;gap:4px;}
+        .hamburger span{display:block;width:17px;height:2px;background:var(--text-sub);border-radius:2px;}
+        @media(max-width:860px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.12)}.main{margin-left:0}.hamburger{display:flex}.topbar{padding:0 16px 0 52px}.content{padding:16px}}
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-wrap"><div class="logo-icon">🐰</div><div><div class="logo-name">귀요미 길드</div><div class="logo-sub">세븐나이츠 공략집</div></div></div></div>
+    <div class="sidebar-user">
+        <div class="user-avatar">🌸</div>
+        <div class="user-info"><div class="user-name" id="sidebarName">로딩중...</div><div class="user-role" id="sidebarRole">멤버</div></div>
+        <button class="logout-btn" onclick="handleLogout()">↩</button>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">메뉴</div>
+        <a href="main.html" class="nav-item"><span class="nav-icon">🏠</span> 홈</a>
+        <div class="nav-label">공략</div>
+        <a href="guildwar.html" class="nav-item"><span class="nav-icon">⚔️</span> 길드전 공략</a>
+        <a href="guildwar_record.html" class="nav-item active"><span class="nav-icon">📊</span> 길드전 기록실</a>
+        <a href="siege.html" class="nav-item"><span class="nav-icon">🏰</span> 공성전</a>
+        <a href="expedition.html" class="nav-item"><span class="nav-icon">🌟</span> 강림원정대</a>
+        <div class="nav-label">커뮤니티</div>
+        <a href="board.html" class="nav-item"><span class="nav-icon">📋</span> 게시판</a>
+    </nav>
+    <div class="sidebar-bottom" id="adminSection" style="display:none;">
+        <a href="admin.html" class="admin-link"><span>👑</span> 회원 관리</a>
+    </div>
+</aside>
+<div class="main">
+    <div class="topbar">
+        <div><div class="topbar-title">길드전 기록실</div><div class="topbar-date" id="topDate"></div></div>
+        <div class="guild-chip">🐰 귀요미 길드</div>
+    </div>
+    <div class="content">
+        <div class="page-hd"><h1>📊 길드전 기록실</h1><p>시즌별 공격 조합과 전적을 기록해요</p></div>
+        <div class="filter-bar">
+            <select class="f-sel" id="selSeason" onchange="onSeasonChange()"><option value="">시즌 선택</option></select>
+            <select class="f-sel" id="selRound" onchange="loadRecord()"><option value="">라운드 선택</option></select>
+            <button class="btn-primary" id="btnAddSeason" onclick="openSeasonModal()" style="display:none;">+ 시즌/라운드 추가</button>
+        </div>
+        <div id="recordArea"><div class="empty-state"><div class="empty-icon">📊</div><p>시즌과 라운드를 선택해주세요</p></div></div>
+    </div>
+</div>
+
+<!-- 공격 입력 모달 -->
+<div class="overlay" id="atkModal">
+    <div class="modal">
+        <div class="modal-hd"><div class="modal-hd-title" id="atkTitle">공격 기록</div><button class="modal-close" onclick="closeAtkModal()">✕</button></div>
+        <div class="modal-body">
+            <div>
+                <div class="sec-title" style="color:var(--secondary);">🛡️ 상대 방어팀</div>
+                <div class="slots-row">
+                    <div class="slot-wrap"><div class="slot-img def" id="mDef0" onclick="openHeroSel('def',0)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN0">선택</div></div>
+                    <div class="slot-wrap"><div class="slot-img def" id="mDef1" onclick="openHeroSel('def',1)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN1">선택</div></div>
+                    <div class="slot-wrap"><div class="slot-img def" id="mDef2" onclick="openHeroSel('def',2)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN2">선택</div></div>
+                </div>
+            </div>
+            <div>
+                <div class="sec-title" style="color:var(--primary);">⚔️ 내 공격팀</div>
+                <div class="slots-row">
+                    <div class="slot-wrap"><div class="slot-img" id="mAtk0" onclick="openHeroSel('atk',0)"><span style="font-size:1.3em;">⚔️</span></div><div class="slot-name" id="mAN0">선택</div></div>
+                    <div class="slot-wrap"><div class="slot-img" id="mAtk1" onclick="openHeroSel('atk',1)"><span style="font-size:1.3em;">⚔️</span></div><div class="slot-name" id="mAN1">선택</div></div>
+                    <div class="slot-wrap"><div class="slot-img" id="mAtk2" onclick="openHeroSel('atk',2)"><span style="font-size:1.3em;">⚔️</span></div><div class="slot-name" id="mAN2">선택</div></div>
+                </div>
+            </div>
+            <div>
+                <div class="sec-title" style="color:var(--teal);">🐾 펫 (선택)</div>
+                <div class="pet-grid" id="mPetGrid"></div>
+            </div>
+            <div>
+                <div class="sec-title" style="color:var(--text-sub);">🏆 결과</div>
+                <div class="result-row">
+                    <button class="res-btn win-btn" id="btnWin" onclick="setResult(true)">✅ 승리</button>
+                    <button class="res-btn lose-btn" id="btnLose" onclick="setResult(false)">❌ 패배</button>
+                </div>
+            </div>
+            <div>
+                <div class="sec-title" style="color:var(--text-muted);">📝 메모</div>
+                <input class="f-input" type="text" id="mMemo" placeholder="특이사항...">
+            </div>
+        </div>
+        <div class="modal-ft">
+            <button class="btn-cancel" onclick="closeAtkModal()">취소</button>
+            <button class="btn-save" onclick="saveRecord()">저장</button>
+        </div>
+    </div>
+</div>
+
+<!-- 영웅 선택 모달 -->
+<div class="hero-overlay" id="heroSelModal">
+    <div class="hero-modal">
+        <div class="hero-modal-hd"><div style="font-size:.9em;font-weight:800;" id="heroSelTitle">영웅 선택</div><button class="modal-close" onclick="closeHeroSel()">✕</button></div>
+        <div class="hero-search-wrap"><input type="text" id="heroSelSearch" placeholder="영웅 이름 검색..." oninput="renderHeroSel(this.value)"></div>
+        <div class="hero-modal-body" id="heroSelBody"></div>
+    </div>
+</div>
+
+<!-- 시즌 추가 모달 -->
+<div class="overlay" id="seasonModal">
+    <div class="modal sm">
+        <div class="modal-hd"><div class="modal-hd-title">시즌 / 라운드 추가</div><button class="modal-close" onclick="closeSeasonModal()">✕</button></div>
+        <div class="modal-body">
+            <div><label class="f-label">시즌</label><input class="f-input" type="number" id="inSeason" min="1" placeholder="예: 1"></div>
+            <div><label class="f-label">라운드 (1~15)</label><input class="f-input" type="number" id="inRound" min="1" max="15" placeholder="예: 3"></div>
+        </div>
+        <div class="modal-ft">
+            <button class="btn-cancel" onclick="closeSeasonModal()">취소</button>
+            <button class="btn-save" onclick="addSeason()">추가</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const FB = {apiKey:"AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",authDomain:"gyuomi-guild.firebaseapp.com",projectId:"gyuomi-guild",storageBucket:"gyuomi-guild.firebasestorage.app",messagingSenderId:"43293575259",appId:"1:43293575259:web:2ac8bd0dfecda6a2be177e"};
+const app=initializeApp(FB), auth=getAuth(app), db=getFirestore(app);
+
+const HERO_IMG = './heroes/', PET_IMG = './pets/';
+const HERO_DATA = {'구세나':['갤리두스','로지','밀리아','쥬리','파이'],'찐스':['나타','델론즈','라드그리드','라이언','란드그리드','레긴레이프','레이첼','루디','린','멜키르','미스트','바네사','브란즈&브란셀','비스킷','손오공','스파이크','실베스타','아일린','아킬라','에이스','엘리시아','여포','연희','오를리','오목','제이브','카구라','카르마','카일','콜트','크리스','클라한','키리엘','태오','트루드','프레이야','플라튼'],'짭스':['관우','녹스','니아','데이지','루리','룩','리나','미호','발리스타','백각','백룡','벨리카','비담','세인','소교','아라곤','아멜리아','에스파다','유신','지크','초선','챈슬러','타카','파스칼','엘리스'],'희귀':['노호','라니아','라쿤','레오','링링','루시','리','메이','베인','빅토리아','블랙로즈','사라','샤오','세라','소이','스니퍼','실비아','아리엘','아수라','에반','유리','유이','조운','조커','진','제인','쥬피','카론','카린','캐티','클레오','클로에','풍연','헤브니아','헬레니아','호킨']};
+const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
+
+let me=null, members=[], seasonIds=[], recordData={}, curId='';
+let mDef=[null,null,null], mAtk=[null,null,null], mPet=null, mResult=null;
+let mUid='', mNick='', mIdx=0;
+let heroSelType='atk', heroSelIdx=0;
+
+const days=['일','월','화','수','목','금','토'], now=new Date();
+document.getElementById('topDate').textContent = `${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href='index.html'; return; }
+    const snap = await getDoc(doc(db,'users',user.uid));
+    if (!snap.exists()) { await signOut(auth); window.location.href='index.html'; return; }
+    const d = snap.data();
+    if (d.role==='pending') { await signOut(auth); window.location.href='index.html'; return; }
+    me = {uid:user.uid,...d};
+    document.getElementById('sidebarName').textContent = me.nickname;
+    document.getElementById('sidebarRole').textContent = me.role==='admin' ? '👑 관리자' : '👤 멤버';
+    if (me.role==='admin') {
+        const el=document.getElementById('adminSection'); if(el) el.style.display='';
+        document.getElementById('btnAddSeason').style.display='';
+    }
+    await loadMembers();
+    await loadSeasons();
+});
+
+window.handleLogout = async () => { if(!confirm('로그아웃?')) return; await signOut(auth); window.location.href='index.html'; };
+
+async function loadMembers() {
+    const snap = await getDocs(collection(db,'users'));
+    members = [];
+    snap.forEach(d => { const r=d.data(); if(r.role!=='pending') members.push({uid:d.id,...r}); });
+    members.sort((a,b) => { if(a.role==='admin'&&b.role!=='admin') return -1; if(a.role!=='admin'&&b.role==='admin') return 1; return new Date(a.createdAt||0)-new Date(b.createdAt||0); });
+}
+
+async function loadSeasons() {
+    const snap = await getDocs(collection(db,'guild_records'));
+    seasonIds = [];
+    snap.forEach(d => seasonIds.push(d.id));
+    const seasonNums = [...new Set(seasonIds.map(id => parseInt(id.split('_R')[0].replace('S',''))))].sort((a,b)=>b-a);
+    const sel = document.getElementById('selSeason');
+    sel.innerHTML = '<option value="">시즌 선택</option>' + seasonNums.map(s=>`<option value="${s}">시즌 ${s}</option>`).join('');
+}
+
+window.onSeasonChange = function() {
+    const season = document.getElementById('selSeason').value;
+    const sel = document.getElementById('selRound');
+    if (!season) { sel.innerHTML='<option value="">라운드 선택</option>'; return; }
+    const rounds = seasonIds.filter(id=>id.startsWith(`S${season}_R`)).map(id=>parseInt(id.split('_R')[1])).sort((a,b)=>a-b);
+    sel.innerHTML = '<option value="">라운드 선택</option>' + rounds.map(r=>`<option value="${r}">라운드 ${r}</option>`).join('');
+    document.getElementById('recordArea').innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>라운드를 선택해주세요</p></div>';
+};
+
+window.loadRecord = async function() {
+    const season=document.getElementById('selSeason').value, round=document.getElementById('selRound').value;
+    if (!season||!round) return;
+    curId = `S${season}_R${round}`;
+    try {
+        const snap = await getDoc(doc(db,'guild_records',curId));
+        recordData = snap.exists() ? (snap.data().records||{}) : {};
+    } catch(e) { recordData={}; }
+    renderTable();
+};
+
+function renderTable() {
+    if (!members.length) { document.getElementById('recordArea').innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>길드원 없음</p></div>'; return; }
+    let html = `<div class="record-wrap"><table class="record-table"><thead><tr><th style="text-align:left;min-width:90px;">닉네임</th><th>1차</th><th>2차</th><th>3차</th><th>4차</th><th>5차</th><th>전적</th></tr></thead><tbody>`;
+    members.forEach(m => {
+        let wins=0, total=0;
+        html += `<tr><td class="member-name">${m.nickname}</td>`;
+        for (let i=1;i<=5;i++) {
+            const key=`${m.uid}_${i}`, r=recordData[key];
+            const canEdit = me && (me.role==='admin' || me.uid===m.uid);
+            if (r) {
+                total++; if(r.win) wins++;
+                const di=(r.defTeam||[]).map(h=>`<img class="atk-hero-img" src="${HERO_IMG}${h}.webp" onerror="this.style.display='none'" title="${h}">`).join('');
+                const ai=(r.atkTeam||[]).map(h=>`<img class="atk-hero-img" src="${HERO_IMG}${h}.webp" onerror="this.style.display='none'" title="${h}">`).join('');
+                html += `<td><div class="atk-cell ${r.win?'win':'lose'}" onclick="openAtk('${m.uid}','${m.nickname}',${i})">
+                    <div class="atk-heroes">${di}</div><div class="atk-heroes">${ai}</div>
+                    <div class="atk-result ${r.win?'win':'lose'}">${r.win?'✅ 승':'❌ 패'}</div>
+                </div></td>`;
+            } else {
+                html += `<td><div class="atk-cell" onclick="${canEdit?`openAtk('${m.uid}','${m.nickname}',${i})`:''}">
+                    <div class="atk-add">${canEdit?'+ 입력':'-'}</div>
+                </div></td>`;
+            }
+        }
+        const sc = total>0 ? `<span style="color:#22c55e;">${wins}승</span> / <span style="color:#ef4444;">${total-wins}패</span>` : '<span style="color:var(--text-muted);">-</span>';
+        html += `<td><div class="score-cell">${sc}</div></td></tr>`;
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('recordArea').innerHTML = html;
+}
+
+// 공격 모달
+window.openAtk = function(uid, nick, idx) {
+    mUid=uid; mNick=nick; mIdx=idx;
+    document.getElementById('atkTitle').textContent = `${nick} · ${idx}차 공격`;
+    const r = recordData[`${uid}_${idx}`];
+    mDef = r ? [...(r.defTeam||[null,null,null]).slice(0,3)] : [null,null,null];
+    mAtk = r ? [...(r.atkTeam||[null,null,null]).slice(0,3)] : [null,null,null];
+    while(mDef.length<3) mDef.push(null);
+    while(mAtk.length<3) mAtk.push(null);
+    mPet = r?.pet||null; mResult = r?.win !== undefined ? r.win : null;
+    document.getElementById('mMemo').value = r?.memo||'';
+    renderSlots(); renderPets(); updateResBtns();
+    document.getElementById('atkModal').classList.add('open');
+};
+window.closeAtkModal = () => document.getElementById('atkModal').classList.remove('open');
+
+function renderSlots() {
+    [0,1,2].forEach(i => {
+        const de=document.getElementById(`mDef${i}`), dn=document.getElementById(`mDN${i}`);
+        const ae=document.getElementById(`mAtk${i}`), an=document.getElementById(`mAN${i}`);
+        if (mDef[i]) { de.innerHTML=`<img src="${HERO_IMG}${mDef[i]}.webp" style="width:100%;height:100%;object-fit:cover;">`; de.classList.add('filled'); dn.textContent=mDef[i]; }
+        else { de.innerHTML='<span style="font-size:1.3em;color:var(--text-muted);">🛡️</span>'; de.classList.remove('filled'); dn.textContent='선택'; }
+        if (mAtk[i]) { ae.innerHTML=`<img src="${HERO_IMG}${mAtk[i]}.webp" style="width:100%;height:100%;object-fit:cover;">`; ae.classList.add('filled'); an.textContent=mAtk[i]; }
+        else { ae.innerHTML='<span style="font-size:1.3em;color:var(--text-muted);">⚔️</span>'; ae.classList.remove('filled'); an.textContent='선택'; }
+    });
+}
+
+function renderPets() {
+    document.getElementById('mPetGrid').innerHTML = PET_LIST.map(n=>`
+        <div class="pet-item" onclick="togglePet('${n}')">
+            <div class="pet-img-wrap ${mPet===n?'selected':''}">
+                <img src="${PET_IMG}${n}.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            <div class="pet-nm">${n}</div>
+        </div>`).join('');
+}
+window.togglePet = n => { mPet = mPet===n ? null : n; renderPets(); };
+
+window.setResult = function(v) { mResult=v; updateResBtns(); };
+function updateResBtns() {
+    document.getElementById('btnWin').classList.toggle('active', mResult===true);
+    document.getElementById('btnLose').classList.toggle('active', mResult===false);
+}
+
+window.saveRecord = async function() {
+    if (!curId) { alert('시즌과 라운드를 먼저 선택해주세요.'); return; }
+    if (mResult===null) { alert('승패를 선택해주세요.'); return; }
+    const key = `${mUid}_${mIdx}`;
+    recordData[key] = { uid:mUid, nickname:mNick, defTeam:mDef.filter(Boolean), atkTeam:mAtk.filter(Boolean), pet:mPet, win:mResult, memo:document.getElementById('mMemo').value, updatedAt:new Date().toISOString() };
+    try {
+        await setDoc(doc(db,'guild_records',curId), {records:recordData}, {merge:true});
+        closeAtkModal(); renderTable();
+    } catch(e) { alert('저장 오류: '+e.message); }
+};
+
+// 영웅 선택
+window.openHeroSel = function(type, idx) {
+    heroSelType=type; heroSelIdx=idx;
+    document.getElementById('heroSelTitle').textContent = type==='def' ? `방어팀 ${idx+1}번` : `공격팀 ${idx+1}번`;
+    document.getElementById('heroSelSearch').value='';
+    renderHeroSel('');
+    document.getElementById('heroSelModal').classList.add('open');
+};
+window.closeHeroSel = () => document.getElementById('heroSelModal').classList.remove('open');
+window.renderHeroSel = function(q) {
+    const lq=q.toLowerCase();
+    let html='';
+    Object.entries(HERO_DATA).forEach(([g,hs]) => {
+        const f = q ? hs.filter(h=>h.toLowerCase().includes(lq)) : hs;
+        if (!f.length) return;
+        html += `<div class="hero-grade-title">${g}</div><div class="hero-grid">`;
+        f.forEach(n => { html += `<div class="hero-item" onclick="pickHero('${n}')"><div class="hero-item-img"><img src="${HERO_IMG}${n}.webp" onerror="this.parentElement.innerHTML='<div style=font-size:.6em;text-align:center;padding:2px;>${n}</div>'"></div><div class="hero-item-name">${n}</div></div>`; });
+        html += '</div>';
+    });
+    document.getElementById('heroSelBody').innerHTML = html||'<p style="text-align:center;padding:30px;color:var(--text-muted);">검색 결과 없음</p>';
+};
+window.pickHero = function(n) {
+    if (heroSelType==='def') mDef[heroSelIdx]=n; else mAtk[heroSelIdx]=n;
+    closeHeroSel(); renderSlots();
+};
+
+// 시즌 추가
+window.openSeasonModal = () => document.getElementById('seasonModal').classList.add('open');
+window.closeSeasonModal = () => document.getElementById('seasonModal').classList.remove('open');
+window.addSeason = async function() {
+    const s=document.getElementById('inSeason').value, r=document.getElementById('inRound').value;
+    if (!s||!r) { alert('시즌과 라운드를 입력해주세요.'); return; }
+    const id=`S${s}_R${r}`;
+    await setDoc(doc(db,'guild_records',id), {records:{}, createdAt:serverTimestamp()}, {merge:true});
+    if (!seasonIds.includes(id)) seasonIds.push(id);
+    closeSeasonModal();
+    await loadSeasons();
+    document.getElementById('selSeason').value=s;
+    onSeasonChange();
+    document.getElementById('selRound').value=r;
+    await loadRecord();
+};
+
+['atkModal','heroSelModal','seasonModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
+});
+
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+window.toggleSidebar=toggleSidebar; window.closeSidebar=closeSidebar;
+</script>
+</body>
+</html>
