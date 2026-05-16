@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>길드전 계산기 - 귀요미 길드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:#f4f5f9;--white:#fff;--primary:#7c5cbf;--primary-soft:#ede8f8;
+            --secondary:#e8609a;--secondary-soft:#fde8f2;
+            --teal:#2a9d8f;--teal-soft:#e6f7f5;
+            --gold:#b8860b;
+            --grad:linear-gradient(135deg,#7c5cbf,#e8609a);
+            --text:#1a1a2e;--text-sub:#5a5a7a;--text-muted:#9898b8;
+            --border:#e8e8f0;--sidebar-w:240px;
+            --green:#059669;--green-soft:#ecfdf5;
+            --red:#e11d48;--red-soft:#fff1f2;
+            --orange:#7c5cbf;--orange-soft:#ede8f8;
+            --shadow:0 10px 28px rgba(15,23,42,0.08);
+        }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+
+        /* 사이드바 */
+        .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--white);border-right:1px solid var(--border);position:fixed;top:0;left:0;display:flex;flex-direction:column;z-index:100;transition:transform .28s cubic-bezier(.4,0,.2,1);}
+        .sidebar-logo{padding:24px 20px 18px;border-bottom:1px solid var(--border);}
+        .logo-wrap{display:flex;align-items:center;gap:10px;}
+        .logo-icon{width:36px;height:36px;background:var(--grad);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1em;flex-shrink:0;}
+        .logo-name{font-size:.95em;font-weight:800;color:var(--primary);}
+        .logo-sub{font-size:.68em;color:var(--text-muted);}
+        .sidebar-user{margin:14px 12px;padding:12px 14px;background:var(--primary-soft);border-radius:12px;display:flex;align-items:center;gap:10px;}
+        .user-avatar{width:32px;height:32px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85em;flex-shrink:0;}
+        .user-info{flex:1;min-width:0;}
+        .user-name{font-size:.85em;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .user-role{font-size:.68em;color:var(--primary);font-weight:600;margin-top:1px;}
+        .logout-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8em;padding:4px 6px;}
+        .sidebar-nav{flex:1;padding:8px 12px;overflow-y:auto;}
+        .nav-label{font-size:.62em;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);padding:14px 10px 6px;}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:.875em;font-weight:600;color:var(--text-sub);text-decoration:none;transition:all .18s;margin-bottom:2px;}
+        .nav-item:hover{background:var(--bg);color:var(--primary);}
+        .nav-item.active{background:var(--primary-soft);color:var(--primary);}
+        .nav-icon{font-size:1em;width:20px;text-align:center;flex-shrink:0;}
+        .sidebar-bottom{padding:12px;border-top:1px solid var(--border);}
+        .admin-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:.875em;font-weight:600;color:var(--secondary);text-decoration:none;background:var(--secondary-soft);}
+        .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+        .topbar{height:56px;background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+        .topbar-title{font-size:.9em;font-weight:700;}
+        .topbar-date{font-size:.78em;color:var(--text-muted);}
+        .guild-chip{padding:5px 12px;background:var(--primary-soft);border-radius:20px;font-size:.78em;font-weight:700;color:var(--primary);}
+        .content{padding:24px 28px;flex:1;}
+        .page-hd{margin-bottom:24px;}
+        .page-hd h1{font-size:1.2em;font-weight:800;}
+        .page-hd p{font-size:.78em;color:var(--text-muted);margin-top:3px;}
+
+        /* 계산기 */
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+        .stat{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,.04);}
+        .stat-label{font-size:.68em;font-weight:800;color:var(--text-muted);margin-bottom:6px;}
+        .stat-value{font-size:1.4em;font-weight:800;letter-spacing:-.03em;}
+        .stat-sub{font-size:.68em;color:var(--text-muted);margin-top:3px;}
+        .calc-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;align-items:start;}
+        .panel{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,.04);}
+        .panel h2{font-size:1em;font-weight:800;margin-bottom:4px;}
+        .panel-hint{font-size:.76em;color:var(--text-muted);margin-bottom:16px;}
+        .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+        .input-box{border-radius:12px;padding:14px;}
+        .input-box.our{background:var(--green-soft);}
+        .input-box.enemy{background:var(--red-soft);}
+        .input-box.plain{background:var(--bg);}
+        .input-box.plain-green{background:var(--green-soft);}
+        .input-label{font-size:.74em;font-weight:800;color:var(--text-sub);display:block;margin-bottom:8px;}
+        .row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+        .pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:var(--white);color:var(--text);font-size:.74em;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+        input[type="number"]{width:100%;min-height:44px;border-radius:10px;border:1px solid var(--border);padding:9px 12px;font:inherit;font-size:1.1em;font-weight:800;outline:none;background:white;color:var(--text);}
+        input[type="number"]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,92,191,.15);}
+        input[type="range"]{width:100%;margin:6px 0 8px;accent-color:var(--primary);}
+        .input-box.plain-green input[type="range"]{accent-color:var(--green);}
+        .target-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+        .target-panel{border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--bg);}
+        .target-panel.our{background:rgba(236,253,245,.6);border-color:#a7f3d0;}
+        .target-panel.enemy{background:rgba(255,241,242,.6);border-color:#fecdd3;}
+        .target-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+        .target-hd h3{font-size:.88em;font-weight:800;}
+        .target-hd .hint{font-size:.7em;color:var(--text-muted);margin-top:2px;}
+        .mini-btn{background:var(--white);color:var(--text-sub);padding:6px 11px;border-radius:999px;font-size:.72em;font-weight:700;border:1px solid var(--border);cursor:pointer;font-family:inherit;}
+        .zone{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;background:var(--white);}
+        .zone:last-child{margin-bottom:0;}
+        .zone.outer{border-color:#bae6fd;}
+        .zone.inner{border-color:#ddd6fe;}
+        .zone.main{border-color:#fde68a;}
+        .zone-name{font-size:.9em;font-weight:800;}
+        .zone-meta{font-size:.68em;color:var(--text-muted);margin-top:1px;}
+
+        /* 결과 */
+        .result{border-radius:16px;padding:22px;border:1px solid;margin-bottom:14px;}
+        .result.locked{border-color:#a7f3d0;background:var(--green-soft);}
+        .result.possible{border-color:#bfdbfe;background:#eff6ff;}
+        .result.unlocked{border-color:var(--border);background:var(--bg);}
+        .result.bad{border-color:#fecdd3;background:var(--red-soft);}
+        .result-label{font-size:.72em;font-weight:800;color:var(--text-muted);margin-bottom:4px;}
+        .result-title{font-size:2em;font-weight:800;letter-spacing:-.04em;line-height:1;}
+        .locked .result-title,.locked .result-label{color:var(--green);}
+        .possible .result-title,.possible .result-label{color:#2563eb;}
+        .unlocked .result-title,.unlocked .result-label{color:var(--text-sub);}
+        .bad .result-title,.bad .result-label{color:var(--red);}
+        .result-desc{font-size:.8em;color:var(--text-sub);line-height:1.65;margin-top:10px;}
+        .calc-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+        .calc-card{border-radius:12px;padding:14px;background:var(--bg);}
+        .calc-card.green{background:var(--green-soft);}
+        .calc-card.red{background:var(--red-soft);}
+        .summary-box{border-radius:12px;padding:14px;margin-top:10px;}
+        .summary-box.good{background:var(--green-soft);border:1px solid #a7f3d0;}
+        .summary-box.danger{background:var(--red-soft);border:1px solid #fecdd3;}
+        .summary-title{font-size:.68em;font-weight:800;color:var(--text-muted);margin-bottom:6px;}
+        .summary-formula{font-size:.88em;font-weight:800;letter-spacing:-.02em;line-height:1.4;}
+        .summary-sub{font-size:.72em;color:var(--text-muted);margin-top:5px;}
+        .reset-btn{padding:9px 18px;background:var(--white);border:1px solid var(--border);color:var(--text-sub);border-radius:10px;font-size:.84em;font-weight:700;cursor:pointer;font-family:inherit;}
+        .reset-btn:hover{background:var(--bg);}
+
+        /* 사이드바 오버레이 */
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:90;}
+        .sidebar-overlay.open{display:block;}
+        .hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--white);border:1px solid var(--border);border-radius:9px;padding:9px;cursor:pointer;flex-direction:column;gap:4px;}
+        .hamburger span{display:block;width:17px;height:2px;background:var(--text-sub);border-radius:2px;}
+        @media(max-width:860px){
+            .sidebar{transform:translateX(-100%);}
+            .sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.12);}
+            .main{margin-left:0;}
+            .hamburger{display:flex;}
+            .topbar{padding:0 16px 0 52px;}
+            .content{padding:16px;}
+            .stats{grid-template-columns:1fr 1fr;}
+            .calc-grid{grid-template-columns:1fr;}
+            .two,.target-grid,.calc-cards{grid-template-columns:1fr;}
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-wrap">
+            <div class="logo-icon">🐰</div>
+            <div><div class="logo-name">귀요미 길드</div><div class="logo-sub">세븐나이츠 공략집</div></div>
+        </div>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar">🌸</div>
+        <div class="user-info"><div class="user-name" id="sidebarName">로딩중...</div><div class="user-role" id="sidebarRole">멤버</div></div>
+        <button class="logout-btn" onclick="handleLogout()">↩</button>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">메뉴</div>
+        <a href="main.html" class="nav-item"><span class="nav-icon">🏠</span> 홈</a>
+        <div class="nav-label">공략</div>
+        <a href="guildwar.html" class="nav-item">
+            <span class="nav-icon">⚔️</span> 길드전
+        </a>
+        <a href="guildwar_record.html" class="nav-item">
+            <span class="nav-icon">📊</span> 길드전 기록실
+        </a>
+        <a href="calculator.html" class="nav-item active">
+            <span class="nav-icon">🧮</span> 길드전 계산기
+        </a>
+        <a href="siege.html" class="nav-item"><span class="nav-icon">🏰</span> 공성전</a>
+        <a href="expedition.html" class="nav-item"><span class="nav-icon">🌟</span> 강림원정대</a>
+        <div class="nav-label">커뮤니티</div>
+        <a href="board.html" class="nav-item"><span class="nav-icon">📋</span> 게시판</a>
+    </nav>
+    <div class="sidebar-bottom" id="adminSection" style="display:none;">
+        <a href="admin.html" class="admin-link"><span>👑</span> 회원 관리</a>
+    </div>
+</aside>
+
+<div class="main">
+    <div class="topbar">
+        <div><div class="topbar-title">길드전 계산기</div><div class="topbar-date" id="topDate"></div></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <button class="reset-btn" id="resetBtn">↺ 초기화</button>
+            <div class="guild-chip">🐰 귀요미 길드</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="page-hd">
+            <h1>🧮 길드전 승리확정 계산기</h1>
+            <p>양쪽 남은 공격권과 남은 성 개수를 입력하면 승리 확정 여부를 계산해요</p>
+        </div>
+
+        <!-- 통계 바 -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">현재 점수차</div>
+                <div class="stat-value" id="gapStat">+0점</div>
+                <div class="stat-sub">우리 - 상대</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">우리 최대 추가점수</div>
+                <div class="stat-value" id="ourGainStat" style="color:var(--green);">0점</div>
+                <div class="stat-sub">우리 남은 공격 기준</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">상대 최대 추가점수</div>
+                <div class="stat-value" id="enemyGainStat" style="color:var(--red);">0점</div>
+                <div class="stat-sub">상대 남은 공격 기준</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">최대 최종 점수차</div>
+                <div class="stat-value" id="maxFinalGapStat">+0점</div>
+                <div class="stat-sub">우리 최대 - 상대 최대</div>
+            </div>
+        </div>
+
+        <!-- 메인 그리드 -->
+        <div class="calc-grid">
+            <!-- 왼쪽: 입력 -->
+            <div class="panel">
+                <h2>입력</h2>
+                <p class="panel-hint">우리 쪽과 상대 쪽을 각각 입력하세요</p>
+
+                <!-- 현재 점수 -->
+                <div class="two">
+                    <div class="input-box our">
+                        <span class="input-label">우리 현재 점수</span>
+                        <input id="ourScore" type="number" min="0" value="0">
+                    </div>
+                    <div class="input-box enemy">
+                        <span class="input-label">상대 현재 점수</span>
+                        <input id="enemyScore" type="number" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- 남은 공격권 -->
+                <div class="two">
+                    <div class="input-box plain-green">
+                        <div class="row-between">
+                            <span class="input-label" style="margin:0;">우리 남은 공격권</span>
+                            <span class="pill" id="ourAttacksPill">0회</span>
+                        </div>
+                        <input id="ourAttacksRange" type="range" min="0" max="150" value="0">
+                        <input id="ourAttacks" type="number" min="0" max="150" value="0">
+                    </div>
+                    <div class="input-box plain">
+                        <div class="row-between">
+                            <span class="input-label" style="margin:0;">상대 남은 공격권</span>
+                            <span class="pill" id="enemyAttacksPill">150회</span>
+                        </div>
+                        <input id="enemyAttacksRange" type="range" min="0" max="150" value="150">
+                        <input id="enemyAttacks" type="number" min="0" max="150" value="150">
+                    </div>
+                </div>
+
+                <!-- 성 남은 개수 -->
+                <div class="target-grid">
+                    <div class="target-panel our">
+                        <div class="target-hd">
+                            <div><h3>우리가 먹을 수 있는 성</h3><p class="hint">상대 성에 남아있는 개수</p></div>
+                            <button class="mini-btn" id="ourMaxBtn">최대치로</button>
+                        </div>
+                        <div class="zone outer">
+                            <div class="row-between">
+                                <div><p class="zone-name">외성</p><p class="zone-meta">1개 = 20점</p></div>
+                                <span class="pill" id="ourOuterPill">50/50</span>
+                            </div>
+                            <input id="ourOuterRange" type="range" min="0" max="50" value="50">
+                            <input id="ourOuterRemain" type="number" min="0" max="50" value="50">
+                        </div>
+                        <div class="zone inner">
+                            <div class="row-between">
+                                <div><p class="zone-name">내성</p><p class="zone-meta">1개 = 35점</p></div>
+                                <span class="pill" id="ourInnerPill">45/45</span>
+                            </div>
+                            <input id="ourInnerRange" type="range" min="0" max="45" value="45">
+                            <input id="ourInnerRemain" type="number" min="0" max="45" value="45">
+                        </div>
+                        <div class="zone main">
+                            <div class="row-between">
+                                <div><p class="zone-name">본성</p><p class="zone-meta">1개 = 50점</p></div>
+                                <span class="pill" id="ourMainPill">20/20</span>
+                            </div>
+                            <input id="ourMainRange" type="range" min="0" max="20" value="20">
+                            <input id="ourMainRemain" type="number" min="0" max="20" value="20">
+                        </div>
+                    </div>
+
+                    <div class="target-panel enemy">
+                        <div class="target-hd">
+                            <div><h3>상대가 먹을 수 있는 성</h3><p class="hint">우리 성에 남아있는 개수</p></div>
+                            <button class="mini-btn" id="enemyMaxBtn">최대치로</button>
+                        </div>
+                        <div class="zone outer">
+                            <div class="row-between">
+                                <div><p class="zone-name">외성</p><p class="zone-meta">1개 = 20점</p></div>
+                                <span class="pill" id="enemyOuterPill">50/50</span>
+                            </div>
+                            <input id="enemyOuterRange" type="range" min="0" max="50" value="50">
+                            <input id="enemyOuterRemain" type="number" min="0" max="50" value="50">
+                        </div>
+                        <div class="zone inner">
+                            <div class="row-between">
+                                <div><p class="zone-name">내성</p><p class="zone-meta">1개 = 35점</p></div>
+                                <span class="pill" id="enemyInnerPill">45/45</span>
+                            </div>
+                            <input id="enemyInnerRange" type="range" min="0" max="45" value="45">
+                            <input id="enemyInnerRemain" type="number" min="0" max="45" value="45">
+                        </div>
+                        <div class="zone main">
+                            <div class="row-between">
+                                <div><p class="zone-name">본성</p><p class="zone-meta">1개 = 50점</p></div>
+                                <span class="pill" id="enemyMainPill">20/20</span>
+                            </div>
+                            <input id="enemyMainRange" type="range" min="0" max="20" value="20">
+                            <input id="enemyMainRemain" type="number" min="0" max="20" value="20">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 결과 -->
+            <div>
+                <div class="result unlocked" id="resultBox">
+                    <div class="result-label">판정 결과</div>
+                    <div class="result-title" id="resultTitle">확정불가</div>
+                    <div class="result-desc" id="resultDesc">현재는 승패가 확정되지 않았습니다.</div>
+                </div>
+
+                <div class="panel">
+                    <h2 style="margin-bottom:12px;">핵심 계산</h2>
+                    <div class="calc-cards">
+                        <div class="calc-card green">
+                            <div class="stat-label">우리 최대 최종점수</div>
+                            <div class="stat-value" id="ourFinalCalc">0점</div>
+                        </div>
+                        <div class="calc-card red">
+                            <div class="stat-label">상대 최대 최종점수</div>
+                            <div class="stat-value" id="enemyFinalCalc">0점</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="stat-label">확정 필요 추가점수</div>
+                            <div class="stat-value" id="needMoreCalc">1점</div>
+                        </div>
+                        <div class="calc-card">
+                            <div class="stat-label">최대 최종 점수차</div>
+                            <div class="stat-value" id="maxFinalGapCalc">+0점</div>
+                        </div>
+                    </div>
+                    <div class="summary-box good">
+                        <div class="summary-title">우리 최대 추가점수 계산</div>
+                        <div class="summary-formula" id="ourFormula">본성×0 + 내성×0 + 외성×0 = 0점</div>
+                        <div class="summary-sub" id="ourUnused"></div>
+                    </div>
+                    <div class="summary-box danger">
+                        <div class="summary-title">상대 최대 추가점수 계산</div>
+                        <div class="summary-formula" id="enemyFormula">본성×0 + 내성×0 + 외성×0 = 0점</div>
+                        <div class="summary-sub" id="enemyUnused"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const FB = {apiKey:"AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",authDomain:"gyuomi-guild.firebaseapp.com",projectId:"gyuomi-guild",storageBucket:"gyuomi-guild.firebasestorage.app",messagingSenderId:"43293575259",appId:"1:43293575259:web:2ac8bd0dfecda6a2be177e"};
+const app=initializeApp(FB), auth=getAuth(app), db=getFirestore(app);
+
+const days=['일','월','화','수','목','금','토'], now=new Date();
+document.getElementById('topDate').textContent=`${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href='index.html'; return; }
+    const snap = await getDoc(doc(db,'users',user.uid));
+    if (!snap.exists()) { await signOut(auth); window.location.href='index.html'; return; }
+    const d = snap.data();
+    if (d.role==='pending') { await signOut(auth); window.location.href='index.html'; return; }
+    document.getElementById('sidebarName').textContent = d.nickname;
+    document.getElementById('sidebarRole').textContent = d.role==='admin' ? '👑 관리자' : '👤 멤버';
+    if (d.role==='admin') { const el=document.getElementById('adminSection'); if(el) el.style.display=''; }
+});
+window.handleLogout = async () => { if(!confirm('로그아웃?')) return; await signOut(auth); window.location.href='index.html'; };
+
+// ── 계산기 로직 ──
+const TOTAL = 150;
+const rules = {
+    outer:{total:50,point:20,unlockNeeded:30},
+    inner:{total:45,point:35,unlockNeeded:30},
+    main:{total:20,point:50}
+};
+const defaults = {outer:50,inner:45,main:20};
+const state = {
+    ourScore:0, enemyScore:0,
+    ourAttacks:0, enemyAttacks:TOTAL,
+    our:{...defaults}, enemy:{...defaults}
+};
+
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n).toLocaleString('ko-KR');
+const clamp=(v,mn,mx)=>Math.min(mx,Math.max(mn,Math.floor(Number(v)||mn)));
+
+function calcMaxGain(rem, attacks) {
+    const r={...rem};
+    const done={outer:rules.outer.total-r.outer, inner:rules.inner.total-r.inner, main:rules.main.total-r.main};
+    let left=attacks, total=0, used={main:0,inner:0,outer:0};
+    function spend(k, want) {
+        const n=Math.min(left, r[k], want);
+        if(n<=0) return;
+        left-=n; r[k]-=n; done[k]+=n; used[k]+=n; total+=n*rules[k].point;
+    }
+    const needOut=Math.max(0,rules.outer.unlockNeeded-done.outer);
+    if(needOut>0) spend('outer',needOut);
+    if(done.outer<rules.outer.unlockNeeded){spend('outer',Infinity);return{total,used,unused:left};}
+    const needIn=Math.max(0,rules.inner.unlockNeeded-done.inner);
+    if(needIn>0) spend('inner',needIn);
+    if(done.inner>=rules.inner.unlockNeeded){spend('main',Infinity);spend('inner',Infinity);spend('outer',Infinity);}
+    else{spend('inner',Infinity);spend('outer',Infinity);}
+    return{total,used,unused:left};
+}
+
+function render() {
+    $('ourScore').value=state.ourScore;
+    $('enemyScore').value=state.enemyScore;
+    $('ourAttacks').value=state.ourAttacks; $('ourAttacksRange').value=state.ourAttacks;
+    $('ourAttacksPill').textContent=`${state.ourAttacks}회`;
+    $('enemyAttacks').value=state.enemyAttacks; $('enemyAttacksRange').value=state.enemyAttacks;
+    $('enemyAttacksPill').textContent=`${state.enemyAttacks}회`;
+    ['outer','inner','main'].forEach(k=>{
+        const u=k[0].toUpperCase()+k.slice(1);
+        $(`our${u}Remain`).value=state.our[k]; $(`our${u}Range`).value=state.our[k];
+        $(`enemy${u}Remain`).value=state.enemy[k]; $(`enemy${u}Range`).value=state.enemy[k];
+        $(`our${u}Pill`).textContent=`${state.our[k]}/${rules[k].total}`;
+        $(`enemy${u}Pill`).textContent=`${state.enemy[k]}/${rules[k].total}`;
+    });
+
+    const og=calcMaxGain(state.our,state.ourAttacks);
+    const eg=calcMaxGain(state.enemy,state.enemyAttacks);
+    const ourMax=state.ourScore+og.total, enemyMax=state.enemyScore+eg.total;
+    const gap=state.ourScore-state.enemyScore, maxGap=ourMax-enemyMax;
+    const need=Math.max(0,enemyMax+1-state.ourScore);
+
+    $('gapStat').textContent=`${gap>=0?'+':''}${fmt(gap)}점`;
+    $('gapStat').style.color=gap>=0?'var(--green)':'var(--red)';
+    $('ourGainStat').textContent=`${fmt(og.total)}점`;
+    $('enemyGainStat').textContent=`${fmt(eg.total)}점`;
+    $('maxFinalGapStat').textContent=`${maxGap>=0?'+':''}${fmt(maxGap)}점`;
+    $('maxFinalGapStat').style.color=maxGap>0?'var(--green)':maxGap<0?'var(--red)':'var(--text-muted)';
+
+    const rb=$('resultBox');
+    rb.classList.remove('locked','possible','unlocked','bad');
+    if(state.ourScore>enemyMax){
+        rb.classList.add('locked');
+        $('resultTitle').textContent='승리확정 ✅';
+        $('resultDesc').innerHTML=`상대 최대 최종점수 <strong>${fmt(enemyMax)}점</strong>보다 현재 우리 점수가 이미 높습니다!`;
+    } else if(ourMax<state.enemyScore){
+        rb.classList.add('bad');
+        $('resultTitle').textContent='패배확정 ❌';
+        $('resultDesc').innerHTML=`우리 최대 최종점수 <strong>${fmt(ourMax)}점</strong>이 상대 현재 점수 <strong>${fmt(state.enemyScore)}점</strong>보다 낮습니다.`;
+    } else if(ourMax===enemyMax){
+        rb.classList.add('unlocked');
+        $('resultTitle').textContent='무승부 🤝';
+        $('resultDesc').innerHTML=`양측 최대 최종점수가 모두 <strong>${fmt(ourMax)}점</strong>으로 동일합니다.`;
+    } else {
+        rb.classList.add('unlocked');
+        $('resultTitle').textContent='확정불가';
+        $('resultDesc').innerHTML=`우리 최대 <strong>${fmt(ourMax)}점</strong> / 상대 최대 <strong>${fmt(enemyMax)}점</strong> — 아직 확정되지 않았어요.`;
+    }
+
+    $('ourFinalCalc').textContent=`${fmt(ourMax)}점`;
+    $('enemyFinalCalc').textContent=`${fmt(enemyMax)}점`;
+    $('needMoreCalc').textContent=`${fmt(need)}점`;
+    $('maxFinalGapCalc').textContent=`${maxGap>=0?'+':''}${fmt(maxGap)}점`;
+    $('maxFinalGapCalc').style.color=maxGap>0?'var(--green)':maxGap<0?'var(--red)':'var(--text-muted)';
+    $('ourFormula').textContent=`본성×${og.used.main} + 내성×${og.used.inner} + 외성×${og.used.outer} = ${fmt(og.total)}점`;
+    $('enemyFormula').textContent=`본성×${eg.used.main} + 내성×${eg.used.inner} + 외성×${eg.used.outer} = ${fmt(eg.total)}점`;
+    $('ourUnused').textContent=og.unused>0?`남은 공격권 ${og.unused}회는 추가점수에 반영되지 않았어요`:'';
+    $('enemyUnused').textContent=eg.unused>0?`남은 공격권 ${eg.unused}회는 추가점수에 반영되지 않았어요`:'';
+}
+
+// 이벤트
+$('ourScore').addEventListener('input',e=>{state.ourScore=clamp(e.target.value,0,999999);render();});
+$('enemyScore').addEventListener('input',e=>{state.enemyScore=clamp(e.target.value,0,999999);render();});
+$('ourAttacks').addEventListener('input',e=>{state.ourAttacks=clamp(e.target.value,0,TOTAL);render();});
+$('ourAttacksRange').addEventListener('input',e=>{state.ourAttacks=clamp(e.target.value,0,TOTAL);render();});
+$('enemyAttacks').addEventListener('input',e=>{state.enemyAttacks=clamp(e.target.value,0,TOTAL);render();});
+$('enemyAttacksRange').addEventListener('input',e=>{state.enemyAttacks=clamp(e.target.value,0,TOTAL);render();});
+['outer','inner','main'].forEach(k=>{
+    const u=k[0].toUpperCase()+k.slice(1), mx=rules[k].total;
+    $(`our${u}Remain`).addEventListener('input',e=>{state.our[k]=clamp(e.target.value,0,mx);render();});
+    $(`our${u}Range`).addEventListener('input',e=>{state.our[k]=clamp(e.target.value,0,mx);render();});
+    $(`enemy${u}Remain`).addEventListener('input',e=>{state.enemy[k]=clamp(e.target.value,0,mx);render();});
+    $(`enemy${u}Range`).addEventListener('input',e=>{state.enemy[k]=clamp(e.target.value,0,mx);render();});
+});
+$('ourMaxBtn').addEventListener('click',()=>{state.our={...defaults};render();});
+$('enemyMaxBtn').addEventListener('click',()=>{state.enemy={...defaults};render();});
+$('resetBtn').addEventListener('click',()=>{
+    state.ourScore=0;state.enemyScore=0;
+    state.ourAttacks=0;state.enemyAttacks=TOTAL;
+    state.our={...defaults};state.enemy={...defaults};
+    render();
+});
+
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+window.toggleSidebar=toggleSidebar;window.closeSidebar=closeSidebar;
+
+render();
+</script>
+</body>
+</html>
