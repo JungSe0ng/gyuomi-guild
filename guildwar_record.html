@@ -138,6 +138,7 @@
         <div class="nav-label">공략</div>
         <a href="guildwar.html" class="nav-item"><span class="nav-icon">⚔️</span> 길드전 공략</a>
         <a href="guildwar_record.html" class="nav-item active"><span class="nav-icon">📊</span> 길드전 기록실</a>
+        <a href="calculator.html" class="nav-item"><span class="nav-icon">🧮</span> 길드전 계산기</a>
         <a href="siege.html" class="nav-item"><span class="nav-icon">🏰</span> 공성전</a>
         <a href="expedition.html" class="nav-item"><span class="nav-icon">🌟</span> 강림원정대</a>
         <div class="nav-label">커뮤니티</div>
@@ -201,17 +202,6 @@
     <div class="modal">
         <div class="modal-hd"><div class="modal-hd-title" id="atkTitle">공격 기록</div><button class="modal-close" onclick="closeAtkModal()">✕</button></div>
         <div class="modal-body">
-            <div style="background:var(--secondary-soft);border:1.5px solid #f8c8dc;border-radius:12px;padding:14px;">
-                <div class="sec-title" style="color:var(--secondary);">🛡️ 상대 방어팀</div>
-                <div style="display:flex;gap:6px;align-items:center;">
-                    <div class="slots-row" style="flex:1;">
-                        <div class="slot-wrap"><div class="slot-img def" id="mDef0" onclick="openHeroSel('def',0)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN0">선택</div></div>
-                        <div class="slot-wrap"><div class="slot-img def" id="mDef1" onclick="openHeroSel('def',1)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN1">선택</div></div>
-                        <div class="slot-wrap"><div class="slot-img def" id="mDef2" onclick="openHeroSel('def',2)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN2">선택</div></div>
-                    </div>
-                    <button onclick="openHeroSel('def')" style="padding:8px 14px;border-radius:9px;border:none;background:var(--secondary);color:white;font-size:.8em;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">상대 방어팀 선택</button>
-                </div>
-            </div>
             <div style="background:var(--primary-soft);border:1.5px solid #d4c5f0;border-radius:12px;padding:14px;">
                 <div class="sec-title" style="color:var(--primary);">⚔️ 내 공격팀</div>
                 <div style="display:flex;gap:6px;align-items:center;">
@@ -226,6 +216,17 @@
             <div>
                 <div class="sec-title" style="color:var(--teal);">🐾 펫 (선택)</div>
                 <div class="pet-grid" id="mPetGrid"></div>
+            </div>
+            <div style="background:var(--secondary-soft);border:1.5px solid #f8c8dc;border-radius:12px;padding:14px;">
+                <div class="sec-title" style="color:var(--secondary);">🛡️ 상대 방어팀</div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <div class="slots-row" style="flex:1;">
+                        <div class="slot-wrap"><div class="slot-img def" id="mDef0" onclick="openHeroSel('def',0)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN0">선택</div></div>
+                        <div class="slot-wrap"><div class="slot-img def" id="mDef1" onclick="openHeroSel('def',1)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN1">선택</div></div>
+                        <div class="slot-wrap"><div class="slot-img def" id="mDef2" onclick="openHeroSel('def',2)"><span style="font-size:1.3em;">🛡️</span></div><div class="slot-name" id="mDN2">선택</div></div>
+                    </div>
+                    <button onclick="openHeroSel('def')" style="padding:8px 14px;border-radius:9px;border:none;background:var(--secondary);color:white;font-size:.8em;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">상대 방어팀 선택</button>
+                </div>
             </div>
             <div>
                 <div class="sec-title" style="color:var(--text-sub);">🏆 결과</div>
@@ -280,7 +281,7 @@ const FB = {apiKey:"AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",authDomain:"gyuomi-
 const app=initializeApp(FB), auth=getAuth(app), db=getFirestore(app);
 
 const HERO_IMG = './heroes/', PET_IMG = './pets/';
-const HERO_DATA = {'구세나':['갤리두스','로지','밀리아','쥬리','파이'],'찐스':['나타','델론즈','라드그리드','라이언','란드그리드','레긴레이프','레이첼','루디','린','멜키르','미스트','바네사','브란즈&브란셀','비스킷','손오공','스파이크','실베스타','아일린','아킬라','에이스','엘리시아','여포','연희','오를리','오목','제이브','카구라','카르마','카일','콜트','크리스','클라한','키리엘','태오','트루드','프레이야','플라튼'],'짭스':['관우','녹스','니아','데이지','루리','룩','리나','미호','발리스타','백각','백룡','벨리카','비담','세인','소교','아라곤','아멜리아','에스파다','유신','지크','초선','챈슬러','타카','파스칼','엘리스'],'희귀':['노호','라니아','라쿤','레오','링링','루시','리','메이','베인','빅토리아','블랙로즈','사라','샤오','세라','소이','스니퍼','실비아','아리엘','아수라','에반','유리','유이','조운','조커','진','제인','쥬피','카론','카린','캐티','클레오','클로에','풍연','헤브니아','헬레니아','호킨']};
+const HERO_DATA = {'구세나':['갤리두스','로지','밀리아','쥬리','파이'],'찐스':['나타','델론즈','라드그리드','라이언','란드그리드','레긴레이프','레이첼','루디','린','멜키르','미스트','바네사','브란즈&브란셀','비스킷','손오공','스파이크','실베스타','아일린','아킬라','에이스','엘리시아','여포','연희','오를리','오목','제이브','카구라','카르마','카일','콜트','크리스','클라한','키리엘','태오','트루드','프레이야','플라튼','팔라누스'],'짭스':['관우','녹스','니아','데이지','루리','룩','리나','미호','발리스타','백각','백룡','벨리카','비담','세인','소교','아라곤','아멜리아','에스파다','유신','지크','초선','챈슬러','타카','파스칼','엘리스'],'희귀':['노호','라니아','라쿤','레오','링링','루시','리','메이','베인','빅토리아','블랙로즈','사라','샤오','세라','소이','스니퍼','실비아','아리엘','아수라','에반','유리','유이','조운','조커','진','제인','쥬피','카론','카린','캐티','클레오','클로에','풍연','헤브니아','헬레니아','호킨']};
 const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
 
 let me=null, members=[], seasonIds=[], recordData={}, curId='';
