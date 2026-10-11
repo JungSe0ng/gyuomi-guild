@@ -315,6 +315,52 @@
             .skill-tile { width: 34px; height: 34px; }
         }
 
+        /* 공략 카드 머리 (리플레이 모양: 공격 위 / 방어 아래) */
+        .replay-box { display: flex; flex-direction: column; gap: 4px; max-width: 520px; margin-bottom: 10px; }
+
+        .replay-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 12px; border-radius: 12px;
+            border: 1px solid var(--border); border-left-width: 4px;
+        }
+        .replay-row.atk { background: var(--primary-soft); border-left-color: var(--primary); }
+        .replay-row.def { background: var(--secondary-soft); border-left-color: var(--secondary); }
+
+        .replay-label { min-width: 64px; flex-shrink: 0; font-size: 0.7em; font-weight: 800; }
+        .replay-row.atk .replay-label { color: var(--primary); }
+        .replay-row.def .replay-label { color: var(--secondary); }
+
+        .replay-heroes { display: flex; gap: 8px; }
+        .replay-hero { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .replay-hero-img {
+            width: 44px; height: 44px; border-radius: 9px; overflow: hidden;
+            border: 2px solid var(--white); background: var(--white);
+        }
+        .replay-hero-img img { width: 100%; height: 100%; object-fit: cover; }
+        .replay-hero-fallback {
+            display: flex; align-items: center; justify-content: center; height: 100%;
+            padding: 1px; font-size: 0.55em; text-align: center; color: var(--text-muted);
+        }
+        .replay-hero-name { font-size: 0.62em; font-weight: 600; color: var(--text-sub); }
+
+        .replay-pets { display: flex; align-items: center; gap: 3px; margin-left: auto; }
+        .replay-pets img {
+            width: 34px; height: 34px; border-radius: 8px; object-fit: cover;
+            border: 2px solid var(--gold); background: var(--white);
+        }
+        .replay-pets .pet-arrow { font-size: 0.75em; font-weight: 700; color: var(--text-muted); }
+
+        .replay-vs {
+            align-self: center; padding: 1px 10px; border-radius: 999px;
+            background: var(--text); color: var(--white);
+            font-size: 0.62em; font-weight: 800; letter-spacing: 0.05em;
+        }
+
+        @media (max-width: 480px) {
+            .replay-row { flex-wrap: wrap; gap: 8px; }
+            .replay-pets { flex-basis: 100%; margin-left: 0; }
+        }
+
         .skill-item {
             display: flex; flex-direction: column; align-items: center; gap: 3px;
             cursor: pointer;
@@ -685,18 +731,18 @@
                     <!-- ── 우측 패널 ── -->
                     <div class="right-panel">
 
-                        <!-- 상대 방어팀 -->
+                        <!-- 내 공격팀 (리플레이처럼 공격이 위) -->
                         <div class="team-section">
-                            <div class="team-section-hd def-hd">🛡️ 상대 방어팀 (3명)</div>
-                            <div class="team-slots" id="defSlots">
+                            <div class="team-section-hd atk-hd">⚔️ 내 공격팀 (3명)</div>
+                            <div class="team-slots" id="atkSlots">
                                 <!-- JS로 생성 -->
                             </div>
                         </div>
 
-                        <!-- 내 공격팀 -->
+                        <!-- 상대 방어팀 -->
                         <div class="team-section">
-                            <div class="team-section-hd atk-hd">⚔️ 내 공격팀 (3명)</div>
-                            <div class="team-slots" id="atkSlots">
+                            <div class="team-section-hd def-hd">🛡️ 상대 방어팀 (3명)</div>
+                            <div class="team-slots" id="defSlots">
                                 <!-- JS로 생성 -->
                             </div>
                         </div>
@@ -1389,6 +1435,30 @@ async function loadGuides() {
     el.innerHTML = renderGuidesHTML(guides);
 }
 
+// 공략 카드 머리의 팀 한 줄 (리플레이 모양)
+// type: 'atk' | 'def', heroes: 영웅 이름 목록, pets: 펫 이름 목록 (방어팀은 빈 배열)
+function renderReplayRow(type, heroes, pets) {
+    const label = type === 'atk' ? '⚔️ 아군 공격' : '🛡️ 상대 방어';
+    const heroesHtml = heroes.filter(Boolean).map(h => `
+        <div class="replay-hero">
+            <div class="replay-hero-img">
+                <img src="${HERO_IMG_PATH}${h}.webp" alt="${h}"
+                     onerror="this.parentElement.innerHTML='<div class=\\'replay-hero-fallback\\'>${h}</div>'">
+            </div>
+            <span class="replay-hero-name">${h}</span>
+        </div>`).join('');
+    const petsHtml = pets.filter(Boolean).map(p =>
+        `<img src="${PET_IMG_PATH}${p}.png" alt="${p}" title="${p}" onerror="this.style.display='none'">`
+    ).join('<span class="pet-arrow">›</span>');
+
+    return `
+    <div class="replay-row ${type}">
+        <span class="replay-label">${label}</span>
+        <div class="replay-heroes">${heroesHtml}</div>
+        ${petsHtml ? `<div class="replay-pets">${petsHtml}</div>` : ''}
+    </div>`;
+}
+
 function renderGuidesHTML(guides) {
     if (!guides.length) return '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">조건에 맞는 공략이 없습니다.</div></div>';
 
@@ -1498,33 +1568,11 @@ function renderGuidesHTML(guides) {
             <div onclick="toggleDetail('guide-${gi}')" style="padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:0.95em;font-weight:700;color:var(--text);margin-bottom:10px;">${g.name}</div>
-                    <!-- 방어팀 초상화 -->
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                        <span style="font-size:0.68em;font-weight:800;color:var(--secondary);min-width:70px;flex-shrink:0;">상대 방어팀</span>
-                        <div style="display:flex;gap:6px;">
-                            ${dt.map(h=>`
-                            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-                                <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--secondary-soft);background:var(--bg);">
-                                    <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
-                                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\\'>${h}</div>'">
-                                </div>
-                                <span style="font-size:0.62em;font-weight:600;color:var(--text-sub);">${h}</span>
-                            </div>`).join('')}
-                        </div>
-                    </div>
-                    <!-- 공격팀 초상화 -->
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                        <span style="font-size:0.68em;font-weight:800;color:var(--primary);min-width:70px;flex-shrink:0;">아군 공격팀</span>
-                        <div style="display:flex;gap:6px;">
-                            ${at.map(h=>`
-                            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-                                <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:2px solid var(--primary-soft);background:var(--bg);">
-                                    <img src="${HERO_IMG_PATH}${h}.webp" style="width:100%;height:100%;object-fit:cover;"
-                                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.55em;text-align:center;color:var(--text-muted);padding:1px;\\'>${h}</div>'">
-                                </div>
-                                <span style="font-size:0.62em;font-weight:600;color:var(--text-sub);">${h}</span>
-                            </div>`).join('')}
-                        </div>
+                    <!-- 리플레이 모양: 공격 위 / 방어 아래 -->
+                    <div class="replay-box">
+                        ${renderReplayRow('atk', at, pets)}
+                        <div class="replay-vs">▼ VS</div>
+                        ${renderReplayRow('def', dt, [])}
                     </div>
                     <div style="font-size:0.73em;color:var(--text-muted);">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}${g.successRate ? ` · 📊 ${g.successRate}%` : ''}</div>
                 </div>
