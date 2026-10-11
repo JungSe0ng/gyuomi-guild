@@ -4,30 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>귀요미 길드 공략집</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- 공통 테마 (변수) -->
+    <link rel="stylesheet" href="theme.css">
     <style>
-        :root {
-            --bg: #f4f5f9;
-            --white: #ffffff;
-            --primary: #7c5cbf;
-            --primary-light: #9b7fd4;
-            --primary-soft: #ede8f8;
-            --secondary: #e8609a;
-            --secondary-soft: #fde8f2;
-            --grad: linear-gradient(135deg, #7c5cbf, #e8609a);
-            --grad-soft: linear-gradient(135deg, #ede8f8, #fde8f2);
-            --text: #1a1a2e;
-            --text-sub: #5a5a7a;
-            --text-muted: #9898b8;
-            --border: #e8e8f0;
-            --shadow-lg: 0 20px 60px rgba(124,92,191,0.15);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        /* 로그인 페이지는 사이드바 없이 가운데 카드 하나. 배경은 성 내부 */
         body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background: var(--bg);
+            background:
+                linear-gradient(180deg, rgba(26,23,33,0.55), rgba(26,23,33,0.88)),
+                url('ui/TEX_Bg_Login.jpg') center / cover no-repeat,
+                var(--page-bg);
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -37,13 +24,13 @@
             overflow: hidden;
         }
 
-        /* 배경 장식 */
+        /* 배경 장식: 금빛 / 아군 파랑 빛 */
         body::before {
             content: '';
             position: fixed;
             top: -120px; right: -120px;
             width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(124,92,191,0.12) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(217,181,106,0.22) 0%, transparent 70%);
             pointer-events: none;
         }
         body::after {
@@ -51,19 +38,19 @@
             position: fixed;
             bottom: -100px; left: -100px;
             width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(232,96,154,0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(62,111,216,0.18) 0%, transparent 70%);
             pointer-events: none;
         }
 
-        /* ── 카드 ── */
+        /* ── 카드 (인게임 팝업: 크림 판 + 진한 테두리 + 금색 안쪽 선) ── */
         .auth-card {
             background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 24px;
+            border: 3px solid #2f2b33;
+            border-radius: 20px;
             padding: 40px;
             width: 100%;
             max-width: 420px;
-            box-shadow: var(--shadow-lg);
+            box-shadow: inset 0 0 0 1px var(--gold-line), 0 20px 60px rgba(0,0,0,0.5);
             position: relative;
             z-index: 1;
             animation: fadeUp 0.45s ease;
@@ -80,15 +67,16 @@
             margin-bottom: 28px;
         }
 
+        /* 길드 로고 (글자 포함 전체): 둥근 사각형 + 금테 */
         .logo-circle {
-            width: 68px; height: 68px;
-            background: var(--grad);
-            border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2em;
+            width: 140px; height: 140px;
+            border: 2px solid var(--gold-line);
+            border-radius: 24px;
+            overflow: hidden;
             margin: 0 auto 14px;
-            box-shadow: 0 8px 24px rgba(124,92,191,0.25);
+            box-shadow: 0 0 18px rgba(217,181,106,0.4);
         }
+        .logo-circle img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
         .logo-title {
             font-size: 1.25em;
@@ -189,22 +177,23 @@
         }
 
         /* 제출 버튼 */
+        /* 인게임 '입장' 금색 버튼 */
         .btn-submit {
             width: 100%;
             padding: 12px;
             background: var(--grad);
-            color: white;
-            border: none;
-            border-radius: 11px;
+            color: var(--ink-on-gold);
+            border: 2px solid #fff4d2;
+            border-radius: 999px;
             font-size: 0.92em;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             font-family: inherit;
-            transition: opacity 0.18s, transform 0.18s;
-            box-shadow: 0 4px 16px rgba(124,92,191,0.25);
+            transition: filter 0.18s, transform 0.18s;
+            box-shadow: 0 0 0 1px #a8823f, 0 4px 14px rgba(0,0,0,0.3);
         }
 
-        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-submit:hover { filter: brightness(1.05); transform: translateY(-1px); }
         .btn-submit:active { transform: translateY(0); }
 
         /* 미리보기 버튼 */
@@ -252,9 +241,9 @@
 <div class="auth-card">
     <!-- 로고 -->
     <div class="logo-area">
-        <div class="logo-circle">🐰</div>
+        <div class="logo-circle"><img src="ui/UI_Logo.png" alt="귀요미 길드 로고"></div>
         <div class="logo-title">귀요미 길드 공략집</div>
-        <div class="logo-sub">세븐나이츠 길드원 전용 공간</div>
+        <div class="logo-sub">세븐나이츠 리버스 길드원 전용 공간</div>
     </div>
 
     <!-- 탭 -->
