@@ -265,51 +265,54 @@
 
         .skill-body { padding: 14px 16px; }
 
-        /* 스킬 선택 영역 */
-        .skill-selected-row {
-            display: flex; gap: 10px; margin-bottom: 14px; align-items: center;
+        /* 스킬 예약 (인게임 모양: 초상화 + 각성기/S2/S1 세로) */
+        .skill-unit-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+        .skill-unit {
+            display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 10px 12px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 12px;
+        }
+        .skill-unit-body { display: flex; align-items: flex-end; gap: 6px; }
+
+        .skill-unit-portrait {
+            width: 92px; height: 92px; flex-shrink: 0;
+            border-radius: 50%; overflow: hidden;
+            border: 3px solid var(--gold); background: var(--white);
+            box-shadow: 0 0 0 2px rgba(184,134,11,0.15);
+        }
+        .skill-unit-portrait img { width: 100%; height: 100%; object-fit: cover; }
+        .skill-unit-fallback {
+            display: flex; align-items: center; justify-content: center; height: 100%;
+            padding: 2px; font-size: 0.65em; text-align: center; color: var(--text-muted);
         }
 
-        .skill-order-slot {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        .skill-unit-col { display: flex; flex-direction: column; gap: 4px; }
+
+        .skill-tile {
+            position: relative; width: 44px; height: 44px;
+            border-radius: 8px; border: 2px solid var(--border); background: var(--bg);
+        }
+        .skill-tile img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+        .skill-tile.clickable { cursor: pointer; transition: all 0.18s; }
+        .skill-tile.clickable:hover { border-color: var(--gold); transform: scale(1.06); }
+        .skill-tile.awaken { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+        .skill-tile.reserved { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,134,11,0.25); }
+        .skill-tile.no-awaken { visibility: hidden; }
+
+        .reserve-badge {
+            position: absolute; right: 70%; top: 50%; transform: translateY(-50%); z-index: 1;
+            padding: 2px 7px; border-radius: 999px; white-space: nowrap; pointer-events: none;
+            background: rgba(20,20,30,0.88); border: 1px solid var(--gold);
+            color: #ffd666; font-size: 0.62em; font-weight: 800;
         }
 
-        .skill-order-num {
-            font-size: 0.65em; font-weight: 800; color: var(--text-muted);
-        }
+        .skill-unit-name { font-size: 0.72em; font-weight: 700; color: var(--text-sub); }
 
-        .skill-order-img {
-            width: 52px; height: 52px; border-radius: 10px;
-            border: 2px dashed var(--border);
-            background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2em; color: var(--text-muted);
-            overflow: hidden; cursor: pointer; transition: all 0.18s;
-            position: relative;
-        }
-        .skill-order-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-        .skill-order-img.filled { border: 2px solid var(--gold); box-shadow: 0 0 0 2px rgba(184,134,11,0.15); }
-        .skill-order-img .del-skill {
-            position: absolute; top: -4px; right: -4px;
-            width: 15px; height: 15px; background: #d94f4f; color: white;
-            border-radius: 50%; font-size: 0.6em; border: none;
-            display: none; align-items: center; justify-content: center; cursor: pointer;
-        }
-        .skill-order-img:hover .del-skill { display: flex; }
-
-        .skill-arrow { color: var(--text-muted); font-size: 1em; margin-top: 16px; }
-
-        /* 스킬 선택 그리드 */
-        .skill-search { margin-bottom: 10px; }
-        .skill-search input { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82em; font-family: inherit; }
-        .skill-search input:focus { outline: none; border-color: var(--primary); }
-
-        .skill-grid {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 2px;
+        @media (max-width: 480px) {
+            .skill-unit { padding: 8px; }
+            .skill-unit-portrait { width: 72px; height: 72px; }
+            .skill-tile { width: 34px; height: 34px; }
         }
 
         .skill-item {
@@ -715,40 +718,11 @@
 
                         <!-- 스킬 순서 -->
                         <div class="skill-section">
-                            <div class="skill-section-hd">⭐ 스킬 순서 (3개 선택)</div>
+                            <div class="skill-section-hd">⭐ 스킬 예약 (3개 선택)</div>
                             <div class="skill-body">
-                                <!-- 선택된 순서 표시 -->
-                                <div class="skill-selected-row" id="skillSelectedRow">
-                                    <div class="skill-order-slot">
-                                        <div class="skill-order-num">1순위</div>
-                                        <div class="skill-order-img" id="skillSlot0" onclick="clearSkillSlot(0)">
-                                            <span>?</span>
-                                            <button class="del-skill">×</button>
-                                        </div>
-                                    </div>
-                                    <div class="skill-arrow">→</div>
-                                    <div class="skill-order-slot">
-                                        <div class="skill-order-num">2순위</div>
-                                        <div class="skill-order-img" id="skillSlot1" onclick="clearSkillSlot(1)">
-                                            <span>?</span>
-                                            <button class="del-skill">×</button>
-                                        </div>
-                                    </div>
-                                    <div class="skill-arrow">→</div>
-                                    <div class="skill-order-slot">
-                                        <div class="skill-order-num">3순위</div>
-                                        <div class="skill-order-img" id="skillSlot2" onclick="clearSkillSlot(2)">
-                                            <span>?</span>
-                                            <button class="del-skill">×</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- 스킬 이미지 그리드 -->
-                                <div class="skill-search">
-                                    <input type="text" placeholder="스킬 검색..." oninput="renderSkillGrid(this.value)">
-                                </div>
-                                <div class="skill-grid" id="skillGrid">
-                                    <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">
+                                <!-- 공격팀 영웅별 스킬 (누르면 예약 N) -->
+                                <div class="skill-unit-row" id="skillGrid">
+                                    <div style="width:100%;text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">
                                         공격팀 영웅을 선택하면 스킬이 표시됩니다
                                     </div>
                                 </div>
@@ -1096,7 +1070,7 @@ function selectHero(name) {
         document.getElementById(`atkSlotName${idx}`).textContent = name;
         setActiveAtk(idx);
         renderEquipTabs();
-        renderSkillGrid('');
+        renderSkillGrid();
     }
 
     closeHeroModal();
@@ -1217,129 +1191,75 @@ function saveEquip(key, val) {
 }
 
 // ──────────────────────────────────────────
-// 스킬 그리드
+// 스킬 예약
 // ──────────────────────────────────────────
-function getAvailableSkills() {
-    const skills = [];
-    atkHeroes.forEach(name => {
-        if (!name) return;
-        skills.push({ hero: name, num: 1, key: `${name}_1`, img: `${HERO_IMG_PATH}${name}1.webp` });
-        skills.push({ hero: name, num: 2, key: `${name}_2`, img: `${HERO_IMG_PATH}${name}2.webp` });
-    });
-    return skills;
+// 영웅 1명의 스킬 블록 (인게임 모양: 초상화 + 각성기/S2/S1 세로)
+// 각성기는 {영웅}3.webp 이미지가 있는 영웅만 보인다 (없으면 onerror로 숨김)
+// order: 예약 목록 [{hero, num}], clickable: 눌러서 예약할 수 있는지 (등록 화면)
+function renderSkillUnit(hero, order, clickable) {
+    const tile = num => {
+        const img = `${HERO_IMG_PATH}${hero}${num}.webp`;
+        const orderIdx = order.findIndex(o => o && o.hero === hero && o.num === num);
+        const cls = ['skill-tile'];
+        if (num === 3) cls.push('awaken');
+        if (orderIdx !== -1) cls.push('reserved');
+        if (clickable) cls.push('clickable');
+        const onerror = num === 3
+            ? `this.parentElement.classList.add('no-awaken')`
+            : `this.parentElement.style.background='var(--primary-soft)'`;
+        return `<div class="${cls.join(' ')}"${clickable ? ` onclick="toggleSkill('${hero}_${num}','${hero}',${num},'${img}')"` : ''}>
+                <img src="${img}" alt="${hero} ${num === 3 ? '각성기' : `스킬${num}`}" onerror="${onerror}">
+                ${orderIdx !== -1 ? `<span class="reserve-badge">예약 ${orderIdx + 1}</span>` : ''}
+            </div>`;
+    };
+
+    return `
+    <div class="skill-unit">
+        <div class="skill-unit-body">
+            <div class="skill-unit-portrait">
+                <img src="${HERO_IMG_PATH}${hero}.webp" alt="${hero}"
+                     onerror="this.parentElement.innerHTML='<div class=\\'skill-unit-fallback\\'>${hero}</div>'">
+            </div>
+            <div class="skill-unit-col">${[3, 2, 1].map(tile).join('')}</div>
+        </div>
+        <div class="skill-unit-name">${hero}</div>
+    </div>`;
 }
 
-function renderSkillGrid(q) {
+function renderSkillGrid() {
     const grid = document.getElementById('skillGrid');
-    const skills = getAvailableSkills();
-    const usedKeys = skillOrder.filter(Boolean).map(s => s.key);
+    const heroes = atkHeroes.filter(Boolean);
 
-    if (!skills.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">공격팀 영웅을 선택하면 스킬이 표시됩니다</div>';
+    // 팀에서 빠진 영웅의 예약은 지운다 (예약을 따로 해제할 칸이 없으므로)
+    skillOrder = skillOrder.filter(s => s && heroes.includes(s.hero));
+    while (skillOrder.length < 3) skillOrder.push(null);
+
+    if (!heroes.length) {
+        grid.innerHTML = '<div style="width:100%;text-align:center;padding:20px;color:var(--text-muted);font-size:0.82em;">공격팀 영웅을 선택하면 스킬이 표시됩니다</div>';
         return;
     }
 
-    const lq = q.toLowerCase();
-    const filtered = q ? skills.filter(s => s.hero.toLowerCase().includes(lq)) : skills;
-
-    // 영웅별로 그룹핑
-    const grouped = {};
-    filtered.forEach(s => {
-        if (!grouped[s.hero]) grouped[s.hero] = [];
-        grouped[s.hero].push(s);
-    });
-
-    grid.innerHTML = Object.entries(grouped).map(([hero, heroSkills]) => {
-        const skillsHtml = heroSkills.map(s => {
-            const used = usedKeys.includes(s.key);
-            const orderIdx = skillOrder.findIndex(o => o && o.key === s.key);
-            return `
-            <div onclick="toggleSkill('${s.key}','${s.hero}',${s.num},'${s.img}')"
-                 style="position:relative;width:52px;height:52px;border-radius:10px;overflow:hidden;border:2px solid ${used ? '#b8860b' : 'var(--border)'};cursor:pointer;background:var(--bg);transition:all 0.18s;">
-                <img src="${s.img}" style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.style.background='var(--primary-soft)'">
-                ${used ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.25);display:flex;align-items:center;justify-content:center;">
-                    <span style="background:#b8860b;color:white;font-size:0.75em;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${orderIdx+1}</span>
-                </div>` : ''}
-            </div>`;
-        }).join('');
-
-        // S2 위, S1 아래 순서로 정렬
-        const sortedSkills = [...heroSkills].sort((a, b) => b.num - a.num);
-        const skillsVertical = sortedSkills.map(s => {
-            const used = usedKeys.includes(s.key);
-            const orderIdx = skillOrder.findIndex(o => o && o.key === s.key);
-            return `<div onclick="toggleSkill('${s.key}','${s.hero}',${s.num},'${s.img}')"
-                 style="position:relative;width:52px;height:52px;border-radius:10px;overflow:hidden;border:2px solid ${used ? '#b8860b' : 'var(--border)'};cursor:pointer;background:var(--bg);transition:all 0.18s;">
-                <img src="${s.img}" style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.style.background='var(--primary-soft)'">
-                ${used ? `<div style="position:absolute;inset:0;background:rgba(184,134,11,0.25);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.75em;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${orderIdx+1}</span></div>` : ''}
-            </div>`;
-        }).join('');
-
-        return `
-        <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:10px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
-            <div style="display:flex;align-items:center;gap:6px;">
-                <!-- 초상화 왼쪽 크게 -->
-                <div style="width:72px;height:72px;border-radius:12px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:var(--white);">
-                    <img src="${HERO_IMG_PATH}${hero}.webp" style="width:100%;height:100%;object-fit:cover;"
-                         onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.65em;text-align:center;color:var(--text-muted);padding:2px;\\'>${hero}</div>'">
-                </div>
-                <!-- 스킬: S2 위, S1 아래 -->
-                <div style="display:flex;flex-direction:column;gap:4px;">
-                    ${skillsVertical}
-                </div>
-            </div>
-            <div style="font-size:0.72em;font-weight:700;color:var(--text-sub);text-align:center;">${hero}</div>
-        </div>`;
-    }).join('');
+    grid.innerHTML = heroes.map(name => renderSkillUnit(name, skillOrder, true)).join('');
 }
 
 function toggleSkill(key, hero, num, img) {
     const existIdx = skillOrder.findIndex(s => s && s.key === key);
     if (existIdx !== -1) {
-        // 이미 선택된 경우 → 제거 후 재정렬
+        // 이미 예약된 경우 → 해제 후 뒤 번호 당기기
         skillOrder[existIdx] = null;
         skillOrder = skillOrder.filter(Boolean);
         while (skillOrder.length < 3) skillOrder.push(null);
     } else {
-        // 미선택 → 빈 슬롯에 추가
+        // 미예약 → 빈 자리에 추가
         const emptyIdx = skillOrder.findIndex(s => s === null);
         if (emptyIdx === -1) return;
         skillOrder[emptyIdx] = { key, hero, num, img };
     }
-    renderSkillSlots();
-    renderSkillGrid('');
+    renderSkillGrid();
 }
 
 function addSkill(key, hero, num, img) {
     toggleSkill(key, hero, num, img);
-}
-
-function clearSkillSlot(idx) {
-    if (!skillOrder[idx]) return;
-    skillOrder[idx] = null;
-    // 뒤를 앞으로 당기기
-    skillOrder = skillOrder.filter(Boolean);
-    while (skillOrder.length < 3) skillOrder.push(null);
-    renderSkillSlots();
-    renderSkillGrid('');
-}
-
-function renderSkillSlots() {
-    [0,1,2].forEach(i => {
-        const slot = document.getElementById(`skillSlot${i}`);
-        const s = skillOrder[i];
-        if (s) {
-            slot.className = 'skill-order-img filled';
-            slot.innerHTML = `<img src="${s.img}" alt="${s.hero} 스킬${s.num}"
-                onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.62em;text-align:center;\\'>${s.hero}<br>S${s.num}</span>'">
-                <button class="del-skill" onclick="event.stopPropagation();clearSkillSlot(${i})">×</button>`;
-        } else {
-            slot.className = 'skill-order-img';
-            slot.innerHTML = `<span>?</span><button class="del-skill">×</button>`;
-        }
-    });
 }
 
 // ──────────────────────────────────────────
@@ -1527,33 +1447,8 @@ function renderGuidesHTML(guides) {
                 <div style="font-size:0.68em;font-weight:700;color:#b8860b;text-align:center;">${s.hero}<br>S${s.num}</div>
             </div>`).join('');
 
-        // 스킬 순서 (등록 UI와 동일: 초상화+S2위+S1아래)
-        const skillCards = sk.map((s, i) => `
-            <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:8px;background:var(--bg);border-radius:12px;border:1px solid var(--border);">
-                <div style="display:flex;align-items:center;gap:5px;">
-                    <div style="position:relative;">
-                        <div style="width:56px;height:56px;border-radius:10px;overflow:hidden;border:2px solid var(--border);background:var(--white);">
-                            <img src="${HERO_IMG_PATH}${s.hero}.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6em;text-align:center;color:var(--text-muted);padding:2px;\\'>${s.hero}</div>'">
-                        </div>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:3px;">
-                        <!-- S2 위 -->
-                        <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===2?'#b8860b':'var(--border)'};background:var(--bg);">
-                            <img src="${HERO_IMG_PATH}${s.hero}2.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.style.background='var(--primary-soft)'">
-                            ${s.num===2 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
-                        </div>
-                        <!-- S1 아래 -->
-                        <div style="position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;border:2px solid ${s.num===1?'#b8860b':'var(--border)'};background:var(--bg);">
-                            <img src="${HERO_IMG_PATH}${s.hero}1.webp" style="width:100%;height:100%;object-fit:cover;"
-                                 onerror="this.parentElement.style.background='var(--primary-soft)'">
-                            ${s.num===1 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(184,134,11,0.15);display:flex;align-items:center;justify-content:center;"><span style="background:#b8860b;color:white;font-size:0.72em;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span></div>` : ''}
-                        </div>
-                    </div>
-                </div>
-                <div style="font-size:0.7em;font-weight:700;color:var(--text-sub);text-align:center;">${s.hero} S${s.num}</div>
-            </div>`).join('<div style="display:flex;align-items:center;color:var(--text-muted);font-size:1em;padding:0 2px;padding-bottom:20px;">→</div>');
+        // 스킬 예약 (등록 화면과 같은 인게임 모양)
+        const skillUnits = at.filter(Boolean).map(name => renderSkillUnit(name, sk, false)).join('');
 
         // 펫 > 구분자
         const petChips = pets.map((name, pi) => `
@@ -1652,11 +1547,11 @@ function renderGuidesHTML(guides) {
                     <div style="display:flex;gap:10px;flex-wrap:wrap;">${equipCards}</div>
                 </div>` : ''}
 
-                <!-- 스킬 순서 -->
+                <!-- 스킬 예약 -->
                 ${sk.length ? `
                 <div style="margin-bottom:18px;">
-                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:10px;">⭐ 스킬 순서</div>
-                    <div style="display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;">${skillCards}</div>
+                    <div style="font-size:0.72em;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#b8860b;margin-bottom:10px;">⭐ 스킬 예약</div>
+                    <div class="skill-unit-row">${skillUnits}</div>
                 </div>` : ''}
 
                 <!-- 펫 -->
@@ -1839,8 +1734,7 @@ window.editGuide = async function(id) {
     renderEquipTabs();
     if (atkHeroes[0]) { activeAtkIdx = 0; setActiveAtk(0); }
 
-    // 스킬 순서 복원
-    renderSkillGrid('');
+    // 스킬 예약 복원
     skillOrder = [null, null, null];
     (g.skillOrder || []).forEach((s, i) => {
         skillOrder[i] = {
@@ -1849,8 +1743,7 @@ window.editGuide = async function(id) {
             img: `${HERO_IMG_PATH}${s.hero}${s.num}.webp`
         };
     });
-    renderSkillSlots();
-    renderSkillGrid('');
+    renderSkillGrid();
 
     // 펫 복원
     selectedPets = [null, null, null];
@@ -1961,7 +1854,6 @@ window.setActiveAtk = setActiveAtk;
 window.saveEquip = saveEquip;
 window.renderSkillGrid = renderSkillGrid;
 window.addSkill = addSkill;
-window.clearSkillSlot = clearSkillSlot;
 window.addPet = addPet;
 window.clearPet = clearPet;
 window.toggleSidebar = toggleSidebar;
