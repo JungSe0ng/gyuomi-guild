@@ -55,21 +55,6 @@
         .team-section { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
         .team-section-hd { padding: 11px 16px; font-size: 0.75em; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         .team-section-hd.def-hd { color: var(--teal); }
-        .team-slots { padding: 14px 16px; display: flex; gap: 12px; }
-
-        /* 영웅 슬롯 */
-        .hero-slot { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .hero-slot-img { width: 72px; height: 72px; border-radius: 12px; border: 2px dashed var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; overflow: hidden; position: relative; }
-        .hero-slot-img:hover { border-color: var(--teal); background: var(--teal-soft); }
-        .hero-slot-img.selected { border: 2px solid var(--teal); box-shadow: 0 0 0 3px rgba(42,157,143,0.15); }
-        .hero-slot-img.active-hero { border: 2px solid var(--teal); box-shadow: 0 0 0 4px rgba(42,157,143,0.25); }
-        .hero-slot-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-        .slot-empty { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-muted); font-size: 0.68em; font-weight: 600; }
-        .slot-empty .slot-icon { font-size: 1.6em; }
-        .hero-slot-name { font-size: 0.72em; font-weight: 700; color: var(--text); text-align: center; min-height: 16px; }
-        .hero-slot-btn { font-size: 0.68em; padding: 3px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; transition: all 0.18s; font-family: inherit; }
-        .hero-slot-btn:hover { border-color: var(--teal); color: var(--teal); }
-        .hero-slot-btn.active-btn { background: var(--teal); color: white; border-color: var(--teal); }
 
         /* 장비 패널 */
         .equip-panel { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
@@ -360,7 +345,8 @@
                     <!-- 내 방어팀 -->
                     <div class="team-section">
                         <div class="team-section-hd def-hd">🛡️ 내 방어팀 (3명)</div>
-                        <div class="team-slots" id="defSlots"></div>
+                        <!-- 진형 편집기: 진형 칸을 눌러 영웅 배치 (JS로 생성) -->
+                        <div class="formation-editor" id="defFormation"></div>
                     </div>
 
                     <!-- 장비 패널 -->
@@ -449,7 +435,8 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { setHeroGrades, renderReplayRow, renderEquipCards, renderPriorityStars } from './guide-ui.js';
+import { setHeroGrades, renderReplayRow, renderEquipCards, renderPriorityStars,
+         readFormation, placeHero, removeHero, renderFormationEditor } from './guide-ui.js';
 
 const FB = {
     apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -498,11 +485,12 @@ const ARM_OPTS = ['받는 피해 감소','막기 확률','모든 공격력(%)','
 // 상태
 // ──────────────────────────────────
 let defHeroes   = [null, null, null];
+let defFormation = readFormation(null); // 방어팀 진형 {type, positions} (기본 진형 1·2·3)
 let activeDefIdx = 0;
 let equipData   = [{}, {}, {}];
 let skillOrder  = [null, null, null];
 let selectedPets = [null, null, null];
-let modalTargetIdx = 0;
+let modalTargetPos = 0; // 영웅 선택창을 연 진형 칸 번호(1~5)
 let editingDefId = null;
 let allDefGuides = [];
 
@@ -520,16 +508,41 @@ function switchSub(sub) {
 // 슬롯 초기화
 // ──────────────────────────────────
 function initSlots() {
-    document.getElementById('defSlots').innerHTML = [0,1,2].map(i => `
-        <div class="hero-slot">
-            <div class="hero-slot-img" id="defSlot${i}" onclick="openHeroModal(${i})">
-                <div class="slot-empty"><span class="slot-icon">🛡️</span><span>선택</span></div>
-            </div>
-            <div class="hero-slot-name" id="defSlotName${i}"></div>
-            <button class="hero-slot-btn" id="defSlotBtn${i}" onclick="setActiveHero(${i})">장비설정</button>
-        </div>
-    `).join('');
+    // 방어팀 영웅은 진형 편집기의 칸을 눌러 고른다
     renderPetGrid();
+    renderFormationEditors();
+}
+
+// ──────────────────────────────────
+// 진형 편집기 (방어팀)
+// ──────────────────────────────────
+function renderFormationEditors() {
+    document.getElementById('defFormation').innerHTML = renderFormationEditor('def', defFormation, defHeroes);
+}
+
+function setFormationType(team, type) {
+    defFormation = { ...defFormation, type };
+    renderFormationEditors();
+}
+
+// 진형 칸에서 영웅을 빼고 그 영웅의 장비 입력도 비운다
+function removeSlotHero(team, idx) {
+    defHeroes = removeHero(defHeroes, idx);
+    equipData[idx] = {};
+    refreshDefEquip();
+    renderSkillGrid();
+    renderFormationEditors();
+}
+
+// 방어팀이 바뀐 뒤 장비 패널을 맞춘다: 활성 영웅이 빠졌으면 남은 첫 영웅, 아무도 없으면 안내 문구
+function refreshDefEquip() {
+    const firstIdx = defHeroes.findIndex(Boolean);
+    if (firstIdx === -1) {
+        document.getElementById('equipHeroTabs').innerHTML = '';
+        document.getElementById('equipBody').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">방어팀 영웅을 먼저 선택해주세요</div>';
+        return;
+    }
+    setActiveHero(defHeroes[activeDefIdx] ? activeDefIdx : firstIdx);
 }
 
 // ──────────────────────────────────
@@ -543,9 +556,10 @@ function heroImg(name) {
 // ──────────────────────────────────
 // 영웅 선택 모달
 // ──────────────────────────────────
-function openHeroModal(idx) {
-    modalTargetIdx = idx;
-    document.getElementById('heroModalTitle').textContent = `방어팀 ${idx+1}번 영웅 선택`;
+// 진형 칸(pos)을 눌렀을 때: 그 자리에 놓을 영웅을 고르는 창을 연다
+function openSlotModal(team, pos) {
+    modalTargetPos = pos;
+    document.getElementById('heroModalTitle').textContent = `방어팀 ${pos}번 자리 영웅 선택`;
     document.getElementById('heroSearch').value = '';
     renderHeroModal('');
     document.getElementById('heroModal').classList.add('open');
@@ -575,17 +589,15 @@ function renderHeroModal(q) {
 }
 
 function selectHero(name) {
-    const idx = modalTargetIdx;
-    defHeroes[idx] = name;
+    const placed = placeHero(defFormation, defHeroes, modalTargetPos, name);
+    if (placed.idx === -1) { closeHeroModal(); return; }
+    defFormation = placed.formation;
+    defHeroes = placed.heroes;
 
-    const slot = document.getElementById(`defSlot${idx}`);
-    slot.innerHTML = heroImg(name);
-    slot.className = 'hero-slot-img selected';
-    document.getElementById(`defSlotName${idx}`).textContent = name;
-
-    setActiveHero(idx);
+    setActiveHero(placed.idx);
     renderEquipTabs();
     renderSkillGrid();
+    renderFormationEditors();
     closeHeroModal();
 }
 
@@ -595,14 +607,6 @@ function selectHero(name) {
 function setActiveHero(idx) {
     if (!defHeroes[idx]) return;
     activeDefIdx = idx;
-
-    [0,1,2].forEach(i => {
-        const btn  = document.getElementById(`defSlotBtn${i}`);
-        const slot = document.getElementById(`defSlot${i}`);
-        if (btn)  btn.className  = 'hero-slot-btn' + (i === idx ? ' active-btn' : '');
-        if (slot && defHeroes[i]) slot.className = 'hero-slot-img' + (i === idx ? ' active-hero' : ' selected');
-    });
-
     renderEquipTabs();
     renderEquipBody();
 }
@@ -848,6 +852,7 @@ async function saveGuide() {
             memo: document.getElementById('fMemo').value,
             detail: document.getElementById('fDetail').value,
             defenseTeam: [...defHeroes],
+            formation: readFormation(defFormation),
             equipData: JSON.parse(JSON.stringify(equipData)),
             skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
             pets: selectedPets.filter(Boolean),
@@ -948,7 +953,7 @@ function renderDefGuidesHTML(guides) {
                     <div class="guide-title">${g.name}${renderPriorityStars(g.priority)}</div>
                     <!-- 리플레이 모양: 아군 방어팀 한 줄 -->
                     <div class="replay-box">
-                        ${renderReplayRow('ally', '🛡️ 아군 방어', heroes, pets)}
+                        ${renderReplayRow('ally', '🛡️ 아군 방어', heroes, pets, g.formation)}
                     </div>
                     <div class="guide-meta">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}</div>
                 </div>
@@ -1014,13 +1019,12 @@ async function editDefGuide(id) {
     const eq = g.equipData || [{},{},{}];
     heroes.forEach((h, i) => {
         if (!h) return;
-        defHeroes[i] = h;
-        const slot = document.getElementById(`defSlot${i}`);
-        const nameEl = document.getElementById(`defSlotName${i}`);
-        if (slot) { slot.innerHTML = heroImg(h); slot.className = 'hero-slot-img selected'; }
-        if (nameEl) nameEl.textContent = h;
+        defHeroes[i] = h; // 진형 편집기에 그려진다
         equipData[i] = { set:eq[i]?.set||'', speed:eq[i]?.speed||'', wpn1:eq[i]?.wpn1||'', wpn2:eq[i]?.wpn2||'', arm1:eq[i]?.arm1||'', arm2:eq[i]?.arm2||'', sub:eq[i]?.sub||'', memo:eq[i]?.memo||'' };
     });
+    // 진형 복원 (진형 정보가 없는 예전 공략은 기본 진형 1·2·3번 자리)
+    defFormation = readFormation(g.formation);
+    renderFormationEditors();
     renderEquipTabs();
     if (defHeroes[0]) { activeDefIdx = 0; setActiveHero(0); }
     skillOrder = [null, null, null];
@@ -1224,10 +1228,12 @@ window.selectDefFilterHero = selectDefFilterHero;
 window.resetDefFilter = resetDefFilter;
 window.filterDefGuides = filterDefGuides;
 window.switchSub = switchSub;
-window.openHeroModal = openHeroModal;
+window.openSlotModal = openSlotModal;
 window.closeHeroModal = closeHeroModal;
 window.renderHeroModal = renderHeroModal;
 window.selectHero = selectHero;
+window.setFormationType = setFormationType;
+window.removeSlotHero = removeSlotHero;
 window.setActiveHero = setActiveHero;
 window.saveEquip = saveEquip;
 window.renderSkillGrid = renderSkillGrid;

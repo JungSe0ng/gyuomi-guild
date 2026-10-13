@@ -1,7 +1,7 @@
 // ──────────────────────────────────────────
 // 길드전·방어 공략 공통 화면 조각
 // guildwar.html, defense.html 이 import 해서 쓴다
-// (리플레이 팀 줄, 장비 2x2 카드, 성공률 등급 배지, 우선순위 별)
+// (리플레이 팀 줄, 진형 판·편집기, 장비 2x2 카드, 성공률 등급 배지, 우선순위 별)
 // ──────────────────────────────────────────
 
 const HERO_IMG_PATH = './heroes/';
@@ -50,6 +50,17 @@ const GRADE_FRAME = {
 // 성공률(%) → 공성 등급 배지. 위에서부터 처음 만족하는 구간을 쓴다
 const SUCCESS_GRADES = [[95, 'SSS'], [90, 'SS'], [80, 'S'], [70, 'A'], [60, 'B'], [50, 'C'], [40, 'D'], [0, 'F']];
 
+// 진형 4종: 자리 번호(1~5)별 전방(F)/후방(B) (인게임 진형 화면 기준)
+export const FORMATIONS = {
+    basic:   { name: '기본 진형',   front: [1, 2],       back: [3, 4, 5] },
+    balance: { name: '밸런스 진형', front: [1, 2, 3],    back: [4, 5] },
+    attack:  { name: '공격 진형',   front: [1],          back: [2, 3, 4, 5] },
+    protect: { name: '보호 진형',   front: [1, 2, 3, 4], back: [5] },
+};
+
+// 진형 정보가 없는 예전 공략은 기본 진형 1·2·3번 자리로 본다
+const DEFAULT_FORMATION = { type: 'basic', positions: [1, 2, 3] };
+
 let gradeByHero = {};
 
 // 페이지의 HERO_DATA({등급: [영웅...]})로 영웅 이름 → 등급 표를 만든다. 페이지 시작 때 한 번 부른다
@@ -70,27 +81,110 @@ function statIcon(option, sizeClass = '') {
     return `<span class="opt-icon ${sizeClass}"><img src="${UI_PATH}ICO_Stat_${key}.png" alt=""></span>`;
 }
 
-// 리플레이 모양 팀 한 줄. side: 'ally'(파랑) | 'enemy'(빨강), pets 는 없으면 빈 배열
-export function renderReplayRow(side, label, heroes, pets) {
-    const heroesHtml = heroes.filter(Boolean).map(name => {
+// 저장된 진형({type, positions})을 읽는다. 없거나 형식이 맞지 않으면 기본 진형 1·2·3번 자리
+// positions[i] 는 팀의 i번째 영웅이 서는 자리 번호(1~5)
+export function readFormation(formation) {
+    const isValid = formation && FORMATIONS[formation.type]
+        && Array.isArray(formation.positions) && formation.positions.length === 3;
+    const source = isValid ? formation : DEFAULT_FORMATION;
+    return { type: source.type, positions: source.positions.map(Number) };
+}
+
+// pos 자리에 영웅을 놓는다. 그 자리를 가진 번호가 있으면 그 번호의 영웅을 바꾸고, 없으면 빈 번호에 자리와 함께 넣는다
+// 돌려주는 idx 는 영웅이 들어간 번호(0~2). 팀이 다 차서 놓을 수 없으면 -1
+export function placeHero(formation, heroes, pos, name) {
+    const placed = readFormation(formation);
+    const nextHeroes = [...heroes];
+    let idx = placed.positions.indexOf(pos);
+    if (idx === -1) {
+        idx = nextHeroes.findIndex(hero => !hero);
+        if (idx === -1) return { formation: placed, heroes: nextHeroes, idx: -1 };
+        placed.positions[idx] = pos;
+    }
+    nextHeroes[idx] = name;
+    return { formation: placed, heroes: nextHeroes, idx };
+}
+
+// idx번째 영웅을 뺀다. 자리 번호는 남겨 두고 그 칸은 빈칸이 된다
+export function removeHero(heroes, idx) {
+    return heroes.map((hero, i) => (i === idx ? null : hero));
+}
+
+// 진형 판: 위 후방(B, 빨강) / 아래 전방(F, 파랑). 그 진형의 자리를 번호 순으로 그리고 영웅이 없는 자리는 빈칸
+// 칸이 적은 줄을 (많은 줄 칸 수 - 적은 줄 칸 수) / 2 칸만큼 밀어서 인게임처럼 앞뒷줄이 엇갈리게 한다
+// team 을 넘기면 편집 모드: 칸을 누르면 페이지의 openSlotModal(team, pos), × 는 removeSlotHero(team, idx)
+export function renderFormationBoard(formation, heroes, team = '') {
+    const { type, positions } = readFormation(formation);
+    const layout = FORMATIONS[type];
+    const isEditable = Boolean(team);
+    const isFull = heroes.every(Boolean);
+    const longest = Math.max(layout.front.length, layout.back.length);
+
+    const renderSlot = pos => {
+        const idx = positions.indexOf(pos);
+        const name = idx === -1 ? null : heroes[idx];
+        if (!name) {
+            const canPlace = isEditable && !isFull;
+            return `
+            <div class="formation-slot empty${isEditable && isFull ? ' disabled' : ''}"${canPlace ? ` onclick="openSlotModal('${team}',${pos})" title="${pos}번 자리에 영웅 배치"` : ''}>
+                <div class="formation-empty">${canPlace ? '+' : ''}</div>
+                <span class="formation-no">${pos}</span>
+            </div>`;
+        }
         const frame = GRADE_FRAME[gradeByHero[name]];
         return `
-        <div class="replay-hero">
+        <div class="formation-slot"${isEditable ? ` onclick="openSlotModal('${team}',${pos})"` : ''} title="${pos}번 · ${name}">
             <div class="replay-hero-img"${frame ? ` style="--grade:${frame}"` : ''}>
                 <img src="${HERO_IMG_PATH}${name}.webp" alt="${name}"
                      onerror="this.parentElement.innerHTML='<div class=\\'replay-hero-fallback\\'>${name}</div>'">
             </div>
+            <span class="formation-no">${pos}</span>
+            ${isEditable ? `<button type="button" class="formation-remove" title="이 자리에서 빼기" onclick="event.stopPropagation();removeSlotHero('${team}',${idx})">×</button>` : ''}
             <span class="replay-hero-name">${name}</span>
         </div>`;
-    }).join('');
+    };
+    const renderLane = (lane, tag, lanePositions) => `
+        <div class="formation-lane ${lane}" style="--lane-offset:${(longest - lanePositions.length) / 2}">
+            <span class="lane-tag">${tag}</span>${lanePositions.map(renderSlot).join('')}
+        </div>`;
+
+    return `
+    <div class="formation-board${isEditable ? ' editable' : ''}">
+        ${renderLane('back', 'B', layout.back)}
+        ${renderLane('front', 'F', layout.front)}
+    </div>`;
+}
+
+// 등록 화면 진형 편집기: 진형 버튼 4개 + 칸을 눌러 영웅을 놓는 진형 판
+// 진형 버튼은 페이지의 setFormationType(team, type)를 부른다
+export function renderFormationEditor(team, formation, heroes) {
+    const { type } = readFormation(formation);
+    const typeButtons = Object.entries(FORMATIONS).map(([key, info]) =>
+        `<button type="button" class="formation-type${key === type ? ' active' : ''}" onclick="setFormationType('${team}','${key}')">${info.name}</button>`
+    ).join('');
+    const placedCount = heroes.filter(Boolean).length;
+
+    return `
+    <div class="formation-editor-hd">진형 <span>빈 칸(+)을 눌러 영웅 배치 · ${placedCount}/3명</span></div>
+    <div class="formation-types">${typeButtons}</div>
+    <div class="formation-preview">${renderFormationBoard(formation, heroes, team)}</div>`;
+}
+
+// 리플레이 모양 팀 한 줄. side: 'ally'(파랑) | 'enemy'(빨강), pets 는 없으면 빈 배열
+// formation 이 없으면 기본 진형 1·2·3번 자리로 그린다
+export function renderReplayRow(side, label, heroes, pets, formation) {
+    const { type } = readFormation(formation);
     const petsHtml = pets.filter(Boolean).map(pet =>
         `<img src="${PET_IMG_PATH}${pet}.png" alt="${pet}" title="${pet}" onerror="this.style.display='none'">`
     ).join('<span class="pet-arrow">›</span>');
 
     return `
     <div class="replay-row ${side}">
-        <span class="replay-label">${label}</span>
-        <div class="replay-heroes">${heroesHtml}</div>
+        <div class="replay-side">
+            <span class="replay-label">${label}</span>
+            <span class="replay-formation">${FORMATIONS[type].name}</span>
+        </div>
+        ${renderFormationBoard(formation, heroes)}
         ${petsHtml ? `<div class="replay-pets">${petsHtml}</div>` : ''}
     </div>`;
 }

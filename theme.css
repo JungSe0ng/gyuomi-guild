@@ -273,13 +273,82 @@ body {
 }
 .replay-row.ally .replay-label { background-image: url('ui/UI_Banner_Ally.png'); }
 .replay-row.enemy .replay-label { background-image: url('ui/UI_Banner_Enemy.png'); }
-.replay-heroes { display: flex; gap: 8px; }
-.replay-hero { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+/* 왼쪽: 팀 배너 + 진형 이름 */
+.replay-side { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; flex-shrink: 0; }
+.replay-formation { margin-left: 8px; font-size: 0.66em; font-weight: 800; color: var(--text-sub); }
 .replay-hero-img { width: 46px; height: 46px; padding: 2px; border-radius: 9px; background: var(--grade, var(--border)); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); }
 .replay-hero-img img,
 .replay-hero-fallback { width: 100%; height: 100%; border-radius: 7px; background: #fff; object-fit: cover; display: block; }
 .replay-hero-fallback { display: flex; align-items: center; justify-content: center; padding: 1px; font-size: 0.52em; text-align: center; color: var(--text-muted); }
-.replay-hero-name { font-size: 0.62em; font-weight: 700; color: var(--text-sub); }
+.replay-hero-name { max-width: 54px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.62em; font-weight: 700; color: var(--text-sub); }
+
+/* 진형 판: 위 후방(B, 빨강) / 아래 전방(F, 파랑). 리플레이 화면처럼 선 위에 자리를 놓는다
+   --lane-offset(칸 수)만큼 줄을 밀어서 앞뒷줄이 서로 사이사이에 엇갈리게 한다 */
+.formation-board {
+    --slot: 46px;          /* 초상화 한 변 */
+    --slot-w: 52px;        /* 칸 너비 */
+    --slot-gap: 6px;
+    --slot-step: calc(var(--slot-w) + var(--slot-gap));
+    display: flex; flex-direction: column; gap: 4px;
+}
+.formation-lane {
+    position: relative;
+    display: flex; align-items: flex-start; gap: var(--slot-gap);
+    min-height: var(--slot);
+    padding-left: calc(24px + var(--lane-offset, 0) * var(--slot-step));
+}
+.formation-lane::before { content: ''; position: absolute; left: 10px; right: 0; top: calc(var(--slot) / 2 - 1px); height: 3px; border-radius: 2px; }
+.formation-lane.back::before { background: linear-gradient(90deg, rgba(200, 50, 60, 0.6), rgba(200, 50, 60, 0.08)); }
+.formation-lane.front::before { background: linear-gradient(90deg, rgba(62, 111, 216, 0.6), rgba(62, 111, 216, 0.08)); }
+.lane-tag { position: absolute; left: 0; top: calc(var(--slot) / 2 - 9px); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6em; font-weight: 900; color: #fff; }
+.formation-lane.back .lane-tag { background: var(--enemy); }
+.formation-lane.front .lane-tag { background: var(--ally); }
+.formation-slot { position: relative; z-index: 1; width: var(--slot-w); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.formation-slot .replay-hero-img { width: var(--slot); height: var(--slot); }
+.formation-empty {
+    width: var(--slot); height: var(--slot);
+    border-radius: 9px; background: #e4ded2; border: 1px dashed #c2b9a6;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4em; font-weight: 300; color: #a39985;
+}
+.formation-no {
+    position: absolute; top: -4px; left: -1px;
+    min-width: 15px; height: 15px; padding: 0 3px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.58em; font-weight: 900; color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.formation-lane.back .formation-no { background: var(--enemy); }
+.formation-lane.front .formation-no { background: var(--ally); }
+.formation-slot.empty .formation-no { background: #a39985; }
+
+/* 등록 화면 진형 편집기: 진형 버튼 + 칸을 눌러 영웅을 놓는 진형 판 */
+.formation-editor { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+.formation-editor-hd { font-size: 0.75em; font-weight: 800; color: var(--text-sub); }
+.formation-editor-hd span { margin-left: 6px; font-weight: 600; color: var(--text-muted); }
+.formation-types { display: flex; flex-wrap: wrap; gap: 6px; }
+.formation-type { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: #fff; color: var(--text-sub); font-family: inherit; font-size: 0.76em; font-weight: 700; cursor: pointer; }
+.formation-type.active { background: var(--grad); color: var(--ink-on-gold); border-color: #a8823f; }
+.formation-preview { padding: 14px 12px 6px; border-radius: 10px; background: #fff; border: 1px solid var(--border); overflow-x: auto; }
+
+/* 편집 모드 진형 판: 칸을 키우고 누를 수 있게 */
+.formation-board.editable { --slot: 64px; --slot-w: 72px; --slot-gap: 10px; gap: 6px; }
+.formation-board.editable .formation-slot { cursor: pointer; }
+.formation-board.editable .formation-slot:hover .formation-empty,
+.formation-board.editable .formation-slot:hover .replay-hero-img { box-shadow: 0 0 0 3px var(--gold-line); }
+.formation-board.editable .formation-slot.disabled { opacity: 0.45; cursor: default; }
+.formation-board.editable .formation-slot.disabled:hover .formation-empty { box-shadow: none; }
+.formation-remove {
+    position: absolute; top: -6px; right: 0;
+    width: 20px; height: 20px;
+    border: none; border-radius: 50%;
+    background: #2f2a3a; color: #fff;
+    font-family: inherit; font-size: 0.75em; line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.formation-remove:hover { background: var(--enemy); }
 .replay-pets { display: flex; align-items: center; gap: 3px; margin-left: auto; }
 .replay-pets img { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--gold-line); background: #fff; object-fit: cover; }
 .replay-pets .pet-arrow { font-size: 0.8em; font-weight: 900; color: var(--gold); }
@@ -315,6 +384,10 @@ body {
 @media (max-width: 480px) {
     .replay-row { flex-wrap: wrap; gap: 8px; }
     .replay-label { width: 96px; }
+    .replay-side { flex-direction: row; align-items: center; flex-basis: 100%; }
+    .formation-board { padding-left: 10px; --slot: 40px; --slot-w: 46px; --slot-gap: 4px; }
+    .formation-board.editable { padding-left: 0; --slot: 50px; --slot-w: 56px; --slot-gap: 6px; }
+    .formation-preview { padding: 12px 8px 6px; }
     .replay-pets { flex-basis: 100%; margin-left: 0; padding-left: 12px; }
     .equip-grid { grid-template-columns: 1fr; }
 }

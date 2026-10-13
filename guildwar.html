@@ -109,58 +109,6 @@
         .team-section-hd.atk-hd { color: var(--primary); }
         .team-section-hd.def-hd { color: var(--secondary); }
 
-        .team-slots {
-            padding: 14px 16px;
-            display: flex;
-            gap: 12px;
-        }
-
-        /* 영웅 슬롯 */
-        .hero-slot {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .hero-slot-img {
-            width: 72px; height: 72px;
-            border-radius: 12px;
-            border: 2px dashed var(--border);
-            background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s;
-            overflow: hidden; position: relative;
-        }
-
-        .hero-slot-img:hover { border-color: var(--primary); background: var(--primary-soft); }
-        .hero-slot-img.selected { border: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(124,92,191,0.15); }
-        .hero-slot-img.active-hero { border: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(124,92,191,0.25); }
-        .hero-slot-img.def-selected { border: 2px solid var(--secondary); box-shadow: 0 0 0 3px rgba(232,96,154,0.15); }
-
-        .hero-slot-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-
-        .hero-slot-img .slot-empty {
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
-            color: var(--text-muted); font-size: 0.68em; font-weight: 600;
-        }
-        .hero-slot-img .slot-empty .slot-icon { font-size: 1.6em; }
-
-        .hero-slot-name {
-            font-size: 0.72em; font-weight: 700; color: var(--text);
-            text-align: center; min-height: 16px;
-        }
-
-        .hero-slot-btn {
-            font-size: 0.68em; padding: 3px 10px;
-            border-radius: 6px; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text-muted);
-            cursor: pointer; transition: all 0.18s;
-        }
-        .hero-slot-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .hero-slot-btn.active-btn { background: var(--primary); color: white; border-color: var(--primary); }
-
         /* 장비 패널 */
         .equip-panel {
             background: var(--white);
@@ -622,17 +570,15 @@
                         <!-- 내 공격팀 (리플레이처럼 공격이 위) -->
                         <div class="team-section">
                             <div class="team-section-hd atk-hd">⚔️ 내 공격팀 (3명)</div>
-                            <div class="team-slots" id="atkSlots">
-                                <!-- JS로 생성 -->
-                            </div>
+                            <!-- 진형 편집기: 진형 칸을 눌러 영웅 배치 (JS로 생성) -->
+                            <div class="formation-editor" id="atkFormation"></div>
                         </div>
 
                         <!-- 상대 방어팀 -->
                         <div class="team-section">
                             <div class="team-section-hd def-hd">🛡️ 상대 방어팀 (3명)</div>
-                            <div class="team-slots" id="defSlots">
-                                <!-- JS로 생성 -->
-                            </div>
+                            <!-- 진형 편집기: 진형 칸을 눌러 영웅 배치 (JS로 생성) -->
+                            <div class="formation-editor" id="defFormation"></div>
                         </div>
 
                         <!-- 장비 패널 -->
@@ -739,7 +685,8 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { setHeroGrades, renderReplayRow, renderReplayVs, renderEquipCards, renderSuccessBadge } from './guide-ui.js';
+import { setHeroGrades, renderReplayRow, renderReplayVs, renderEquipCards, renderSuccessBadge,
+         readFormation, placeHero, removeHero, renderFormationEditor } from './guide-ui.js';
 
 const FB = {
     apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -886,6 +833,8 @@ const ARM_OPTS = ['받는 피해 감소','막기 확률','모든 공격력(%)','
 // ──────────────────────────────────────────
 let defHeroes = [null, null, null]; // 방어팀
 let atkHeroes = [null, null, null]; // 공격팀
+let atkFormation = readFormation(null); // 공격팀 진형 {type, positions} (기본 진형 1·2·3)
+let defFormation = readFormation(null); // 상대 방어팀 진형
 let activeAtkIdx = 0; // 현재 활성 공격 영웅 탭
 let equipData = [{}, {}, {}]; // 각 공격영웅 장비
 let skillOrder = [null, null, null]; // 스킬 순서
@@ -917,29 +866,47 @@ function switchSub(sub) {
 // 초기 슬롯 렌더
 // ──────────────────────────────────────────
 function initSlots() {
-    // 방어팀
-    document.getElementById('defSlots').innerHTML = [0,1,2].map(i => `
-        <div class="hero-slot">
-            <div class="hero-slot-img" id="defSlot${i}" onclick="openHeroModal('def',${i})">
-                <div class="slot-empty"><span class="slot-icon">🛡️</span><span>선택</span></div>
-            </div>
-            <div class="hero-slot-name" id="defSlotName${i}"></div>
-            <button class="hero-slot-btn" onclick="openHeroModal('def',${i})">선택</button>
-        </div>
-    `).join('');
-
-    // 공격팀
-    document.getElementById('atkSlots').innerHTML = [0,1,2].map(i => `
-        <div class="hero-slot">
-            <div class="hero-slot-img" id="atkSlot${i}" onclick="openHeroModal('atk',${i})">
-                <div class="slot-empty"><span class="slot-icon">⚔️</span><span>선택</span></div>
-            </div>
-            <div class="hero-slot-name" id="atkSlotName${i}"></div>
-            <button class="hero-slot-btn" id="atkSlotBtn${i}" onclick="setActiveAtk(${i})">장비설정</button>
-        </div>
-    `).join('');
-
+    // 팀 영웅은 진형 편집기의 칸을 눌러 고른다
     renderPetGrid();
+    renderFormationEditors();
+}
+
+// ──────────────────────────────────────────
+// 진형 편집기 (공격팀 / 상대 방어팀)
+// ──────────────────────────────────────────
+function renderFormationEditors() {
+    document.getElementById('atkFormation').innerHTML = renderFormationEditor('atk', atkFormation, atkHeroes);
+    document.getElementById('defFormation').innerHTML = renderFormationEditor('def', defFormation, defHeroes);
+}
+
+function setFormationType(team, type) {
+    if (team === 'atk') atkFormation = { ...atkFormation, type };
+    else defFormation = { ...defFormation, type };
+    renderFormationEditors();
+}
+
+// 진형 칸에서 영웅을 뺀다. 공격팀이면 그 영웅의 장비 입력도 비운다
+function removeSlotHero(team, idx) {
+    if (team === 'atk') {
+        atkHeroes = removeHero(atkHeroes, idx);
+        equipData[idx] = {};
+        refreshAtkEquip();
+        renderSkillGrid();
+    } else {
+        defHeroes = removeHero(defHeroes, idx);
+    }
+    renderFormationEditors();
+}
+
+// 공격팀이 바뀐 뒤 장비 패널을 맞춘다: 활성 영웅이 빠졌으면 남은 첫 영웅, 아무도 없으면 안내 문구
+function refreshAtkEquip() {
+    const firstIdx = atkHeroes.findIndex(Boolean);
+    if (firstIdx === -1) {
+        document.getElementById('equipHeroTabs').innerHTML = '';
+        document.getElementById('equipBody').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">공격팀 영웅을 먼저 선택해주세요</div>';
+        return;
+    }
+    setActiveAtk(atkHeroes[activeAtkIdx] ? activeAtkIdx : firstIdx);
 }
 
 // ──────────────────────────────────────────
@@ -952,10 +919,11 @@ function heroImgEl(name, cls='') {
 // ──────────────────────────────────────────
 // 영웅 선택 모달
 // ──────────────────────────────────────────
-function openHeroModal(type, idx) {
-    modalTarget = { type, idx };
-    const title = type === 'def' ? `방어팀 ${idx+1}번 영웅 선택` : `공격팀 ${idx+1}번 영웅 선택`;
-    document.getElementById('heroModalTitle').textContent = title;
+// 진형 칸(pos)을 눌렀을 때: 그 자리에 놓을 영웅을 고르는 창을 연다
+function openSlotModal(team, pos) {
+    modalTarget = { team, pos };
+    const teamName = team === 'def' ? '상대 방어팀' : '공격팀';
+    document.getElementById('heroModalTitle').textContent = `${teamName} ${pos}번 자리 영웅 선택`;
     document.getElementById('heroSearch').value = '';
     renderHeroModal('');
     document.getElementById('heroModal').classList.add('open');
@@ -990,25 +958,24 @@ function renderHeroModal(q) {
 
 function selectHero(name) {
     if (!modalTarget) return;
-    const { type, idx } = modalTarget;
+    const { team, pos } = modalTarget;
 
-    if (type === 'def') {
-        defHeroes[idx] = name;
-        const slot = document.getElementById(`defSlot${idx}`);
-        slot.innerHTML = heroImgEl(name);
-        slot.className = 'hero-slot-img def-selected';
-        document.getElementById(`defSlotName${idx}`).textContent = name;
+    if (team === 'def') {
+        const placed = placeHero(defFormation, defHeroes, pos, name);
+        if (placed.idx === -1) { closeHeroModal(); return; }
+        defFormation = placed.formation;
+        defHeroes = placed.heroes;
     } else {
-        atkHeroes[idx] = name;
-        const slot = document.getElementById(`atkSlot${idx}`);
-        slot.innerHTML = heroImgEl(name);
-        slot.className = 'hero-slot-img selected';
-        document.getElementById(`atkSlotName${idx}`).textContent = name;
-        setActiveAtk(idx);
+        const placed = placeHero(atkFormation, atkHeroes, pos, name);
+        if (placed.idx === -1) { closeHeroModal(); return; }
+        atkFormation = placed.formation;
+        atkHeroes = placed.heroes;
+        setActiveAtk(placed.idx);
         renderEquipTabs();
         renderSkillGrid();
     }
 
+    renderFormationEditors();
     closeHeroModal();
 }
 
@@ -1018,15 +985,6 @@ function selectHero(name) {
 function setActiveAtk(idx) {
     if (!atkHeroes[idx]) return;
     activeAtkIdx = idx;
-
-    // 슬롯 버튼 강조
-    [0,1,2].forEach(i => {
-        const btn = document.getElementById(`atkSlotBtn${i}`);
-        const slot = document.getElementById(`atkSlot${i}`);
-        if (btn) btn.className = 'hero-slot-btn' + (i === idx ? ' active-btn' : '');
-        if (slot && atkHeroes[i]) slot.className = 'hero-slot-img' + (i === idx ? ' active-hero' : ' selected');
-    });
-
     renderEquipBody();
 }
 
@@ -1278,6 +1236,8 @@ async function saveGuide() {
             detail: document.getElementById('fDetail').value,
             defenseTeam: [...defHeroes],
             attackTeam: [...atkHeroes],
+            attackFormation: readFormation(atkFormation),
+            defenseFormation: readFormation(defFormation),
             equipData: JSON.parse(JSON.stringify(equipData)),
             skillOrder: skillOrder.filter(Boolean).map(s => ({ hero: s.hero, num: s.num, key: s.key })),
             pets: selectedPets.filter(Boolean),
@@ -1393,9 +1353,9 @@ function renderGuidesHTML(guides) {
                     <div class="guide-title">${g.name}${renderSuccessBadge(g.successRate)}</div>
                     <!-- 리플레이 모양: 공격 위 / 방어 아래 -->
                     <div class="replay-box">
-                        ${renderReplayRow('ally', '⚔️ 아군 공격', at, pets)}
+                        ${renderReplayRow('ally', '⚔️ 아군 공격', at, pets, g.attackFormation)}
                         ${renderReplayVs()}
-                        ${renderReplayRow('enemy', '🛡️ 상대 방어', dt, [])}
+                        ${renderReplayRow('enemy', '🛡️ 상대 방어', dt, [], g.defenseFormation)}
                     </div>
                     <div class="guide-meta">${g.author||''} · ${date} · ⚡ ${g.speedCondition||'속내실'}</div>
                 </div>
@@ -1565,27 +1525,19 @@ window.editGuide = async function(id) {
     const radio = document.querySelector(`input[name="speedAtk"][value="${g.speedCondition||'속내실'}"]`);
     if (radio) radio.checked = true;
 
-    // 방어팀 슬롯 채우기
+    // 방어팀 영웅 (진형 편집기에 그려진다)
     const dt = g.defenseTeam || [];
     dt.forEach((h, i) => {
         if (!h) return;
         defHeroes[i] = h;
-        const slot = document.getElementById(`defSlot${i}`);
-        const nameEl = document.getElementById(`defSlotName${i}`);
-        if (slot) { slot.innerHTML = heroImgEl(h); slot.className = 'hero-slot-img def-selected'; }
-        if (nameEl) nameEl.textContent = h;
     });
 
-    // 공격팀 슬롯 채우기
+    // 공격팀 영웅 (진형 편집기에 그려진다)
     const at = g.attackTeam || [];
     const eq = g.equipData || [{},{},{}];
     at.forEach((h, i) => {
         if (!h) return;
         atkHeroes[i] = h;
-        const slot = document.getElementById(`atkSlot${i}`);
-        const nameEl = document.getElementById(`atkSlotName${i}`);
-        if (slot) { slot.innerHTML = heroImgEl(h); slot.className = 'hero-slot-img selected'; }
-        if (nameEl) nameEl.textContent = h;
 
         // 장비 데이터 미리 세팅
         equipData[i] = {
@@ -1600,6 +1552,11 @@ window.editGuide = async function(id) {
             description: eq[i]?.description || '',
         };
     });
+
+    // 진형 복원 (진형 정보가 없는 예전 공략은 기본 진형 1·2·3번 자리)
+    atkFormation = readFormation(g.attackFormation);
+    defFormation = readFormation(g.defenseFormation);
+    renderFormationEditors();
 
     // 장비 탭 렌더
     renderEquipTabs();
@@ -1717,10 +1674,12 @@ window.saveEditComment = saveEditComment;
 window.editGuide = editGuide;
 window.switchMainTab = switchMainTab;
 window.switchSub = switchSub;
-window.openHeroModal = openHeroModal;
+window.openSlotModal = openSlotModal;
 window.closeHeroModal = closeHeroModal;
 window.renderHeroModal = renderHeroModal;
 window.selectHero = selectHero;
+window.setFormationType = setFormationType;
+window.removeSlotHero = removeSlotHero;
 window.setActiveAtk = setActiveAtk;
 window.saveEquip = saveEquip;
 window.renderSkillGrid = renderSkillGrid;
