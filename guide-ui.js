@@ -110,36 +110,58 @@ export function removeHero(heroes, idx) {
     return heroes.map((hero, i) => (i === idx ? null : hero));
 }
 
+// idx번째 영웅을 pos 자리로 옮긴다. 다른 번호가 그 자리를 쓰고 있으면 두 번호의 자리를 맞바꾼다
+// 영웅 번호(idx)는 그대로라서 그 번호에 붙은 장비 입력이 유지된다
+export function moveHero(formation, idx, pos) {
+    const moved = readFormation(formation);
+    const otherIdx = moved.positions.indexOf(pos);
+    if (otherIdx !== -1 && otherIdx !== idx) moved.positions[otherIdx] = moved.positions[idx];
+    moved.positions[idx] = pos;
+    return moved;
+}
+
 // 진형 판: 위 후방(B, 빨강) / 아래 전방(F, 파랑). 그 진형의 자리를 번호 순으로 그리고 영웅이 없는 자리는 빈칸
 // 칸이 적은 줄을 (많은 줄 칸 수 - 적은 줄 칸 수) / 2 칸만큼 밀어서 인게임처럼 앞뒷줄이 엇갈리게 한다
-// team 을 넘기면 편집 모드: 칸을 누르면 페이지의 openSlotModal(team, pos), × 는 removeSlotHero(team, idx)
-export function renderFormationBoard(formation, heroes, team = '') {
+// team 을 넘기면 편집 모드: 칸을 누르면 페이지의 clickFormationSlot(team, pos)
+// (영웅 선택 → 옮길 칸 누르기로 이동·교체, 빈 칸은 영웅 배치), × 는 removeSlotHero(team, idx), [변경] 은 openSlotModal(team, pos)
+// selectedIdx 는 옮기려고 고른 영웅 번호. 없으면 -1
+export function renderFormationBoard(formation, heroes, team = '', selectedIdx = -1) {
     const { type, positions } = readFormation(formation);
     const layout = FORMATIONS[type];
     const isEditable = Boolean(team);
+    const isMoving = isEditable && selectedIdx !== -1 && Boolean(heroes[selectedIdx]);
     const isFull = heroes.every(Boolean);
     const longest = Math.max(layout.front.length, layout.back.length);
+    const slotClick = pos => (isEditable ? ` onclick="clickFormationSlot('${team}',${pos})"` : '');
 
     const renderSlot = pos => {
         const idx = positions.indexOf(pos);
         const name = idx === -1 ? null : heroes[idx];
         if (!name) {
-            const canPlace = isEditable && !isFull;
+            const canClick = isEditable && (isMoving || !isFull);
+            const label = isMoving ? '이동' : (canClick ? '+' : '');
+            const title = isMoving ? `${pos}번 자리로 이동` : `${pos}번 자리에 영웅 배치`;
             return `
-            <div class="formation-slot empty${isEditable && isFull ? ' disabled' : ''}"${canPlace ? ` onclick="openSlotModal('${team}',${pos})" title="${pos}번 자리에 영웅 배치"` : ''}>
-                <div class="formation-empty">${canPlace ? '+' : ''}</div>
+            <div class="formation-slot empty${isEditable && !canClick ? ' disabled' : ''}"${canClick ? `${slotClick(pos)} title="${title}"` : ''}>
+                <div class="formation-empty">${label}</div>
                 <span class="formation-no">${pos}</span>
             </div>`;
         }
         const frame = GRADE_FRAME[gradeByHero[name]];
+        const isSelected = isMoving && idx === selectedIdx;
+        const title = !isEditable ? `${pos}번 · ${name}`
+            : isSelected ? '다시 누르면 선택 해제'
+            : isMoving ? `${heroes[selectedIdx]}와 자리 교체`
+            : `${name} 선택 (옮길 칸을 누르면 이동)`;
         return `
-        <div class="formation-slot"${isEditable ? ` onclick="openSlotModal('${team}',${pos})"` : ''} title="${pos}번 · ${name}">
+        <div class="formation-slot${isSelected ? ' selected' : ''}${isMoving && !isSelected ? ' swap-target' : ''}"${slotClick(pos)} title="${title}">
             <div class="replay-hero-img"${frame ? ` style="--grade:${frame}"` : ''}>
                 <img src="${HERO_IMG_PATH}${name}.webp" alt="${name}"
                      onerror="this.parentElement.innerHTML='<div class=\\'replay-hero-fallback\\'>${name}</div>'">
             </div>
             <span class="formation-no">${pos}</span>
             ${isEditable ? `<button type="button" class="formation-remove" title="이 자리에서 빼기" onclick="event.stopPropagation();removeSlotHero('${team}',${idx})">×</button>` : ''}
+            ${isSelected ? `<button type="button" class="formation-change" title="다른 영웅으로 바꾸기" onclick="event.stopPropagation();openSlotModal('${team}',${pos})">변경</button>` : ''}
             <span class="replay-hero-name">${name}</span>
         </div>`;
     };
@@ -149,25 +171,29 @@ export function renderFormationBoard(formation, heroes, team = '') {
         </div>`;
 
     return `
-    <div class="formation-board${isEditable ? ' editable' : ''}">
+    <div class="formation-board${isEditable ? ' editable' : ''}${isMoving ? ' moving' : ''}">
         ${renderLane('back', 'B', layout.back)}
         ${renderLane('front', 'F', layout.front)}
     </div>`;
 }
 
-// 등록 화면 진형 편집기: 진형 버튼 4개 + 칸을 눌러 영웅을 놓는 진형 판
+// 등록 화면 진형 편집기: 진형 버튼 4개 + 칸을 눌러 영웅을 놓고 옮기는 진형 판
 // 진형 버튼은 페이지의 setFormationType(team, type)를 부른다
-export function renderFormationEditor(team, formation, heroes) {
+export function renderFormationEditor(team, formation, heroes, selectedIdx = -1) {
     const { type } = readFormation(formation);
     const typeButtons = Object.entries(FORMATIONS).map(([key, info]) =>
         `<button type="button" class="formation-type${key === type ? ' active' : ''}" onclick="setFormationType('${team}','${key}')">${info.name}</button>`
     ).join('');
     const placedCount = heroes.filter(Boolean).length;
+    const selectedName = selectedIdx !== -1 ? heroes[selectedIdx] : null;
+    const guide = selectedName
+        ? `<b>${selectedName}</b> 선택됨 · 옮길 칸을 누르세요 (영웅이 있으면 자리 교체)`
+        : `빈 칸(+) 배치 · 영웅을 누르면 자리 이동 · ${placedCount}/3명`;
 
     return `
-    <div class="formation-editor-hd">진형 <span>빈 칸(+)을 눌러 영웅 배치 · ${placedCount}/3명</span></div>
+    <div class="formation-editor-hd">진형 <span${selectedName ? ' class="moving-guide"' : ''}>${guide}</span></div>
     <div class="formation-types">${typeButtons}</div>
-    <div class="formation-preview">${renderFormationBoard(formation, heroes, team)}</div>`;
+    <div class="formation-preview">${renderFormationBoard(formation, heroes, team, selectedIdx)}</div>`;
 }
 
 // 리플레이 모양 팀 한 줄. side: 'ally'(파랑) | 'enemy'(빨강), pets 는 없으면 빈 배열

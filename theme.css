@@ -349,6 +349,35 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 .formation-remove:hover { background: var(--enemy); }
+
+/* 자리 이동: 영웅을 누르면 선택(금색 테두리) → 빈 칸은 이동, 다른 영웅 칸은 자리 교체 */
+.formation-editor-hd .moving-guide { color: var(--gold); }
+.formation-editor-hd .moving-guide b { color: var(--text); }
+.formation-board.editable .formation-slot.selected .replay-hero-img {
+    background: var(--gold-light);
+    box-shadow: 0 0 0 3px var(--gold-line), 0 0 14px 4px rgba(217, 181, 106, 0.75);
+    animation: slot-glow 1.2s ease-in-out infinite alternate;
+}
+@keyframes slot-glow { to { box-shadow: 0 0 0 3px var(--gold-line), 0 0 6px 1px rgba(217, 181, 106, 0.4); } }
+.formation-board.moving .formation-slot.empty .formation-empty {
+    border: 2px dashed var(--gold-line); background: var(--gold-soft);
+    color: var(--gold); font-size: 0.72em; font-weight: 900;
+}
+.formation-board.moving .formation-slot.swap-target .replay-hero-img { position: relative; }
+.formation-board.moving .formation-slot.swap-target:hover .replay-hero-img::after {
+    content: '⇄'; position: absolute; inset: 2px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(30, 26, 38, 0.55); color: #fff; font-size: 1.3em; font-weight: 900;
+}
+.formation-change {
+    position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+    padding: 2px 8px;
+    border: 1px solid #fff4d2; border-radius: 999px;
+    background: var(--grad); color: var(--ink-on-gold);
+    font-family: inherit; font-size: 0.62em; font-weight: 900;
+    cursor: pointer; white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
 .replay-pets { display: flex; align-items: center; gap: 3px; margin-left: auto; }
 .replay-pets img { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--gold-line); background: #fff; object-fit: cover; }
 .replay-pets .pet-arrow { font-size: 0.8em; font-weight: 900; color: var(--gold); }

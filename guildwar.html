@@ -686,7 +686,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { setHeroGrades, renderReplayRow, renderReplayVs, renderEquipCards, renderSuccessBadge,
-         readFormation, placeHero, removeHero, renderFormationEditor } from './guide-ui.js';
+         readFormation, placeHero, removeHero, moveHero, renderFormationEditor } from './guide-ui.js';
 
 const FB = {
     apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -835,6 +835,8 @@ let defHeroes = [null, null, null]; // 방어팀
 let atkHeroes = [null, null, null]; // 공격팀
 let atkFormation = readFormation(null); // 공격팀 진형 {type, positions} (기본 진형 1·2·3)
 let defFormation = readFormation(null); // 상대 방어팀 진형
+let atkSelectedIdx = -1; // 진형 판에서 옮기려고 고른 공격팀 영웅 번호 (없으면 -1)
+let defSelectedIdx = -1; // 진형 판에서 옮기려고 고른 상대 방어팀 영웅 번호
 let activeAtkIdx = 0; // 현재 활성 공격 영웅 탭
 let equipData = [{}, {}, {}]; // 각 공격영웅 장비
 let skillOrder = [null, null, null]; // 스킬 순서
@@ -875,8 +877,8 @@ function initSlots() {
 // 진형 편집기 (공격팀 / 상대 방어팀)
 // ──────────────────────────────────────────
 function renderFormationEditors() {
-    document.getElementById('atkFormation').innerHTML = renderFormationEditor('atk', atkFormation, atkHeroes);
-    document.getElementById('defFormation').innerHTML = renderFormationEditor('def', defFormation, defHeroes);
+    document.getElementById('atkFormation').innerHTML = renderFormationEditor('atk', atkFormation, atkHeroes, atkSelectedIdx);
+    document.getElementById('defFormation').innerHTML = renderFormationEditor('def', defFormation, defHeroes, defSelectedIdx);
 }
 
 function setFormationType(team, type) {
@@ -885,8 +887,45 @@ function setFormationType(team, type) {
     renderFormationEditors();
 }
 
+function setSelectedIdx(team, idx) {
+    if (team === 'atk') atkSelectedIdx = idx;
+    else defSelectedIdx = idx;
+}
+
+// 진형 칸을 눌렀을 때
+// 선택 없음: 영웅 칸이면 그 영웅을 선택, 빈 칸이면 영웅 선택창
+// 선택 있음: 같은 영웅이면 선택 해제, 빈 칸이면 이동, 다른 영웅 칸이면 자리 교체
+// 영웅 번호는 그대로이고 자리 번호만 바뀌어서 장비 입력이 유지된다
+function clickFormationSlot(team, pos) {
+    const isAtk = team === 'atk';
+    const formation = readFormation(isAtk ? atkFormation : defFormation);
+    const heroes = isAtk ? atkHeroes : defHeroes;
+    const selectedIdx = isAtk ? atkSelectedIdx : defSelectedIdx;
+    const idxAtPos = formation.positions.indexOf(pos);
+    const hasHero = idxAtPos !== -1 && Boolean(heroes[idxAtPos]);
+
+    if (selectedIdx === -1 || !heroes[selectedIdx]) {
+        if (hasHero) {
+            setSelectedIdx(team, idxAtPos);
+            renderFormationEditors();
+        } else if (heroes.some(hero => !hero)) {
+            openSlotModal(team, pos);
+        }
+        return;
+    }
+
+    if (idxAtPos !== selectedIdx) {
+        const moved = moveHero(formation, selectedIdx, pos);
+        if (isAtk) atkFormation = moved;
+        else defFormation = moved;
+    }
+    setSelectedIdx(team, -1);
+    renderFormationEditors();
+}
+
 // 진형 칸에서 영웅을 뺀다. 공격팀이면 그 영웅의 장비 입력도 비운다
 function removeSlotHero(team, idx) {
+    setSelectedIdx(team, -1);
     if (team === 'atk') {
         atkHeroes = removeHero(atkHeroes, idx);
         equipData[idx] = {};
@@ -975,6 +1014,7 @@ function selectHero(name) {
         renderSkillGrid();
     }
 
+    setSelectedIdx(team, -1);
     renderFormationEditors();
     closeHeroModal();
 }
@@ -1556,6 +1596,8 @@ window.editGuide = async function(id) {
     // 진형 복원 (진형 정보가 없는 예전 공략은 기본 진형 1·2·3번 자리)
     atkFormation = readFormation(g.attackFormation);
     defFormation = readFormation(g.defenseFormation);
+    atkSelectedIdx = -1;
+    defSelectedIdx = -1;
     renderFormationEditors();
 
     // 장비 탭 렌더
@@ -1680,6 +1722,7 @@ window.renderHeroModal = renderHeroModal;
 window.selectHero = selectHero;
 window.setFormationType = setFormationType;
 window.removeSlotHero = removeSlotHero;
+window.clickFormationSlot = clickFormationSlot;
 window.setActiveAtk = setActiveAtk;
 window.saveEquip = saveEquip;
 window.renderSkillGrid = renderSkillGrid;

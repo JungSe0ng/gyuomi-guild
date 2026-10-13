@@ -436,7 +436,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { setHeroGrades, renderReplayRow, renderEquipCards, renderPriorityStars,
-         readFormation, placeHero, removeHero, renderFormationEditor } from './guide-ui.js';
+         readFormation, placeHero, removeHero, moveHero, renderFormationEditor } from './guide-ui.js';
 
 const FB = {
     apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
@@ -486,6 +486,7 @@ const ARM_OPTS = ['받는 피해 감소','막기 확률','모든 공격력(%)','
 // ──────────────────────────────────
 let defHeroes   = [null, null, null];
 let defFormation = readFormation(null); // 방어팀 진형 {type, positions} (기본 진형 1·2·3)
+let defSelectedIdx = -1; // 진형 판에서 옮기려고 고른 영웅 번호 (없으면 -1)
 let activeDefIdx = 0;
 let equipData   = [{}, {}, {}];
 let skillOrder  = [null, null, null];
@@ -517,7 +518,7 @@ function initSlots() {
 // 진형 편집기 (방어팀)
 // ──────────────────────────────────
 function renderFormationEditors() {
-    document.getElementById('defFormation').innerHTML = renderFormationEditor('def', defFormation, defHeroes);
+    document.getElementById('defFormation').innerHTML = renderFormationEditor('def', defFormation, defHeroes, defSelectedIdx);
 }
 
 function setFormationType(team, type) {
@@ -525,8 +526,33 @@ function setFormationType(team, type) {
     renderFormationEditors();
 }
 
+// 진형 칸을 눌렀을 때
+// 선택 없음: 영웅 칸이면 그 영웅을 선택, 빈 칸이면 영웅 선택창
+// 선택 있음: 같은 영웅이면 선택 해제, 빈 칸이면 이동, 다른 영웅 칸이면 자리 교체
+// 영웅 번호는 그대로이고 자리 번호만 바뀌어서 장비 입력이 유지된다
+function clickFormationSlot(team, pos) {
+    const formation = readFormation(defFormation);
+    const idxAtPos = formation.positions.indexOf(pos);
+    const hasHero = idxAtPos !== -1 && Boolean(defHeroes[idxAtPos]);
+
+    if (defSelectedIdx === -1 || !defHeroes[defSelectedIdx]) {
+        if (hasHero) {
+            defSelectedIdx = idxAtPos;
+            renderFormationEditors();
+        } else if (defHeroes.some(hero => !hero)) {
+            openSlotModal(team, pos);
+        }
+        return;
+    }
+
+    if (idxAtPos !== defSelectedIdx) defFormation = moveHero(formation, defSelectedIdx, pos);
+    defSelectedIdx = -1;
+    renderFormationEditors();
+}
+
 // 진형 칸에서 영웅을 빼고 그 영웅의 장비 입력도 비운다
 function removeSlotHero(team, idx) {
+    defSelectedIdx = -1;
     defHeroes = removeHero(defHeroes, idx);
     equipData[idx] = {};
     refreshDefEquip();
@@ -597,6 +623,7 @@ function selectHero(name) {
     setActiveHero(placed.idx);
     renderEquipTabs();
     renderSkillGrid();
+    defSelectedIdx = -1;
     renderFormationEditors();
     closeHeroModal();
 }
@@ -1024,6 +1051,7 @@ async function editDefGuide(id) {
     });
     // 진형 복원 (진형 정보가 없는 예전 공략은 기본 진형 1·2·3번 자리)
     defFormation = readFormation(g.formation);
+    defSelectedIdx = -1;
     renderFormationEditors();
     renderEquipTabs();
     if (defHeroes[0]) { activeDefIdx = 0; setActiveHero(0); }
@@ -1234,6 +1262,7 @@ window.renderHeroModal = renderHeroModal;
 window.selectHero = selectHero;
 window.setFormationType = setFormationType;
 window.removeSlotHero = removeSlotHero;
+window.clickFormationSlot = clickFormationSlot;
 window.setActiveHero = setActiveHero;
 window.saveEquip = saveEquip;
 window.renderSkillGrid = renderSkillGrid;
