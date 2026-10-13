@@ -322,6 +322,8 @@ body {
 .formation-lane.back .formation-no { background: var(--enemy); }
 .formation-lane.front .formation-no { background: var(--ally); }
 .formation-slot.empty .formation-no { background: #a39985; }
+/* 자리 번호는 등록 화면(편집 모드)에서만 보인다. 등록된 공략 카드에서는 숨긴다 */
+.formation-board:not(.editable) .formation-no { display: none; }
 
 /* 등록 화면 진형 편집기: 진형 버튼 + 칸을 눌러 영웅을 놓는 진형 판 */
 .formation-editor { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 10px; }
