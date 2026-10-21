@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강림 원정대 - 귀요미 길드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- 공통 테마 (변수, 사이드바, 상단바, 공략 카드 · 머리판 · 영웅 세팅 · 스킬 순서 부품) -->
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        /* ── 콘텐츠 레이아웃 ── */
+        .content { padding: 24px 28px; flex: 1; }
+
+        .page-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .page-hd h1 { font-size: 1.2em; font-weight: 800; }
+        .page-hd p { font-size: 0.78em; color: var(--text-muted); margin-top: 2px; }
+
+        /* 보스 탭: 종결 보스 파괴신을 맨 앞에, 뒤로 파괴의 그림자 4마리 */
+        .boss-tabs {
+            display: flex; align-items: stretch; gap: 6px;
+            padding: 6px; margin-bottom: 14px;
+            background: rgba(12, 11, 16, 0.6);
+            border: 1px solid var(--line-dark);
+            border-radius: 14px;
+        }
+        .boss-tab {
+            position: relative;
+            flex: 1 1 0; min-width: 0;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            padding: 12px 4px 9px;
+            border: 1px solid transparent; border-radius: 10px;
+            background: transparent; color: var(--on-page-sub);
+            font-family: inherit; cursor: pointer;
+            transition: all 0.18s;
+        }
+        .boss-tab:hover { background: rgba(255, 255, 255, 0.06); color: var(--gold-light); }
+        .boss-tab.active {
+            background: linear-gradient(180deg, #fbf6ea, #e8dfcc);
+            color: var(--text);
+            border-color: var(--gold-line);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        }
+        .boss-tab-name { font-size: 0.88em; font-weight: 900; white-space: nowrap; }
+        .boss-tab-sub { font-size: 0.6em; font-weight: 700; opacity: 0.8; white-space: nowrap; }
+        .boss-tab-count {
+            position: absolute; top: 5px; right: 6px;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.12); color: var(--gold-light);
+            font-size: 0.62em; font-weight: 800;
+        }
+        .boss-tab-count.zero { opacity: 0.45; }
+        .boss-tab.active .boss-tab-count { background: var(--gold-soft); color: var(--gold); opacity: 1; }
+
+        /* 보스 얼굴: 그림자는 보라 테두리 + 어둡게, 파괴신은 금빛 결정 엠블럼 (인게임 이미지가 없다) */
+        .boss-face {
+            width: 50px; height: 50px; flex-shrink: 0;
+            border-radius: 50%; overflow: hidden;
+            border: 2px solid rgba(160, 120, 230, 0.75);
+            box-shadow: 0 0 12px rgba(130, 90, 220, 0.55);
+            background: #1a1724;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .boss-face img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.55) brightness(0.88); }
+        .boss-face.final {
+            border-color: #f6c35b;
+            background: radial-gradient(circle at 38% 32%, #fff6cf 0%, #f8c454 35%, #d9772a 70%, #7a2f10 100%);
+            box-shadow: 0 0 16px rgba(246, 178, 60, 0.75);
+            color: #4a1a04; font-size: 1.35em; font-weight: 900;
+        }
+        .boss-tab.final { flex-grow: 1.25; background: radial-gradient(circle at 50% 30%, rgba(246, 178, 60, 0.2), transparent 70%); }
+        .boss-tab.final.active { background: linear-gradient(180deg, #fff4dc, #f0d9a8); border-color: #e7a73c; }
+        .boss-final-badge {
+            position: absolute; top: 5px; left: 6px;
+            padding: 0 6px; border-radius: 999px;
+            background: linear-gradient(180deg, #ffb35c, #d9602a); border: 1px solid #9c3d12;
+            color: #fff; font-size: 0.58em; font-weight: 900; line-height: 15px;
+        }
+        /* 파괴신 ‹ 그림자 4: 그림자를 모두 처치하면 강림 */
+        .boss-flow { align-self: center; display: flex; flex-direction: column; align-items: center; gap: 1px; color: var(--gold-light); font-size: 0.62em; font-weight: 800; white-space: nowrap; }
+        .boss-flow b { font-size: 1.6em; line-height: 1; }
+
+        /* 보스 머리판 (theme.css 머리판 + 큰 보스 얼굴, 파괴신은 금빛) */
+        .boss-hd-main { display: flex; align-items: center; gap: 14px; }
+        .boss-hd-main .boss-face { width: 64px; height: 64px; }
+        .castle-hd.final {
+            border-color: #f6c35b;
+            background:
+                radial-gradient(circle at 10% 50%, rgba(246, 178, 60, 0.4), transparent 55%),
+                linear-gradient(180deg, #4a3326, #221a17);
+        }
+
+        /* 공략 카드: 1팀 · 2팀 두 줄, 스킬 순서가 아직 없을 때 안내 */
+        .team-rows { display: flex; flex-direction: column; gap: 8px; max-width: 620px; margin-bottom: 10px; }
+        .skill-empty { padding: 18px; border-radius: 12px; background: #fff; border: 1px dashed var(--border); text-align: center; font-size: 0.8em; color: var(--text-muted); }
+
+        /* ── 등록 폼 메인 레이아웃 (guildwar.html · siege.html 과 같은 틀) ── */
+        .form-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .left-panel { display: flex; flex-direction: column; gap: 12px; }
+
+        .panel-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .panel-card-title {
+            padding: 11px 14px;
+            font-size: 0.75em;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .panel-card-body { padding: 14px; }
+
+        /* 보스 라디오 */
+        .radio-group { display: flex; flex-direction: column; gap: 7px; }
+        .radio-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 11px; border-radius: 9px;
+            border: 1px solid var(--border);
+            cursor: pointer; transition: all 0.18s;
+            font-size: 0.82em; font-weight: 600;
+        }
+        .radio-item input[type=radio] { accent-color: var(--primary); }
+        .radio-item:has(input:checked) { background: var(--primary-soft); border-color: var(--primary-soft); color: var(--primary); }
+
+        /* 텍스트 입력 */
+        .f-input, .f-textarea, .f-select {
+            width: 100%; padding: 8px 10px;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-size: 0.83em; font-family: inherit; color: var(--text);
+            background: var(--white); transition: border-color 0.18s;
+        }
+        .f-input:focus, .f-textarea:focus, .f-select:focus { outline: none; border-color: var(--primary); }
+        .f-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+        .f-select { cursor: pointer; }
+        .f-label { font-size: 0.73em; font-weight: 700; color: var(--text-sub); margin-bottom: 5px; display: block; }
+
+        /* ── 우측 메인 패널 ── */
+        .right-panel { display: flex; flex-direction: column; gap: 14px; }
+
+        .team-section, .equip-panel, .skill-section {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .team-section-hd, .skill-section-hd {
+            padding: 11px 16px;
+            font-size: 0.75em; font-weight: 800;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+        .team-section-hd { color: var(--primary); }
+        .skill-section-hd { color: var(--gold); }
+        .skill-section-hd span { margin-left: 6px; font-weight: 600; letter-spacing: 0; color: var(--text-muted); }
+
+        /* 팀 펫 고르기 (팀당 1마리, 다시 누르면 해제) */
+        .pet-pick { padding: 0 16px 14px; }
+        .pet-pick-hd { margin-bottom: 7px; font-size: 0.75em; font-weight: 800; color: var(--text-sub); }
+        .pet-pick-hd span { margin-left: 6px; font-weight: 600; color: var(--text-muted); }
+        .pet-options { display: flex; flex-wrap: wrap; gap: 6px; }
+        .pet-option {
+            width: 40px; height: 40px; padding: 0;
+            border-radius: 50%; border: 2px solid transparent; background: #fff;
+            cursor: pointer; overflow: hidden; opacity: 0.55;
+            transition: all 0.15s;
+        }
+        .pet-option img { width: 100%; height: 100%; object-fit: cover; }
+        .pet-option:hover { opacity: 1; }
+        .pet-option.active { opacity: 1; border-color: var(--gold-line); box-shadow: 0 0 0 2px rgba(217, 181, 106, 0.45); }
+
+        /* 장비 패널: 팀 전환 + 영웅 탭 */
+        .equip-panel-hd {
+            padding: 11px 16px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .equip-panel-hd .view-seg { font-size: 0.8em; }
+        .equip-panel-title { font-size: 0.75em; font-weight: 800; letter-spacing: 0.05em; color: var(--primary); }
+        .equip-hero-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 16px 0; }
+        .equip-hero-tab {
+            display: flex; align-items: center; gap: 5px;
+            padding: 5px 12px; border-radius: 8px;
+            font-size: 0.78em; font-weight: 700;
+            cursor: pointer; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-muted);
+            transition: all 0.18s;
+        }
+        .equip-hero-tab img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
+        .equip-hero-tab.active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary-soft); }
+
+        .equip-body { padding: 16px; }
+        .equip-form-hd { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .equip-form-hd .replay-hero-img { width: 52px; height: 52px; flex-shrink: 0; }
+        .equip-form-hd b { font-size: 0.95em; font-weight: 800; color: var(--primary); }
+        .equip-form-hd .lane-chip { font-size: 0.72em; }
+        .equip-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .equip-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .form-empty { text-align: center; padding: 26px; color: var(--text-muted); font-size: 0.84em; }
+
+        .skill-body { padding: 14px 16px; }
+
+        /* 스킬 칸 (인게임 모양: 초상화 + 각성기/S2/S1 세로) — siege.html 과 같은 모양 */
+        .skill-unit-row { display: flex; flex-wrap: wrap; gap: 12px; }
+        .skill-unit {
+            display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 10px 12px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 12px;
+        }
+        .skill-unit-body { display: flex; align-items: flex-end; gap: 6px; }
+        .skill-unit-portrait {
+            width: 64px; height: 64px; flex-shrink: 0;
+            border-radius: 50%; overflow: hidden;
+            border: 2px solid var(--gold); background: var(--white);
+            box-shadow: 0 0 0 2px rgba(184,134,11,0.15);
+        }
+        .skill-unit-portrait img { width: 100%; height: 100%; object-fit: cover; }
+        .skill-unit-fallback {
+            display: flex; align-items: center; justify-content: center; height: 100%;
+            padding: 2px; font-size: 0.65em; text-align: center; color: var(--text-muted);
+        }
+        .skill-unit-col { display: flex; flex-direction: column; gap: 4px; }
+        .skill-tile {
+            position: relative; width: 34px; height: 34px;
+            border-radius: 8px; border: 2px solid var(--border); background: var(--bg);
+        }
+        .skill-tile img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+        .skill-tile.clickable { cursor: pointer; transition: all 0.18s; }
+        .skill-tile.clickable:hover { border-color: var(--gold); transform: scale(1.06); }
+        .skill-tile.awaken { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+        .skill-tile.no-awaken { visibility: hidden; }
+        .skill-unit-name { font-size: 0.72em; font-weight: 700; color: var(--text-sub); }
+
+        /* 스킬 사이 메모 끼우기 */
+        .note-insert { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding: 9px 10px; border-radius: 10px; background: var(--secondary-soft); }
+        .note-insert .round-picker-label { color: var(--secondary); }
+        .note-insert .f-input { width: auto; background: #fff; }
+        .note-insert .note-turn { width: 90px; }
+        .note-insert .note-text { flex: 1; min-width: 160px; }
+        .note-insert button { padding: 7px 14px; border: none; border-radius: 8px; background: var(--secondary); color: #fff; font-family: inherit; font-size: 0.8em; font-weight: 800; cursor: pointer; }
+
+        /* 영웅 선택 모달 */
+        .hero-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4); z-index: 300;
+            align-items: center; justify-content: center;
+        }
+        .hero-modal-overlay.open { display: flex; }
+        .hero-modal {
+            background: var(--white); border-radius: 18px;
+            width: 100%; max-width: 560px; max-height: 80vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: mIn 0.22s ease;
+        }
+        @keyframes mIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+        .hero-modal-hd {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .hero-modal-hd-title { font-size: 0.92em; font-weight: 800; color: var(--text); }
+        .hero-modal-close { background: none; border: none; font-size: 1.2em; color: var(--text-muted); cursor: pointer; }
+        .hero-modal-search { padding: 12px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .hero-modal-search input {
+            width: 100%; padding: 8px 12px;
+            border: 1px solid var(--border); border-radius: 9px;
+            font-size: 0.86em; font-family: inherit;
+        }
+        .hero-modal-search input:focus { outline: none; border-color: var(--primary); }
+        .hero-modal-body { padding: 14px 20px; overflow-y: auto; flex: 1; }
+        .hero-grade-title {
+            font-size: 0.68em; font-weight: 800; letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin: 10px 0 8px; padding-left: 2px;
+        }
+        .hero-grade-title:first-child { margin-top: 0; }
+        .hero-grid-modal { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; margin-bottom: 4px; }
+        .hero-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .hero-item-img {
+            width: 64px; height: 64px; border-radius: 11px;
+            border: 2px solid transparent; overflow: hidden;
+            transition: all 0.18s; background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65em; color: var(--text-muted);
+        }
+        .hero-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-item-img:hover { border-color: var(--primary); transform: scale(1.05); box-shadow: 0 4px 12px rgba(124,92,191,0.2); }
+        .hero-item.in-team { opacity: 0.35; pointer-events: none; }
+        .hero-item-name { font-size: 0.68em; font-weight: 600; color: var(--text); text-align: center; }
+
+        /* 저장 버튼 */
+        .form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; }
+        .btn-cancel { padding: 9px 20px; border-radius: 9px; border: 1px solid var(--border); background: var(--white); color: var(--text-muted); font-size: 0.84em; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-cancel:hover { border-color: var(--secondary); color: var(--secondary); }
+        .btn-submit { padding: 9px 26px; }
+
+        .empty-state { text-align: center; padding: 56px 20px; color: var(--text-muted); background: var(--white); border: 1px solid var(--border); border-radius: 14px; }
+        .empty-icon { font-size: 2.4em; margin-bottom: 9px; }
+        .empty-text { font-size: 0.84em; }
+
+        /* 모바일 (사이드바·햄버거·머리판·영웅 세팅·스킬 순서는 theme.css) */
+        @media (max-width: 1100px) { .form-layout { grid-template-columns: 260px 1fr; } }
+        @media (max-width: 860px) {
+            .content { padding: 16px; }
+            .form-layout { grid-template-columns: 1fr; }
+            .equip-grid-2 { grid-template-columns: 1fr; }
+        }
+        /* 휴대폰: 보스 탭은 얼굴 + 이름만 */
+        @media (max-width: 480px) {
+            .boss-tabs { gap: 3px; padding: 4px; }
+            .boss-tab { padding: 15px 0 7px; }
+            .boss-face { width: 38px; height: 38px; }
+            .boss-tab-name { font-size: 0.72em; }
+            .boss-tab-sub, .boss-flow span { display: none; }
+            .boss-tab-count { top: 3px; right: 3px; min-width: 15px; height: 15px; padding: 0 4px; }
+            .boss-final-badge { top: 3px; left: 3px; padding: 0 4px; font-size: 0.5em; line-height: 13px; }
+            .boss-hd-main .boss-face { width: 50px; height: 50px; }
+            .guide-detail { padding: 16px 12px; }
+            .guide-sec-title { flex-wrap: wrap; }
+            .skill-unit { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+
+<!-- 사이드바 -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-wrap">
+            <div class="logo-icon"><img src="ui/UI_Logo_Icon.png" alt=""></div>
+            <div><div class="logo-name">귀요미 길드</div><div class="logo-sub">세븐나이츠 리버스 공략집</div></div>
+        </div>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar">🌸</div>
+        <div class="user-info">
+            <div class="user-name" id="sidebarName">로딩중...</div>
+            <div class="user-role" id="sidebarRole">멤버</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">↩</button>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">메뉴</div>
+        <a href="main.html" class="nav-item"><span class="nav-icon"><img src="ui/ICO_Menu_Home.png" alt=""></span> 홈</a>
+        <div class="nav-label">길드</div>
+        <a href="siege.html" class="nav-item"><span class="nav-icon"><img src="ui/ICO_Menu_Siege.png" alt=""></span> 공성전</a>
+        <a href="guildwar.html" class="nav-item"><span class="nav-icon"><img src="ui/ICO_Menu_GuildWar.png" alt=""></span> 길드전</a>
+        <a href="calculator.html" class="nav-item"><span class="nav-icon"><img src="ui/ICO_Menu_Calculator.png" alt=""></span> 길드전 계산기</a>
+        <a href="expedition.html" class="nav-item active"><span class="nav-icon"><img src="ui/ICO_Menu_Expedition.png" alt=""></span> 강림 원정대</a>
+        <div class="nav-label">커뮤니티</div>
+        <a href="board.html" class="nav-item"><span class="nav-icon"><img src="ui/ICO_Menu_Board.png" alt=""></span> 게시판</a>
+    </nav>
+    <div class="sidebar-bottom" id="adminSection" style="display:none;">
+        <a href="admin.html" class="admin-link"><img src="ui/ICO_Menu_Admin.png" alt=""> 회원 관리</a>
+    </div>
+</aside>
+
+<!-- 메인 -->
+<div class="main">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">강림 원정대 공략</div>
+            <div class="topbar-date" id="topDate"></div>
+        </div>
+        <div class="guild-chip"><img src="ui/UI_Logo_Icon.png" alt=""> 귀요미 길드</div>
+    </div>
+
+    <div class="content">
+        <div class="page-hd">
+            <div>
+                <h1>👹 강림 원정대 공략</h1>
+                <p>종결 보스 파괴신과 파괴의 그림자 4마리 공략을 2팀(1·2라운드) 기준으로 정리해요</p>
+            </div>
+        </div>
+
+        <!-- 보스 탭 (JS로 생성) -->
+        <div class="boss-tabs" id="bossTabs"></div>
+
+        <!-- 선택한 보스 머리판 + 목록/등록 전환 (JS로 생성) -->
+        <div class="castle-hd" id="bossHd"></div>
+
+        <!-- 목록 -->
+        <div id="viewList">
+            <div class="empty-state">
+                <div class="empty-icon">👹</div>
+                <div class="empty-text">로딩중...</div>
+            </div>
+        </div>
+
+        <!-- 등록 폼 -->
+        <div id="viewForm" style="display:none;">
+            <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+                <label class="f-label">📝 공략 이름</label>
+                <input class="f-input" id="fName" type="text" placeholder="예: 파괴신 60% 고점 빌드">
+            </div>
+
+            <div class="form-layout">
+                <!-- ── 좌측 패널 ── -->
+                <div class="left-panel">
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--gold);">👹 보스</div>
+                        <div class="panel-card-body"><div class="radio-group" id="fBoss"></div></div>
+                    </div>
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--secondary);">⚠️ 주의사항</div>
+                        <div class="panel-card-body">
+                            <textarea class="f-textarea" id="fCaution" placeholder="카드 위에 빨갛게 보여요 (예: 38턴에 아일린이 빔 맞고 죽어야 함)"></textarea>
+                        </div>
+                    </div>
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--primary);">📺 참고 영상</div>
+                        <div class="panel-card-body">
+                            <input class="f-input" id="fVideo" type="text" placeholder="유튜브 링크 (https://...)">
+                        </div>
+                    </div>
+                    <div class="panel-card">
+                        <div class="panel-card-title" style="color:var(--text-sub);">📌 메모</div>
+                        <div class="panel-card-body">
+                            <textarea class="f-textarea" id="fMemo" placeholder="대체 영웅, 운용 팁 등"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 우측 패널 ── -->
+                <div class="right-panel">
+                    <!-- 1팀 · 2팀: 진형 칸을 눌러 영웅 배치 + 펫 (JS로 생성) -->
+                    <div class="team-section">
+                        <div class="team-section-hd">⚔️ 1팀 · 1라운드 (5명 + 펫)</div>
+                        <div class="formation-editor" id="teamFormation0"></div>
+                        <div class="pet-pick" id="teamPet0"></div>
+                    </div>
+                    <div class="team-section">
+                        <div class="team-section-hd">⚔️ 2팀 · 2라운드 (5명 + 펫)</div>
+                        <div class="formation-editor" id="teamFormation1"></div>
+                        <div class="pet-pick" id="teamPet1"></div>
+                    </div>
+
+                    <!-- 장비 세팅 -->
+                    <div class="equip-panel">
+                        <div class="equip-panel-hd">
+                            <div class="equip-panel-title">🎯 장비 세팅</div>
+                            <div id="equipTeamSeg"></div>
+                        </div>
+                        <div class="equip-hero-tabs" id="equipHeroTabs"></div>
+                        <div class="equip-body" id="equipBody"></div>
+                    </div>
+
+                    <!-- 스킬 순서 -->
+                    <div class="skill-section">
+                        <div class="skill-section-hd">⭐ 스킬 순서<span>1라운드는 1팀, 2라운드는 2팀 스킬 · 라운드 첫 스킬은 턴 그대로, 다음부터 +4턴 (최대 70턴)</span></div>
+                        <div class="skill-body" id="skillEditor"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-cancel" onclick="setView('list')">취소</button>
+                        <button class="btn-submit btn-gold" id="btnSubmit" onclick="saveGuide()">✅ 공략 등록하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 영웅 선택 모달 -->
+<div class="hero-modal-overlay" id="heroModal">
+    <div class="hero-modal">
+        <div class="hero-modal-hd">
+            <div class="hero-modal-hd-title" id="heroModalTitle">영웅 선택</div>
+            <button class="hero-modal-close" onclick="closeHeroModal()">✕</button>
+        </div>
+        <div class="hero-modal-search">
+            <input type="text" id="heroSearch" placeholder="영웅 이름 검색..." oninput="renderHeroModal(this.value)">
+        </div>
+        <div class="hero-modal-body" id="heroModalBody"></div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { setHeroGrades, renderReplayRow,
+         readFormation, placeHero, removeHero, moveHero, renderFormationEditor,
+         TURN_LIMIT, SKILL_WORD, isSkillNote, lastSkillTurn, renderGhostChip, renderSkillLanes, renderSkillText, renderTurnLegend, skillOrderText,
+         renderHeroSetting, renderLaneChip } from './guide-ui.js';
+
+const FB = {
+    apiKey: "AIzaSyAIuUCCt5RfN5Jv9THi3-OAn1F4xJ7TH4U",
+    authDomain: "gyuomi-guild.firebaseapp.com",
+    projectId: "gyuomi-guild",
+    storageBucket: "gyuomi-guild.firebasestorage.app",
+    messagingSenderId: "43293575259",
+    appId: "1:43293575259:web:2ac8bd0dfecda6a2be177e"
+};
+const app = initializeApp(FB);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const COLLECTION = 'expedition_strategies';
+let currentUser = null;
+
+// ──────────────────────────────────────────
+// 날짜
+// ──────────────────────────────────────────
+const days = ['일','월','화','수','목','금','토'], now = new Date();
+document.getElementById('topDate').textContent = `${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+// ──────────────────────────────────────────
+// 상수
+// ──────────────────────────────────────────
+const HERO_IMG_PATH = './heroes/';
+const PET_IMG_PATH  = './pets/';
+
+const HERO_DATA = {
+    '구세나': ['밀리아','갤리두스','파이','쥬리','로지'],
+    '찐스': ['나타', '델론즈', '라드그리드', '라이언', '란드그리드', '레긴레이프', '레이첼', '루디', '린', '멜키르', '미스트', '바네사', '브란즈&브란셀', '비스킷', '손오공', '스파이크', '실베스타', '아일린', '아킬라', '에이스', '엘리시아', '여포', '연희', '오를리', '오목', '제이브', '카구라', '카르마', '카일', '콜트', '크리스', '클라한', '키리엘', '태오', '트루드', '프레이야', '플라튼','팔라누스','스쿨드','칼헤론','오르카','아리스','클레미스','동영','선란','윤건','젠이츠','탄지로','하연'],
+    '짭스': ['백각','아멜리아','미호','데이지','타카','파스칼','아라곤','엘리스','발리스타','챈슬러','룩','지크','세인','에스파다','니아','루리','벨리카','리나','비담','유신','녹스','초선','백룡','소교','관우','돼오'],
+    '희귀': ['레이','진','캐티','블랙로즈','아수라','노호','클로에','메이','세라','제인','유이','실비아','루시','빅토리아','카론','조커','카린','에반','쥬피','스니퍼','소이','풍연','헤브니아','헬레니아','아리엘','리','사라','라니아','클레오','베인','레오','유리','라쿤','호킨','샤오','링링','조운']
+};
+Object.keys(HERO_DATA).forEach(grade => HERO_DATA[grade].sort((a, b) => a.localeCompare(b, 'ko')));
+setHeroGrades(HERO_DATA); // 초상화 테두리를 등급색으로
+
+// 펫 목록 (pets/ 폴더 이미지명과 일치하게 관리)
+const PET_LIST = ['더지','델로','루','리첼','멜페로','믹','에리','연지','요랑','윈디','유','이린','제브','제오','카람','크리','파이크'];
+
+// 보스 탭 순서: 종결 보스 파괴신을 맨 앞에, 뒤로 파괴의 그림자 4마리 (그림자를 모두 처치하면 파괴신이 강림한다)
+// 공략에는 탭 순서와 상관없는 key 로 저장해서 순서를 바꿔도 데이터가 그대로다
+const BOSSES = [
+    { key: 'destroyer', name: '파괴신', isFinal: true },
+    { key: 'teo', name: '태오', face: '태오' },
+    { key: 'kyle', name: '카일', face: '카일' },
+    { key: 'yeonhee', name: '연희', face: '연희' },
+    { key: 'karma', name: '카르마', face: '카르마' },
+];
+const SHADOWS = BOSSES.filter(boss => !boss.isFinal);
+
+const TEAM_SIZE = 5;
+const TEAMS = [0, 1];  // 1팀 · 2팀
+const ROUNDS = [1, 2]; // 1라운드는 1팀, 2라운드는 2팀이 싸운다 (턴 규칙과 스킬 순서 화면은 guide-ui.js)
+const roundTeamLabel = round => `${round}팀`;
+
+// 공략 카드 스킬 순서 보기(이미지/텍스트)는 사람마다 이 브라우저에 기억한다
+const SKILL_VIEW_KEY = 'expeditionSkillView';
+
+// 장비 옵션
+const SETS = ['선봉장','성기사','암살자','복수자','조율자','수문장','수호자','추적자','주술사'];
+const WPN_OPTS = ['약점 공격 확률','치명타 확률','치명타 피해','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 적중'];
+const ARM_OPTS = ['받는 피해 감소','막기 확률','모든 공격력(%)','모든 공격력','방어력(%)','방어력','생명력(%)','생명력','효과 저항'];
+
+// ──────────────────────────────────────────
+// 상태
+// ──────────────────────────────────────────
+let allGuides = [];
+let activeBoss = BOSSES[0].key; // 처음엔 맨 앞 탭(파괴신)
+let view = 'list';
+let skillView = readSkillView();
+const openCards = new Set(); // 펼친 공략 카드 id
+const pickedTeam = {};       // 공략 id → 영웅 세팅에서 보고 있는 팀 (0·1)
+const pickedHero = {};       // '공략id-팀' → 장비를 보고 있는 영웅 번호 (없으면 속공 순서 맨 위 영웅)
+
+let editingId = null; // 수정 중인 공략 ID
+let formBoss = activeBoss;
+let formTeams = emptyTeams();
+let formSkills = [];          // 스킬 {round, hero, num} · 메모 {round, at, note}. 라운드 순서대로 묶어 둔다
+let formSelectedIdx = [-1, -1]; // 팀별로 진형 판에서 옮기려고 고른 영웅 번호
+let activeEquipTeam = 0;      // 장비 탭에서 보고 있는 팀
+let activeEquipIdx = 0;       // 장비 탭에서 보고 있는 영웅 번호
+let currentRound = 1;         // 스킬을 넣을 라운드 (= 팀 번호 + 1)
+let selectedChip = -1;        // 끼워 넣을 기준 칩 (없으면 -1 → 고른 라운드 끝에 붙인다)
+let skillWarning = '';
+let modalTarget = null;       // 영웅 선택창이 채울 { teamIdx, pos }
+
+function emptyTeam() {
+    return {
+        heroes: Array(TEAM_SIZE).fill(null),
+        formation: readFormation(null, TEAM_SIZE),
+        pet: '',
+        equipData: Array.from({ length: TEAM_SIZE }, () => ({})),
+    };
+}
+function emptyTeams() { return TEAMS.map(emptyTeam); }
+
+// 저장된 팀을 2팀 · 5명 모양으로 맞춘다
+function readTeams(teams) {
+    return TEAMS.map(teamIdx => {
+        const saved = teams?.[teamIdx] || {};
+        return {
+            heroes: Array.from({ length: TEAM_SIZE }, (_, idx) => saved.heroes?.[idx] || null),
+            formation: readFormation(saved.formation, TEAM_SIZE),
+            pet: saved.pet || '',
+            equipData: Array.from({ length: TEAM_SIZE }, (_, idx) => ({ ...(saved.equipData?.[idx] || {}) })),
+        };
+    });
+}
+
+// 진형 편집기가 넘기는 팀 이름('team0' · 'team1') → 팀 번호
+function teamIndexOf(teamKey) { return Number(teamKey.slice(4)); }
+
+function bossOf(key) { return BOSSES.find(boss => boss.key === key) || BOSSES[0]; }
+
+// '파괴의 그림자 N' 또는 '종결 보스'
+function bossSubLabel(boss) {
+    return boss.isFinal ? '종결 보스' : `파괴의 그림자 ${SHADOWS.indexOf(boss) + 1}`;
+}
+
+function readSkillView() {
+    try { return localStorage.getItem(SKILL_VIEW_KEY) === 'text' ? 'text' : 'image'; }
+    catch (e) { return 'image'; }
+}
+
+// 입력창 value="" 와 링크 주소에 넣는 글자를 HTML 로 안전하게
+function escapeHtml(text) {
+    return String(text ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// 참고 영상은 http(s) 주소만 링크로 쓴다
+function safeUrl(url) {
+    return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '';
+}
+
+// 1팀 · 2팀 전환 버튼. call(teamIdx) 는 눌렀을 때 실행할 코드
+function renderTeamSeg(activeTeam, call) {
+    return `
+    <div class="view-seg">
+        ${TEAMS.map(teamIdx => `<button type="button" class="${teamIdx === activeTeam ? 'active' : ''}" onclick="${call(teamIdx)}">${teamIdx + 1}팀 · ${teamIdx + 1}라운드</button>`).join('')}
+    </div>`;
+}
+
+// ──────────────────────────────────────────
+// 보스 탭 · 보스 머리판 · 화면 전환
+// ──────────────────────────────────────────
+function renderBossFace(boss) {
+    return boss.isFinal
+        ? '<div class="boss-face final">神</div>'
+        : `<div class="boss-face"><img src="${HERO_IMG_PATH}${boss.face}.webp" alt="${boss.name}" onerror="this.style.display='none'"></div>`;
+}
+
+// 파괴신 탭 뒤에 '‹ 그림자 4 처치 후 강림' 표시를 두고 그림자 탭들을 잇는다
+function renderBossTabs() {
+    document.getElementById('bossTabs').innerHTML = BOSSES.map(boss => {
+        const count = allGuides.filter(guide => guide.boss === boss.key).length;
+        return `
+        <button class="boss-tab${boss.isFinal ? ' final' : ''}${boss.key === activeBoss ? ' active' : ''}" onclick="setBoss('${boss.key}')">
+            ${boss.isFinal ? '<span class="boss-final-badge">종결</span>' : ''}
+            <span class="boss-tab-count${count ? '' : ' zero'}">${count}</span>
+            ${renderBossFace(boss)}
+            <span class="boss-tab-name">${boss.name}</span>
+            <span class="boss-tab-sub">${bossSubLabel(boss)}</span>
+        </button>
+        ${boss.isFinal ? '<div class="boss-flow"><b>‹</b><span>그림자 4</span><span>처치 후 강림</span></div>' : ''}`;
+    }).join('');
+}
+
+function renderBossHd() {
+    const boss = bossOf(activeBoss);
+    const count = allGuides.filter(guide => guide.boss === activeBoss).length;
+    const canRegister = currentUser?.role === 'admin';
+    const hd = document.getElementById('bossHd');
+    hd.className = `castle-hd${boss.isFinal ? ' final' : ''}`;
+    hd.innerHTML = `
+        <div class="boss-hd-main">
+            ${renderBossFace(boss)}
+            <div>
+                <div class="castle-hd-day">${boss.isFinal ? '종결 보스 · 그림자 4마리를 모두 처치하면 강림' : `${bossSubLabel(boss)} / 4`}</div>
+                <div class="castle-hd-name">${boss.name}</div>
+                <div class="castle-hd-sub">등록된 공략 ${count}개 · 1팀(1라운드) + 2팀(2라운드) · 장비 · 스킬 순서</div>
+            </div>
+        </div>
+        <div class="castle-hd-actions">
+            <button class="view-btn${view === 'list' ? ' active' : ''}" onclick="setView('list')">📋 목록 (${count})</button>
+            ${canRegister ? '<button class="btn-gold" onclick="startNewGuide()">✏️ 공략 등록</button>' : ''}
+        </div>`;
+}
+
+// 등록 화면에서 보스 탭을 누르면 그 보스로 등록한다
+function setBoss(key) {
+    activeBoss = key;
+    renderBossTabs();
+    renderBossHd();
+    if (view === 'list') {
+        renderList();
+    } else {
+        formBoss = key;
+        renderFormBosses();
+    }
+}
+
+function setView(next) {
+    view = next;
+    document.getElementById('viewList').style.display = view === 'list' ? '' : 'none';
+    document.getElementById('viewForm').style.display = view === 'form' ? '' : 'none';
+    renderBossHd();
+    if (view === 'list') renderList();
+    else renderForm();
+}
+
+// 공략 등록 버튼: 수정하던 공략이 있으면 비우고 새로 시작한다. 새로 쓰던 내용은 그대로 둔다
+function startNewGuide() {
+    if (editingId) resetForm();
+    formBoss = activeBoss;
+    setView('form');
+}
+
+// ──────────────────────────────────────────
+// 스킬 순서 복사 · 보기 전환 (턴 계산과 칩 · 라운드 줄 · 텍스트 화면은 guide-ui.js)
+// ──────────────────────────────────────────
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        alert('스킬 순서를 복사했어요 📋');
+    } catch (e) {
+        prompt('아래 글을 복사해서 쓰세요', text);
+    }
+}
+
+function copySkillText(guideId) {
+    const guide = allGuides.find(item => item.id === guideId);
+    if (guide) copyText(skillOrderText(guide.skillOrder || [], ROUNDS));
+}
+
+function copyFormSkillText() {
+    copyText(skillOrderText(formSkills, ROUNDS));
+}
+
+function setSkillView(next) {
+    skillView = next;
+    try { localStorage.setItem(SKILL_VIEW_KEY, next); } catch (e) { /* 저장이 막힌 브라우저면 이번 화면에서만 */ }
+    renderList();
+}
+
+// ──────────────────────────────────────────
+// 영웅 세팅 (팀 전환 + 화면은 guide-ui.js)
+// ──────────────────────────────────────────
+function pickTeam(guideId, teamIdx) {
+    pickedTeam[guideId] = teamIdx;
+    renderList();
+}
+
+function pickHero(guideId, teamIdx, idx) {
+    pickedHero[`${guideId}-${teamIdx}`] = idx;
+    renderList();
+}
+
+// ──────────────────────────────────────────
+// 목록
+// ──────────────────────────────────────────
+function renderList() {
+    const el = document.getElementById('viewList');
+    const guides = allGuides.filter(guide => guide.boss === activeBoss);
+    if (!guides.length) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">👹</div><div class="empty-text">아직 등록된 ${bossOf(activeBoss).name} 공략이 없어요</div></div>`;
+        return;
+    }
+    el.innerHTML = guides.map(renderGuideCard).join('');
+}
+
+function renderGuideCard(guide) {
+    const isOpen = openCards.has(guide.id);
+    const teams = readTeams(guide.teams);
+    const skillOrder = guide.skillOrder || [];
+    const comments = guide.comments || [];
+    const createdAt = guide.createdAt?.toDate ? guide.createdAt.toDate() : null;
+    const date = createdAt ? `${createdAt.getMonth() + 1}.${createdAt.getDate()}` : '';
+    const canManage = currentUser && (currentUser.uid === guide.authorUid || currentUser.role === 'admin');
+    const videoUrl = safeUrl(guide.videoUrl);
+    const teamIdx = pickedTeam[guide.id] || 0;
+    const shownTeam = teams[teamIdx];
+
+    const teamRows = teams.map((team, idx) =>
+        renderReplayRow('ally', `⚔️ ${idx + 1}팀 · ${idx + 1}라운드`, team.heroes, team.pet ? [team.pet] : [], team.formation)
+    ).join('');
+
+    const commentsHtml = comments.map(comment => {
+        const canEditComment = currentUser && (currentUser.uid === comment.uid || currentUser.role === 'admin');
+        return `
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;border-left:3px solid var(--primary-soft);">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span style="font-size:0.78em;font-weight:700;color:var(--primary);">${comment.author}</span>
+                <span style="font-size:0.7em;color:var(--text-muted);margin-left:auto;">${comment.date || ''}</span>
+                ${canEditComment ? `
+                <button onclick="startEditComment('${comment.id}')"
+                        style="font-size:0.7em;color:var(--primary);background:none;border:none;cursor:pointer;padding:0 2px;">수정</button>
+                <button onclick="deleteComment('${guide.id}','${comment.id}')"
+                        style="font-size:0.7em;color:#d94f4f;background:none;border:none;cursor:pointer;padding:0 2px;">삭제</button>` : ''}
+            </div>
+            <div id="cmtext-${comment.id}" style="font-size:0.83em;color:var(--text-sub);line-height:1.5;white-space:pre-wrap;">${comment.text}</div>
+            <div id="cmedit-${comment.id}" style="display:none;margin-top:6px;">
+                <textarea id="cminput-${comment.id}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82em;font-family:inherit;resize:vertical;min-height:56px;"></textarea>
+                <div style="display:flex;gap:6px;margin-top:5px;justify-content:flex-end;">
+                    <button onclick="cancelEditComment('${comment.id}')"
+                            style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text-muted);font-size:0.78em;cursor:pointer;">취소</button>
+                    <button onclick="saveEditComment('${guide.id}','${comment.id}')"
+                            style="padding:5px 12px;border-radius:7px;border:none;background:var(--primary-soft);color:var(--primary);font-size:0.78em;font-weight:700;cursor:pointer;">저장</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    return `
+    <div class="guide-card">
+
+        <!-- 헤더: 1팀 · 2팀 진형 · 주의사항 · 참고 영상 -->
+        <div class="guide-card-hd" onclick="toggleDetail('${guide.id}')">
+            <div class="guide-card-main">
+                <div class="guide-title">${guide.name}</div>
+                <div class="team-rows">${teamRows}</div>
+                ${guide.caution ? `<div class="guide-caution">⚠️ ${guide.caution}</div>` : ''}
+                <div class="guide-meta">${guide.author || ''} · ${date}${videoUrl ? ` · <a class="video-link" href="${videoUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📺 참고 영상</a>` : ''}</div>
+            </div>
+            <div class="guide-actions">
+                ${canManage ? `
+                <button class="btn-mini edit" onclick="event.stopPropagation();editGuide('${guide.id}')">수정</button>
+                <button class="btn-mini danger" onclick="event.stopPropagation();deleteGuide('${guide.id}')">삭제</button>` : ''}
+                <span class="guide-toggle"${isOpen ? ' style="transform:rotate(180deg)"' : ''}>▼</span>
+            </div>
+        </div>
+
+        ${isOpen ? `
+        <div class="guide-detail">
+
+            <!-- 영웅 세팅 -->
+            ${shownTeam.heroes.some(Boolean) ? `
+            <div class="guide-sec">
+                <div class="guide-sec-title">영웅 세팅 <span class="sec-hint">위에서부터 속공 순서 · 영웅을 누르면 장비가 보여요</span>
+                    <div class="sec-tools">${renderTeamSeg(teamIdx, idx => `pickTeam('${guide.id}',${idx})`)}</div>
+                </div>
+                ${renderHeroSetting(shownTeam.heroes, shownTeam.formation, shownTeam.equipData, pickedHero[`${guide.id}-${teamIdx}`], idx => `pickHero('${guide.id}',${teamIdx},${idx})`)}
+            </div>` : ''}
+
+            <!-- 스킬 순서 (아직 없으면 안내) -->
+            <div class="guide-sec">
+                <div class="guide-sec-title">스킬 순서
+                    ${skillOrder.length ? `
+                    <div class="sec-tools">
+                        <div class="view-seg">
+                            <button type="button" class="${skillView === 'image' ? 'active' : ''}" onclick="setSkillView('image')">🖼 이미지</button>
+                            <button type="button" class="${skillView === 'text' ? 'active' : ''}" onclick="setSkillView('text')">📝 텍스트</button>
+                        </div>
+                        <button type="button" class="btn-mini copy" onclick="copySkillText('${guide.id}')">📋 복사</button>
+                    </div>` : ''}
+                </div>
+                ${!skillOrder.length
+                    ? `<div class="skill-empty">아직 스킬 순서가 등록되지 않았어요${canManage ? ' · 수정에서 넣을 수 있어요' : ''}</div>`
+                    : `${skillView === 'image'
+                        ? renderSkillLanes(skillOrder, ROUNDS, { roundSub: roundTeamLabel })
+                        : renderSkillText(skillOrder, ROUNDS, { roundSub: roundTeamLabel })}
+                       ${renderTurnLegend(skillOrder, ROUNDS, skillView === 'image')}`}
+            </div>
+
+            <!-- 메모 -->
+            ${guide.memo ? `
+            <div class="guide-sec">
+                <div class="guide-sec-title">메모</div>
+                <div class="guide-memo">${guide.memo}</div>
+            </div>` : ''}
+
+            <!-- 댓글 -->
+            <div style="border-top:1px solid var(--border);padding-top:14px;">
+                <div style="font-size:0.78em;font-weight:700;color:var(--text);margin-bottom:10px;">💬 댓글 (${comments.length})</div>
+                <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;">
+                    ${commentsHtml || '<p style="font-size:0.78em;color:var(--text-muted);padding:4px 0;">첫 댓글을 남겨보세요!</p>'}
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <input id="cinput-${guide.id}" type="text" placeholder="댓글을 입력하세요..."
+                           style="flex:1;min-width:0;padding:8px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.84em;font-family:inherit;"
+                           onkeydown="if(event.key==='Enter') addComment('${guide.id}')">
+                    <button onclick="addComment('${guide.id}')"
+                            style="padding:8px 16px;background:var(--primary-soft);color:var(--primary);border:none;border-radius:9px;font-size:0.82em;font-weight:700;cursor:pointer;white-space:nowrap;">등록</button>
+                </div>
+            </div>
+        </div>` : ''}
+    </div>`;
+}
+
+function toggleDetail(guideId) {
+    if (openCards.has(guideId)) openCards.delete(guideId);
+    else openCards.add(guideId);
+    renderList();
+}
+
+// ──────────────────────────────────────────
+// 등록 폼
+// ──────────────────────────────────────────
+function resetForm() {
+    editingId = null;
+    ['fName', 'fCaution', 'fVideo', 'fMemo'].forEach(id => { document.getElementById(id).value = ''; });
+    formBoss = activeBoss;
+    formTeams = emptyTeams();
+    formSkills = [];
+    formSelectedIdx = [-1, -1];
+    activeEquipTeam = 0;
+    activeEquipIdx = 0;
+    currentRound = 1;
+    selectedChip = -1;
+    skillWarning = '';
+    document.getElementById('btnSubmit').textContent = '✅ 공략 등록하기';
+}
+
+function renderForm() {
+    renderFormBosses();
+    TEAMS.forEach(renderTeamForm);
+    renderEquipForm();
+    renderSkillEditor();
+}
+
+function renderFormBosses() {
+    document.getElementById('fBoss').innerHTML = BOSSES.map(boss => `
+        <label class="radio-item">
+            <input type="radio" name="fBoss"${boss.key === formBoss ? ' checked' : ''} onchange="setFormBoss('${boss.key}')"> ${boss.name} · ${bossSubLabel(boss)}
+        </label>`).join('');
+}
+
+function setFormBoss(key) {
+    formBoss = key;
+}
+
+// ── 팀 (진형 편집기 + 펫) ──
+function renderTeamForm(teamIdx) {
+    const team = formTeams[teamIdx];
+    document.getElementById(`teamFormation${teamIdx}`).innerHTML =
+        renderFormationEditor(`team${teamIdx}`, team.formation, team.heroes, formSelectedIdx[teamIdx]);
+    document.getElementById(`teamPet${teamIdx}`).innerHTML = `
+        <div class="pet-pick-hd">펫<span>${team.pet || '선택 안 함'}</span></div>
+        <div class="pet-options">${PET_LIST.map(pet => `
+            <button type="button" class="pet-option${pet === team.pet ? ' active' : ''}" title="${pet}" onclick="setPet(${teamIdx},'${pet}')">
+                <img src="${PET_IMG_PATH}${pet}.png" alt="${pet}" onerror="this.parentElement.style.display='none'">
+            </button>`).join('')}
+        </div>`;
+}
+
+// 같은 펫을 다시 누르면 해제
+function setPet(teamIdx, pet) {
+    formTeams[teamIdx].pet = formTeams[teamIdx].pet === pet ? '' : pet;
+    renderTeamForm(teamIdx);
+}
+
+// ── 진형 편집기 (guide-ui.js 가 칸을 누르면 아래 함수들을 부른다. teamKey 는 'team0' · 'team1') ──
+function setFormationType(teamKey, type) {
+    const teamIdx = teamIndexOf(teamKey);
+    formTeams[teamIdx].formation = { ...readFormation(formTeams[teamIdx].formation, TEAM_SIZE), type };
+    renderTeamForm(teamIdx);
+    renderEquipForm(); // 전열/후열 배지가 바뀐다
+}
+
+// 진형 칸을 눌렀을 때 (siege.html 과 같은 흐름)
+// 선택 없음: 영웅 칸이면 그 영웅을 선택, 빈 칸이면 영웅 선택창
+// 선택 있음: 같은 영웅이면 선택 해제, 빈 칸이면 이동, 다른 영웅 칸이면 자리 교체
+function clickFormationSlot(teamKey, pos) {
+    const teamIdx = teamIndexOf(teamKey);
+    const team = formTeams[teamIdx];
+    const formation = readFormation(team.formation, TEAM_SIZE);
+    const idxAtPos = formation.positions.indexOf(pos);
+    const hasHero = idxAtPos !== -1 && Boolean(team.heroes[idxAtPos]);
+    const selectedIdx = formSelectedIdx[teamIdx];
+
+    if (selectedIdx === -1 || !team.heroes[selectedIdx]) {
+        if (hasHero) {
+            formSelectedIdx[teamIdx] = idxAtPos;
+            renderTeamForm(teamIdx);
+        } else if (team.heroes.some(hero => !hero)) {
+            openSlotModal(teamKey, pos);
+        }
+        return;
+    }
+
+    if (idxAtPos !== selectedIdx) team.formation = moveHero(formation, selectedIdx, pos, TEAM_SIZE);
+    formSelectedIdx[teamIdx] = -1;
+    renderTeamForm(teamIdx);
+    renderEquipForm();
+}
+
+// 팀에서 빠진 영웅의 장비 입력과 그 라운드의 스킬을 지운다 (메모는 남긴다)
+function clearHeroInput(teamIdx, idx, name) {
+    const round = teamIdx + 1;
+    formTeams[teamIdx].equipData[idx] = {};
+    formSkills = formSkills.filter(entry => isSkillNote(entry) || entry.round !== round || entry.hero !== name);
+    selectedChip = -1;
+    skillWarning = '';
+}
+
+function removeSlotHero(teamKey, idx) {
+    const teamIdx = teamIndexOf(teamKey);
+    const name = formTeams[teamIdx].heroes[idx];
+    formSelectedIdx[teamIdx] = -1;
+    formTeams[teamIdx].heroes = removeHero(formTeams[teamIdx].heroes, idx);
+    if (name) clearHeroInput(teamIdx, idx, name);
+    renderTeamForm(teamIdx);
+    renderEquipForm();
+    renderSkillEditor();
+}
+
+// ── 영웅 선택 모달 ──
+function openSlotModal(teamKey, pos) {
+    modalTarget = { teamIdx: teamIndexOf(teamKey), pos };
+    document.getElementById('heroModalTitle').textContent = `${modalTarget.teamIdx + 1}팀 ${pos}번 자리 영웅 선택`;
+    document.getElementById('heroSearch').value = '';
+    renderHeroModal('');
+    document.getElementById('heroModal').classList.add('open');
+}
+
+function closeHeroModal() {
+    document.getElementById('heroModal').classList.remove('open');
+    modalTarget = null;
+}
+
+// 같은 팀에 이미 있는 영웅은 흐리게 (스킬 순서를 영웅 이름으로 구분하므로 한 팀에 같은 영웅은 한 번만)
+function renderHeroModal(keyword) {
+    const teamHeroes = modalTarget ? formTeams[modalTarget.teamIdx].heroes : [];
+    const lowerKeyword = keyword.toLowerCase();
+    let html = '';
+    Object.entries(HERO_DATA).forEach(([grade, heroes]) => {
+        const filtered = keyword ? heroes.filter(name => name.toLowerCase().includes(lowerKeyword)) : heroes;
+        if (!filtered.length) return;
+        html += `<div class="hero-grade-title">${grade}</div><div class="hero-grid-modal">`;
+        filtered.forEach(name => {
+            html += `
+            <div class="hero-item${teamHeroes.includes(name) ? ' in-team' : ''}" onclick="selectHero('${name}')">
+                <div class="hero-item-img"><img src="${HERO_IMG_PATH}${name}.webp" alt="${name}" onerror="this.parentElement.textContent='${name}'"></div>
+                <div class="hero-item-name">${name}</div>
+            </div>`;
+        });
+        html += '</div>';
+    });
+    document.getElementById('heroModalBody').innerHTML = html ||
+        '<p style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.84em;">검색 결과 없음</p>';
+}
+
+// 칸에 영웅을 놓는다. [변경]으로 다른 영웅으로 바꾸면 바뀐 영웅의 장비·스킬 입력은 지운다
+function selectHero(name) {
+    if (!modalTarget) return;
+    const { teamIdx, pos } = modalTarget;
+    const team = formTeams[teamIdx];
+    if (team.heroes.includes(name)) return;
+    const prevIdx = readFormation(team.formation, TEAM_SIZE).positions.indexOf(pos);
+    const prevName = prevIdx !== -1 ? team.heroes[prevIdx] : null;
+
+    const placed = placeHero(team.formation, team.heroes, pos, name);
+    if (placed.idx === -1) { closeHeroModal(); return; }
+    team.formation = placed.formation;
+    team.heroes = placed.heroes;
+    if (prevName) clearHeroInput(teamIdx, placed.idx, prevName);
+    activeEquipTeam = teamIdx;
+    activeEquipIdx = placed.idx;
+    formSelectedIdx[teamIdx] = -1;
+
+    renderTeamForm(teamIdx);
+    renderEquipForm();
+    renderSkillEditor();
+    closeHeroModal();
+}
+
+// ── 장비 세팅 ──
+function renderEquipForm() {
+    const team = formTeams[activeEquipTeam];
+    const tabs = document.getElementById('equipHeroTabs');
+    const body = document.getElementById('equipBody');
+    document.getElementById('equipTeamSeg').innerHTML = renderTeamSeg(activeEquipTeam, idx => `setEquipTeam(${idx})`);
+    if (!team.heroes.some(Boolean)) {
+        tabs.innerHTML = '';
+        body.innerHTML = `<div class="form-empty">${activeEquipTeam + 1}팀 진형 판에 영웅을 먼저 배치해주세요</div>`;
+        return;
+    }
+    if (!team.heroes[activeEquipIdx]) activeEquipIdx = team.heroes.findIndex(Boolean);
+
+    tabs.innerHTML = team.heroes.map((name, idx) => name ? `
+        <div class="equip-hero-tab${idx === activeEquipIdx ? ' active' : ''}" onclick="setEquipHero(${idx})">
+            <img src="${HERO_IMG_PATH}${name}.webp" alt="" onerror="this.style.display='none'">${name}
+        </div>` : '').join('');
+
+    const name = team.heroes[activeEquipIdx];
+    const equip = team.equipData[activeEquipIdx];
+    const options = (list, key) => list.map(option => `<option value="${option}"${equip[key] === option ? ' selected' : ''}>${option}</option>`).join('');
+    const select = (label, list, key, emptyLabel = '선택') => `
+        <div>
+            <label class="f-label">${label}</label>
+            <select class="f-select" onchange="saveEquip('${key}',this.value)"><option value="">${emptyLabel}</option>${options(list, key)}</select>
+        </div>`;
+    const input = (label, key, placeholder) => `
+        <div>
+            <label class="f-label">${label}</label>
+            <input class="f-input" type="text" placeholder="${placeholder}" value="${escapeHtml(equip[key])}" oninput="saveEquip('${key}',this.value)">
+        </div>`;
+
+    body.innerHTML = `
+        <div class="equip-form-hd">
+            <div class="replay-hero-img"><img src="${HERO_IMG_PATH}${name}.webp" alt="${name}" onerror="this.style.display='none'"></div>
+            <b>${activeEquipTeam + 1}팀 ${name} 장비</b>
+            ${renderLaneChip(team.formation, activeEquipIdx, TEAM_SIZE, true)}
+        </div>
+        <div class="equip-grid-3">
+            ${select('세트', SETS, 'set', '무관 (아무거나)')}
+            ${input('속공', 'speed', '예: 29')}
+            ${input('속공 순위', 'speedRank', '예: 1~3, 상관X')}
+        </div>
+        <div class="equip-grid-2">
+            ${select('무기 메인옵 1', WPN_OPTS, 'wpn1')}
+            ${select('방어구 메인옵 1', ARM_OPTS, 'arm1')}
+        </div>
+        <div class="equip-grid-2">
+            ${select('무기 메인옵 2', WPN_OPTS, 'wpn2')}
+            ${select('방어구 메인옵 2', ARM_OPTS, 'arm2')}
+        </div>
+        ${input('메모 (목표 수치, 반지 등)', 'memo', '예: 치확 83%, 약공 46% 필수')}`;
+}
+
+function setEquipTeam(teamIdx) {
+    activeEquipTeam = teamIdx;
+    activeEquipIdx = 0;
+    renderEquipForm();
+}
+
+function setEquipHero(idx) {
+    activeEquipIdx = idx;
+    renderEquipForm();
+}
+
+function saveEquip(key, value) {
+    formTeams[activeEquipTeam].equipData[activeEquipIdx][key] = value;
+}
+
+// ── 스킬 순서 편집기 ──
+// 영웅 1명의 스킬 칸 (siege.html 의 renderSkillUnit 과 같은 인게임 모양: 초상화 + 각성기/위/아래 세로)
+// 누를 때마다 스킬 순서에 넣는다. 각성기 칸은 {영웅}3.webp 가 불러와질 때만 보이고, 없는 스킬 이미지는 비워 둔다
+function renderSkillUnit(hero) {
+    const tile = num => {
+        const imageEvent = num === 3
+            ? `onload="this.parentElement.classList.remove('no-awaken')"`
+            : `onerror="this.style.visibility='hidden';this.parentElement.style.background='var(--primary-soft)'"`;
+        return `<div class="skill-tile clickable${num === 3 ? ' awaken no-awaken' : ''}" onclick="addSkill('${hero}',${num})" title="${hero} ${SKILL_WORD[num]} 넣기">
+                <img src="${HERO_IMG_PATH}${hero}${num}.webp" alt="${hero} ${SKILL_WORD[num]}" ${imageEvent}>
+            </div>`;
+    };
+
+    return `
+    <div class="skill-unit">
+        <div class="skill-unit-body">
+            <div class="skill-unit-portrait">
+                <img src="${HERO_IMG_PATH}${hero}.webp" alt="${hero}"
+                     onerror="this.parentElement.innerHTML='<div class=\\'skill-unit-fallback\\'>${hero}</div>'">
+            </div>
+            <div class="skill-unit-col">${[3, 2, 1].map(tile).join('')}</div>
+        </div>
+        <div class="skill-unit-name">${hero}</div>
+    </div>`;
+}
+
+// 고른 라운드 팀의 영웅을 진형 자리 번호 순으로
+function roundHeroesByPosition() {
+    const team = formTeams[currentRound - 1];
+    const { positions } = readFormation(team.formation, TEAM_SIZE);
+    return team.heroes
+        .map((name, idx) => ({ name, pos: positions[idx] }))
+        .filter(item => item.name)
+        .sort((a, b) => a.pos - b.pos)
+        .map(item => item.name);
+}
+
+function renderSkillEditor() {
+    const counts = ROUNDS.map(round => formSkills.filter(entry => entry.round === round && !isSkillNote(entry)).length);
+    const last = lastSkillTurn(formSkills, ROUNDS);
+    const heroes = roundHeroesByPosition();
+    const selected = formSkills[selectedChip];
+    const guide = skillWarning
+        ? `<span class="skill-warning">⚠️ ${skillWarning}</span>`
+        : selected
+            ? `<b>${isSkillNote(selected) ? '메모' : `${selected.hero} ${SKILL_WORD[selected.num]}`}</b> 뒤에 끼워 넣어요 · 칩을 다시 누르면 해제`
+            : `<b>${currentRound}라</b>는 ${currentRound}팀 스킬만 나와요 · 누르면 끝에 붙고, 칩을 누르면 그 뒤에 끼워 넣고, ×로 빼요`;
+
+    document.getElementById('skillEditor').innerHTML = `
+        <div class="round-picker">
+            <span class="round-picker-label">넣을 라운드</span>
+            ${ROUNDS.map((round, i) => `<button type="button" class="round-btn${round === currentRound ? ' active' : ''}" onclick="setRound(${round})">${round}라 · ${round}팀<em>${counts[i]}</em></button>`).join('')}
+            <span class="turn-gauge${canAddSkill() ? '' : ' full'}" title="전투는 최대 ${TURN_LIMIT}턴">
+                <span class="turn-gauge-bar"><i style="width:${Math.min(100, last / TURN_LIMIT * 100)}%"></i></span>
+                <b>${last}</b> / ${TURN_LIMIT}턴
+            </span>
+            <span class="skill-guide">${guide}</span>
+        </div>
+        ${heroes.length
+            ? `<div class="skill-unit-row skill-palette">${heroes.map(renderSkillUnit).join('')}</div>`
+            : `<div class="form-empty skill-palette">${currentRound}팀 진형 판에 영웅을 배치하면 스킬이 나와요</div>`}
+        ${renderSkillLanes(formSkills, ROUNDS, { edit: { currentRound, selectedIdx: selectedChip, ghost: renderGhostChip(canAddSkill()) }, roundSub: roundTeamLabel })}
+        <div class="note-insert">
+            <span class="round-picker-label">📌 메모 끼우기</span>
+            <input class="f-input note-turn" id="noteTurn" type="text" placeholder="예: 38턴">
+            <input class="f-input note-text" id="noteText" type="text" placeholder="예: 아일린이 파괴신 빔 맞고 죽어야 함!"
+                   onkeydown="if(event.key==='Enter') addNote()">
+            <button type="button" onclick="addNote()">넣기</button>
+        </div>
+        ${renderTurnLegend(formSkills, ROUNDS)}
+        ${formSkills.length ? `
+        <div class="skill-text">
+            <div class="skill-text-hd">📋 텍스트로 보기 (카톡 공유용) <button type="button" class="btn-mini copy" onclick="copyFormSkillText()">복사</button></div>
+            <div>${skillOrderText(formSkills, ROUNDS).replace(/\n/g, '<br>')}</div>
+        </div>` : ''}`;
+}
+
+// 다음 칩이 들어갈 자리: 고른 칩 바로 뒤, 없으면 고른 라운드 끝
+function insertIndex() {
+    if (selectedChip !== -1) return selectedChip + 1;
+    return formSkills.reduce((at, entry, i) => (entry.round <= currentRound ? i + 1 : at), 0);
+}
+
+function withEntry(entry) {
+    const next = [...formSkills];
+    next.splice(insertIndex(), 0, entry);
+    return next;
+}
+
+function canAddSkill() {
+    return lastSkillTurn(withEntry({ round: currentRound, hero: '', num: 1 }), ROUNDS) <= TURN_LIMIT;
+}
+
+// 스킬 칸을 누르면 넣는다. 넣었을 때 마지막 스킬이 70턴을 넘으면 넣지 않고 경고만 띄운다
+function addSkill(hero, num) {
+    const next = withEntry({ round: currentRound, hero, num });
+    const nextLast = lastSkillTurn(next, ROUNDS);
+    if (nextLast > TURN_LIMIT) {
+        skillWarning = `${TURN_LIMIT}턴을 넘어서 더 넣을 수 없어요 (넣으면 마지막 스킬이 ${nextLast}턴)`;
+        renderSkillEditor();
+        return;
+    }
+    formSkills = next;
+    if (selectedChip !== -1) selectedChip += 1;
+    skillWarning = '';
+    renderSkillEditor();
+}
+
+// 메모는 턴을 늘리지 않으므로 70턴과 상관없이 넣는다
+function addNote() {
+    const note = document.getElementById('noteText').value.trim();
+    if (!note) return;
+    formSkills = withEntry({ round: currentRound, at: document.getElementById('noteTurn').value.trim(), note });
+    if (selectedChip !== -1) selectedChip += 1;
+    skillWarning = '';
+    renderSkillEditor();
+}
+
+function setRound(round) {
+    currentRound = round;
+    selectedChip = -1;
+    skillWarning = '';
+    renderSkillEditor();
+}
+
+function selectChip(idx) {
+    selectedChip = selectedChip === idx ? -1 : idx;
+    if (selectedChip !== -1) currentRound = formSkills[idx].round;
+    skillWarning = '';
+    renderSkillEditor();
+}
+
+function removeChip(idx) {
+    formSkills.splice(idx, 1);
+    if (selectedChip === idx) selectedChip = -1;
+    else if (selectedChip > idx) selectedChip -= 1;
+    skillWarning = '';
+    renderSkillEditor();
+}
+
+// ──────────────────────────────────────────
+// 저장 · 불러오기 · 수정 · 삭제
+// ──────────────────────────────────────────
+async function saveGuide() {
+    if (!currentUser) { alert('로그인이 필요합니다.'); return; }
+    if (currentUser.role !== 'admin' && !editingId) {
+        alert('공략 등록은 관리자만 가능합니다.');
+        setView('list'); return;
+    }
+    const name = document.getElementById('fName').value.trim();
+    if (!name) { alert('공략 이름을 입력해주세요.'); return; }
+    const emptyTeamIdx = formTeams.findIndex(team => team.heroes.some(hero => !hero));
+    if (emptyTeamIdx !== -1) { alert(`${emptyTeamIdx + 1}팀 영웅 5명을 모두 배치해주세요.`); return; }
+
+    const btn = document.getElementById('btnSubmit');
+    const isEditing = Boolean(editingId);
+    btn.textContent = '저장중...'; btn.disabled = true;
+
+    try {
+        const data = {
+            boss: formBoss,
+            name,
+            caution: document.getElementById('fCaution').value.trim(),
+            videoUrl: document.getElementById('fVideo').value.trim(),
+            memo: document.getElementById('fMemo').value.trim(),
+            teams: formTeams.map(team => ({
+                heroes: [...team.heroes],
+                formation: readFormation(team.formation, TEAM_SIZE),
+                pet: team.pet,
+                equipData: JSON.parse(JSON.stringify(team.equipData)),
+            })),
+            skillOrder: formSkills.map(entry => (isSkillNote(entry)
+                ? { round: entry.round, at: entry.at || '', note: entry.note }
+                : { round: entry.round, hero: entry.hero, num: entry.num })),
+        };
+
+        if (isEditing) {
+            await updateDoc(doc(db, COLLECTION, editingId), { ...data, updatedAt: serverTimestamp() });
+            alert('공략이 수정되었습니다! ✅');
+        } else {
+            await addDoc(collection(db, COLLECTION), {
+                ...data,
+                author: currentUser.nickname,
+                authorUid: currentUser.uid,
+                createdAt: serverTimestamp(),
+                comments: []
+            });
+            alert('공략이 등록되었습니다! ✅');
+        }
+        activeBoss = data.boss;
+        resetForm();
+        await loadGuides();
+        setView('list');
+    } catch (e) {
+        console.error(e);
+        alert('저장 오류: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = editingId ? '✅ 공략 수정하기' : '✅ 공략 등록하기';
+    }
+}
+
+async function loadGuides() {
+    let snap;
+    try {
+        snap = await getDocs(query(collection(db, COLLECTION), orderBy('createdAt', 'desc')));
+    } catch (e) {
+        snap = await getDocs(collection(db, COLLECTION));
+    }
+    const guides = [];
+    snap.forEach(item => guides.push({ id: item.id, ...item.data() }));
+    allGuides = guides;
+
+    renderBossTabs();
+    renderBossHd();
+    if (view === 'list') renderList();
+}
+
+function editGuide(id) {
+    const guide = allGuides.find(item => item.id === id);
+    if (!guide) return;
+    resetForm();
+    editingId = id;
+
+    document.getElementById('fName').value = guide.name || '';
+    document.getElementById('fCaution').value = guide.caution || '';
+    document.getElementById('fVideo').value = guide.videoUrl || '';
+    document.getElementById('fMemo').value = guide.memo || '';
+    formBoss = bossOf(guide.boss).key;
+    formTeams = readTeams(guide.teams);
+    formSkills = (guide.skillOrder || []).map(entry => ({ ...entry }));
+    currentRound = formSkills.length ? formSkills[formSkills.length - 1].round : 1;
+    activeEquipTeam = 0;
+    activeEquipIdx = Math.max(0, formTeams[0].heroes.findIndex(Boolean));
+
+    document.getElementById('btnSubmit').textContent = '✅ 공략 수정하기';
+    setView('form');
+    window.scrollTo(0, 0);
+}
+
+async function deleteGuide(id) {
+    if (!confirm('이 공략을 삭제하시겠습니까?')) return;
+    try {
+        await deleteDoc(doc(db, COLLECTION, id));
+        alert('삭제되었습니다.');
+        await loadGuides();
+    } catch (e) { alert('삭제 오류: ' + e.message); }
+}
+
+// ──────────────────────────────────────────
+// 댓글 (guildwar.html 과 같은 방식: 공략 문서의 comments 배열)
+// ──────────────────────────────────────────
+async function addComment(guideId) {
+    const input = document.getElementById(`cinput-${guideId}`);
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+        const guideRef = doc(db, COLLECTION, guideId);
+        const guideSnap = await getDoc(guideRef);
+        const comments = guideSnap.data().comments || [];
+        comments.push({
+            id: Date.now().toString(),
+            text,
+            author: currentUser.nickname,
+            uid: currentUser.uid,
+            date: `${new Date().getMonth()+1}.${new Date().getDate()}`
+        });
+        await updateDoc(guideRef, { comments });
+        await loadGuides();
+    } catch (e) { alert('댓글 등록 오류: ' + e.message); }
+}
+
+function startEditComment(commentId) {
+    const textEl = document.getElementById(`cmtext-${commentId}`);
+    const editEl = document.getElementById(`cmedit-${commentId}`);
+    const inputEl = document.getElementById(`cminput-${commentId}`);
+    if (!textEl || !editEl || !inputEl) return;
+    inputEl.value = textEl.innerText;
+    textEl.style.display = 'none';
+    editEl.style.display = 'block';
+    inputEl.focus();
+}
+
+function cancelEditComment(commentId) {
+    const textEl = document.getElementById(`cmtext-${commentId}`);
+    const editEl = document.getElementById(`cmedit-${commentId}`);
+    if (!textEl || !editEl) return;
+    textEl.style.display = 'block';
+    editEl.style.display = 'none';
+}
+
+async function saveEditComment(guideId, commentId) {
+    const newText = document.getElementById(`cminput-${commentId}`).value.trim();
+    if (!newText) { alert('내용을 입력해주세요.'); return; }
+    try {
+        const guideRef = doc(db, COLLECTION, guideId);
+        const guideSnap = await getDoc(guideRef);
+        const comments = (guideSnap.data().comments || []).map(comment =>
+            comment.id === commentId ? { ...comment, text: newText } : comment
+        );
+        await updateDoc(guideRef, { comments });
+        await loadGuides();
+    } catch (e) { alert('수정 오류: ' + e.message); }
+}
+
+async function deleteComment(guideId, commentId) {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+    try {
+        const guideRef = doc(db, COLLECTION, guideId);
+        const guideSnap = await getDoc(guideRef);
+        const comments = (guideSnap.data().comments || []).filter(comment => comment.id !== commentId);
+        await updateDoc(guideRef, { comments });
+        await loadGuides();
+    } catch (e) { alert('댓글 삭제 오류: ' + e.message); }
+}
+
+// ──────────────────────────────────────────
+// 모달 외부 클릭 · 사이드바
+// ──────────────────────────────────────────
+document.getElementById('heroModal').addEventListener('click', function(e) {
+    if (e.target === this) closeHeroModal();
+});
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
+function closeSidebar()  { document.getElementById('sidebar').classList.remove('open');  document.getElementById('overlay').classList.remove('open'); }
+
+// ── 인증 ──
+onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'index.html'; return; }
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) { await signOut(auth); window.location.href = 'index.html'; return; }
+    const data = snap.data();
+    if (data.role === 'pending') { await signOut(auth); window.location.href = 'index.html'; return; }
+    currentUser = { uid: user.uid, ...data };
+    document.getElementById('sidebarName').textContent = currentUser.nickname;
+    document.getElementById('sidebarRole').textContent = currentUser.role === 'admin' ? '👑 관리자' : '👤 멤버';
+    if (currentUser.role === 'admin') document.getElementById('adminSection').style.display = '';
+    await loadGuides();
+});
+
+window.handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) return;
+    await signOut(auth); window.location.href = 'index.html';
+};
+
+// ── window에 함수 등록 (onclick에서 사용) ──
+Object.assign(window, {
+    setBoss, setView, startNewGuide, toggleDetail, pickTeam, pickHero, setSkillView, copySkillText, copyFormSkillText,
+    setFormBoss, setPet, setFormationType, clickFormationSlot, removeSlotHero, openSlotModal, closeHeroModal, renderHeroModal, selectHero,
+    setEquipTeam, setEquipHero, saveEquip, addSkill, addNote, setRound, selectChip, removeChip,
+    saveGuide, editGuide, deleteGuide, addComment, startEditComment, cancelEditComment, saveEditComment, deleteComment,
+    toggleSidebar, closeSidebar,
+});
+
+// ── 초기화 ──
+renderBossTabs();
+renderBossHd();
+</script>
+
+</body>
+</html>
