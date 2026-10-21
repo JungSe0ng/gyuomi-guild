@@ -1,7 +1,8 @@
 // ──────────────────────────────────────────
 // 길드전·방어·공성전 공략 공통 화면 조각
-// guildwar.html, defense.html, siege.html 이 import 해서 쓴다
-// (리플레이 팀 줄, 진형 판·편집기, 장비 2x2 카드·상세 카드, 성공률 등급 배지, 우선순위 별)
+// guildwar.html, defense.html, siege.html, expedition.html 이 import 해서 쓴다
+// (리플레이 팀 줄, 진형 판·편집기, 장비 2x2 카드·상세 카드, 성공률 등급 배지, 우선순위 별,
+//  공성전·원정대의 스킬 순서와 영웅 세팅)
 // ──────────────────────────────────────────
 
 const HERO_IMG_PATH = './heroes/';
@@ -313,4 +314,203 @@ export function renderPriorityStars(count) {
     if (!count) return '';
     const stars = [1, 2, 3, 4, 5].map(n => `<img src="${UI_PATH}ICO_Star_${n <= count ? 'On' : 'Off'}.png" alt="">`).join('');
     return `<span class="priority-stars" title="우선순위 ${count}">${stars}</span>`;
+}
+
+// ──────────────────────────────────────────
+// 스킬 순서 (공성전 · 강림 원정대 공통)
+// order 는 스킬 {round, hero, num} 과 메모 {round, at, note} 가 라운드 순서대로 섞인 목록
+// 턴: 라운드 첫 스킬은 턴이 늘지 않고, 같은 라운드의 다음 스킬부터 TURN_STEP 씩 는다. 턴은 라운드를 넘어 이어진다
+// 전투는 TURN_LIMIT 턴까지. 메모는 턴 계산에 들어가지 않는다. 턴은 저장하지 않고 순서로 계산한다
+// 등록 화면에서 칩을 누르면 페이지의 selectChip(idx) · removeChip(idx), 라운드 줄을 누르면 setRound(round)
+// ──────────────────────────────────────────
+export const TURN_STEP = 4;
+export const TURN_LIMIT = 70;
+
+// 스킬 번호 → 인게임 스킬 칸 위치 (초상화 옆 세로: 각성기 / 위 = 스킬2 / 아래 = 스킬1)
+export const SKILL_WORD = { 1: '아래', 2: '위', 3: '각성' };
+const SKILL_LABEL = { 1: '▼ 아래', 2: '▲ 위', 3: '★ 각성' };
+
+export function isSkillNote(entry) {
+    return entry.note !== undefined;
+}
+
+// order → 라운드별 [{round, startTurn, entries:[{..., idx, turn, isRoundStart}]}]. idx 는 order 안의 번호
+export function buildSkillRounds(order, rounds) {
+    let turn = 0;
+    return rounds.map(round => {
+        const startTurn = turn;
+        let skillCount = 0;
+        const entries = order
+            .map((entry, idx) => ({ ...entry, idx }))
+            .filter(entry => entry.round === round)
+            .map(entry => {
+                if (isSkillNote(entry)) return entry;
+                if (skillCount > 0) turn += TURN_STEP;
+                skillCount += 1;
+                return { ...entry, turn, isRoundStart: skillCount === 1 };
+            });
+        return { round, startTurn, entries };
+    });
+}
+
+// 마지막 스킬의 턴 (턴은 순서대로 늘기만 하므로 마지막 스킬이 가장 크다)
+export function lastSkillTurn(order, rounds) {
+    const skills = buildSkillRounds(order, rounds).flatMap(lane => lane.entries).filter(entry => !isSkillNote(entry));
+    return skills.length ? skills[skills.length - 1].turn : 0;
+}
+
+// 스킬 칩: 턴 배지 + 스킬 아이콘(영웅 얼굴) + 이름 + 위/아래. 이미지가 없는 영웅은 아이콘 자리에 이름 두 글자
+function renderSkillChip(skill, isEditable, selectedIdx) {
+    const cls = ['skill-chip'];
+    if (skill.isRoundStart) cls.push('round-start');
+    if (isEditable) cls.push('editable');
+    if (isEditable && skill.idx === selectedIdx) cls.push('selected');
+    const title = `${skill.round}라 · ${skill.turn}턴 · ${skill.hero} ${SKILL_WORD[skill.num]}${skill.isRoundStart ? ' (라운드 첫 스킬 · 턴 추가 없음)' : ''}`;
+    return `
+    <div class="${cls.join(' ')}" title="${title}"${isEditable ? ` onclick="event.stopPropagation();selectChip(${skill.idx})"` : ''}>
+        <span class="skill-chip-turn">${skill.turn}턴</span>
+        <div class="skill-chip-icon" data-name="${skill.hero.slice(0, 2)}">
+            <img class="skill-img" src="${HERO_IMG_PATH}${skill.hero}${skill.num}.webp" alt="${skill.hero} ${SKILL_WORD[skill.num]}" onerror="this.style.visibility='hidden'">
+            <img class="face" src="${HERO_IMG_PATH}${skill.hero}.webp" alt="" onerror="this.style.display='none'">
+        </div>
+        <span class="skill-chip-who">${skill.hero}</span>
+        <span class="skill-chip-which">${SKILL_LABEL[skill.num]}</span>
+        ${isEditable ? `<button type="button" class="skill-chip-remove" title="빼기" onclick="event.stopPropagation();removeChip(${skill.idx})">×</button>` : ''}
+    </div>`;
+}
+
+// 스킬 사이 메모 칩 (예: 38턴 아일린이 파괴신 빔 맞고 죽어야 함)
+function renderNoteChip(note, isEditable, selectedIdx) {
+    return `
+    <div class="note-chip${isEditable ? ' editable' : ''}${isEditable && note.idx === selectedIdx ? ' selected' : ''}"${isEditable ? ` onclick="event.stopPropagation();selectChip(${note.idx})"` : ''}>
+        ${note.at ? `<b>⚠️ ${note.at}</b>` : ''}
+        <span>${note.note}</span>
+        ${isEditable ? `<button type="button" class="skill-chip-remove" title="빼기" onclick="event.stopPropagation();removeChip(${note.idx})">×</button>` : ''}
+    </div>`;
+}
+
+// 등록 화면에서 다음 스킬이 들어갈 자리. 70턴을 넘어서 더 넣을 수 없으면 회색
+export function renderGhostChip(canAdd) {
+    return canAdd
+        ? '<div class="skill-chip-ghost" title="다음 스킬이 들어갈 자리">＋</div>'
+        : `<div class="skill-chip-ghost full" title="${TURN_LIMIT}턴을 넘어서 더 넣을 수 없어요">${TURN_LIMIT}턴<br>끝</div>`;
+}
+
+// 라운드마다 한 줄
+// edit 이 없으면 공략 카드용: 스킬이 있는 라운드만 그린다
+// edit = {currentRound, selectedIdx, ghost} 면 등록 화면용: 모든 라운드 + 고른 라운드 강조 + 다음 스킬이 들어갈 자리(ghost)
+// roundSub(round) 를 주면 라운드 태그에 한 줄을 더 붙인다 (원정대 '1팀')
+export function renderSkillLanes(order, rounds, { edit = null, roundSub = null } = {}) {
+    const isEditable = Boolean(edit);
+    const selectedIdx = isEditable ? edit.selectedIdx : -1;
+    const lanes = buildSkillRounds(order, rounds)
+        .filter(lane => isEditable || lane.entries.length)
+        .map(({ round, startTurn, entries }) => {
+            const isCurrent = isEditable && round === edit.currentRound;
+            let chips = entries.map(entry =>
+                (isSkillNote(entry) ? renderNoteChip(entry, isEditable, selectedIdx) : renderSkillChip(entry, isEditable, selectedIdx))
+                + (isEditable && entry.idx === selectedIdx ? edit.ghost : '')
+            ).join('');
+            if (isCurrent && selectedIdx === -1) chips += edit.ghost;
+            if (!chips) chips = '<span class="round-empty">—</span>';
+            return `
+            <div class="round-lane${isCurrent ? ' current' : ''}"${isEditable ? ` onclick="setRound(${round})"` : ''}>
+                <div class="round-tag"><b>${round}라</b>${roundSub ? `<span class="round-sub">${roundSub(round)}</span>` : ''}<span>${startTurn}턴~</span></div>
+                <div class="round-chips">${chips}</div>
+            </div>`;
+        }).join('');
+    return `<div class="skill-timeline${isEditable ? ' editable' : ''}">${lanes}</div>`;
+}
+
+// 텍스트로 보기: 복사되는 글과 같은 내용을 라운드별 줄로
+export function renderSkillText(order, rounds, { roundSub = null } = {}) {
+    const lines = buildSkillRounds(order, rounds)
+        .filter(lane => lane.entries.length)
+        .map(lane => `
+        <div class="skill-text-line">
+            <b class="skill-text-round">${lane.round}라${roundSub ? ` · ${roundSub(lane.round)}` : ''}</b>
+            <span>${lane.entries.map(entry => isSkillNote(entry)
+                ? `<span class="skill-text-note">⚠️ ${entry.at ? `[${entry.at}] ` : ''}${entry.note}</span>`
+                : `<span class="skill-text-item">${entry.hero} ${SKILL_WORD[entry.num]}<em>(${entry.turn}턴)</em></span>`
+            ).join('<span class="skill-text-sep">-</span>')}</span>
+        </div>`)
+        .join('');
+    return `<div class="skill-text-view">${lines}</div>`;
+}
+
+// 턴 배지 설명 + 마지막 스킬 턴. hasBadges 가 false 면(텍스트로 보기) 마지막 턴만
+export function renderTurnLegend(order, rounds, hasBadges = true) {
+    return `
+    <div class="turn-legend">
+        ${hasBadges ? `
+        <span><i class="start">0턴</i>라운드 첫 스킬 — 턴이 늘지 않아요</span>
+        <span><i class="next">+4턴</i>같은 라운드의 다음 스킬부터 4턴씩</span>` : ''}
+        <span class="turn-total">마지막 <b>${lastSkillTurn(order, rounds)}턴</b> / 최대 ${TURN_LIMIT}턴</span>
+    </div>`;
+}
+
+// 카톡 공유용 텍스트: [1라] 레이첼 아래(0턴) - ... / 메모는 ⚠️[38턴] 내용
+export function skillOrderText(order, rounds) {
+    return buildSkillRounds(order, rounds)
+        .filter(lane => lane.entries.length)
+        .map(lane => `[${lane.round}라] ` + lane.entries.map(entry => isSkillNote(entry)
+            ? `⚠️${entry.at ? `[${entry.at}] ` : ''}${entry.note}`
+            : `${entry.hero} ${SKILL_WORD[entry.num]}(${entry.turn}턴)`
+        ).join(' - '))
+        .join('\n');
+}
+
+// ──────────────────────────────────────────
+// 영웅 세팅 (공성전 · 강림 원정대 공통): 왼쪽 속공 순서 목록(누르면 선택) + 오른쪽 고른 영웅 장비 상세
+// ──────────────────────────────────────────
+// idx번째 영웅이 전열('front')인지 후열('back')인지. size 는 팀 인원
+export function laneOf(formation, idx, size) {
+    const { type, positions } = readFormation(formation, size);
+    return FORMATIONS[type].front.includes(positions[idx]) ? 'front' : 'back';
+}
+
+// 전열/후열 배지. withPos 면 자리 번호까지
+export function renderLaneChip(formation, idx, size, withPos = false) {
+    const lane = laneOf(formation, idx, size);
+    const pos = readFormation(formation, size).positions[idx];
+    return `<span class="lane-chip ${lane}">${lane === 'front' ? '전열' : '후열'}${withPos ? ` · ${pos}번` : ''}</span>`;
+}
+
+// 속공 순위 배지 글자: 숫자가 있으면 'N순위', '상관X' 같은 글자는 그대로
+function rankLabel(rank) {
+    if (!rank) return '—';
+    return /\d/.test(rank) ? `${rank}<span class="rank-unit">순위</span>` : rank;
+}
+
+// 속공 순위 → 같은 순위면 속공 높은 순. 순위가 없으면 맨 뒤
+function heroSettingOrder(heroes, equipData) {
+    return heroes
+        .map((name, idx) => ({ idx, name, speed: equipData[idx]?.speed || '', rank: equipData[idx]?.speedRank || '' }))
+        .filter(item => item.name)
+        .sort((a, b) => (parseInt(a.rank) || 99) - (parseInt(b.rank) || 99) || (parseInt(b.speed) || 0) - (parseInt(a.speed) || 0));
+}
+
+// pickedIdx 가 팀에 없으면 속공 순서 맨 위 영웅을 보여준다
+// pickCall(idx) 는 영웅을 눌렀을 때 실행할 코드 문자열 (예: idx => `pickHero('공략id',${idx})`)
+export function renderHeroSetting(heroes, formation, equipData, pickedIdx, pickCall) {
+    const size = teamSize(heroes);
+    const order = heroSettingOrder(heroes, equipData);
+    const shownIdx = order.some(item => item.idx === pickedIdx) ? pickedIdx : order[0].idx;
+    const picks = order.map((item, i) => {
+        const isNewRank = i > 0 && order[i - 1].rank !== item.rank;
+        return `
+        <button type="button" class="hero-pick${item.idx === shownIdx ? ' active' : ''}${isNewRank ? ' new-rank' : ''}" onclick="${pickCall(item.idx)}" title="${item.name} 장비 보기">
+            <span class="speed-rank">${rankLabel(item.rank)}</span>
+            <span class="hero-pick-face" data-name="${item.name.slice(0, 2)}"><img src="${HERO_IMG_PATH}${item.name}.webp" alt="${item.name}" onerror="this.style.visibility='hidden'"></span>
+            <span class="hero-pick-name">${item.name}</span>
+            ${renderLaneChip(formation, item.idx, size)}
+            <span class="hero-pick-speed">${item.speed ? `${statIcon('속공', 'sm')}${item.speed}` : ''}</span>
+        </button>`;
+    }).join('');
+
+    return `
+    <div class="hero-setting">
+        <div class="hero-pick-list">${picks}</div>
+        ${renderEquipDetail(heroes[shownIdx], equipData[shownIdx] || {}, renderLaneChip(formation, shownIdx, size, true))}
+    </div>`;
 }
