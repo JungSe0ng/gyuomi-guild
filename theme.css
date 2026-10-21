@@ -406,6 +406,19 @@ body {
 .equip-sub { color: var(--text-sub); }
 .equip-memo { padding: 5px 7px; border-radius: 6px; background: var(--white); line-height: 1.45; white-space: pre-wrap; }
 
+/* 장비 상세 카드 (공성전 영웅 세팅): 큰 초상화 머리 + 무기 | 방어구 2x2 */
+.equip-detail { padding: 14px; font-size: 0.8em; }
+.equip-detail-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.equip-detail-hd .replay-hero-img { width: 50px; height: 50px; flex-shrink: 0; }
+.equip-detail-who b { font-size: 1.2em; font-weight: 900; color: var(--ally); }
+.equip-detail-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
+.equip-detail-tags .equip-speed { margin-left: 0; }
+.equip-speed em { margin-left: 4px; font-style: normal; font-weight: 900; color: var(--gold); }
+.equip-detail-hd .equip-set { margin: 0 0 0 auto; padding: 6px 12px; }
+.equip-detail .equip-slots { gap: 8px; }
+.equip-detail .equip-slot { padding: 8px 10px; background: var(--bg); }
+.equip-detail .equip-memo { padding: 7px 10px; background: var(--bg); }
+
 /* 스탯 아이콘: 인게임 스탯 목록처럼 어두운 칸 안의 흰 아이콘 */
 .opt-icon { width: 24px; height: 24px; flex-shrink: 0; border-radius: 6px; background: #3a3540; display: inline-flex; align-items: center; justify-content: center; }
 .opt-icon img { width: 16px; height: 16px; }
@@ -421,4 +434,7 @@ body {
     .formation-preview { padding: 12px 8px 6px; }
     .replay-pets { flex-basis: 100%; margin-left: 0; padding-left: 12px; }
     .equip-grid { grid-template-columns: 1fr; }
+    .equip-detail { padding: 12px; }
+    .equip-detail-hd { flex-wrap: wrap; }
+    .equip-detail-hd .equip-set { margin: 0; flex-basis: 100%; }
 }
